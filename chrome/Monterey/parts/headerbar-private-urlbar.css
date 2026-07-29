@@ -1,0 +1,5 @@
+/* Windows compatibility: keep Firefox's native private browsing indicator. */
+#private-browsing-indicator-with-label,
+#TabsToolbar .private-browsing-indicator {
+  display: flex !important;
+}

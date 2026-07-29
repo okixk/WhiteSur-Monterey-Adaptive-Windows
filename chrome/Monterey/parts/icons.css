@@ -1,0 +1,4 @@
+/* Windows compatibility layer: keep Firefox's native icons.
+ * The upstream icon stylesheet expects a Linux-oriented SVG asset tree that is
+ * not part of this focused Monterey Adaptive Windows package. Native Firefox
+ * icons remain adaptive, sharp at every DPI, and update with Firefox itself. */

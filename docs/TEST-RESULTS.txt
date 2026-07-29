@@ -1,0 +1,29 @@
+WhiteSur Monterey Adaptive Windows 2026.07.28-15
+
+Result: 16/16 automated test groups passed
+
+New v15 checks
+- disabled Forward button keeps a 32 px layout slot
+- enabled and disabled Forward states use identical URLbar coordinates
+- 1310 px fixture URL/tab gap: 40 px in both states
+- desktop left reservation: 510 px
+- navigation and tabstrip empty containers are draggable
+- actual URLbar controls, tabs and buttons remain no-drag
+
+Retained URLbar regression
+- breakout host remains absolutely anchored
+- detached URLbar background remains hidden
+- colored pixels beyond the visible URL field: 0
+- toolbar/tab click behind the former oversized host: passed
+
+Rendered responsive checks
+- compact mode passed at 600, 650, 720, 820, 900, 960 and 980 px
+- one-row mode passed at 981, 1000, 1048, 1070, 1100, 1285, 1437 and 1668 px
+- no URL/tab overlap with Forward disabled or enabled
+- tab closing, close icon and closing-spacer checks passed
+
+Installer checks
+- fresh and empty user.js regression passed
+- active Install-default profile detection passed
+- install/update/uninstall and backup restoration passed
+- customChrome.css preservation passed

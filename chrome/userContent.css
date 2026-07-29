@@ -1,0 +1,12 @@
+/*
+ * WhiteSur Monterey Adaptive for Windows — web-content isolation.
+ *
+ * Intentionally no global website rules.
+ * Previous revisions imported Firefox internal-page variables into every web
+ * document and forced scrollbar-color on :root. On Windows this can turn a
+ * normally hidden/overlay scrollbar of a nested site scroller into a visible
+ * native grip (the vertical stack of horizontal bars seen over page content).
+ *
+ * Browser chrome remains fully themed through userChrome.css. Firefox's own
+ * pages and ordinary websites keep their native/site-provided content styling.
+ */

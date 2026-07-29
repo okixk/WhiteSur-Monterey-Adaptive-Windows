@@ -1,0 +1,46 @@
+name: Bug report
+description: Report a Firefox UI or installer problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please first confirm that the issue disappears in vanilla Firefox without this custom chrome theme.
+  - type: input
+    id: firefox
+    attributes:
+      label: Firefox version
+      placeholder: "e.g. 153.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: "e.g. Windows 11 24H2"
+    validations:
+      required: true
+  - type: dropdown
+    id: state
+    attributes:
+      label: Window state
+      options:
+        - Maximised
+        - Restored/windowed
+        - Full screen
+        - All states
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Include exact steps and screenshots where possible.
+    validations:
+      required: true
+  - type: textarea
+    id: extensions
+    attributes:
+      label: Relevant extensions and Firefox theme
+      description: Mention Adaptive Tab Bar Color and any extension that modifies Firefox colours or toolbars.

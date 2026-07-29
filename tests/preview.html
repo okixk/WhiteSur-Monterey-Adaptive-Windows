@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en" tabsintitlebar customtitlebar sizemode="normal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WhiteSur Monterey Adaptive Windows v15 interaction/geometry smoke test</title>
+<link rel="stylesheet" href="../chrome/Monterey/colors/dark-adaptive.css">
+<link rel="stylesheet" href="../chrome/windows.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; background: #202127; font-family: "Segoe UI", sans-serif; }
+  .window { width: 100vw; min-height: 100vh; overflow: hidden; background: #292a33; }
+  toolbar, hbox, toolbaritem, toolbarspring, tabs, arrowscrollbox { display: flex; }
+  #navigator-toolbox { color: white; }
+  #nav-bar, #TabsToolbar { gap: 4px; }
+  #nav-bar-customization-target, #TabsToolbar-customization-target { gap: 4px; }
+  .toolbar-items { align-items: center; }
+  .nav-button, .tool, #PanelUI-button, #tabs-newtab-button, #alltabs-button {
+    flex: 0 0 32px; width: 32px; height: 32px; display: grid; place-items: center;
+    border-radius: 8px; color: #d7d7dc; border: 0; background: transparent;
+  }
+  .nav-button:hover, .tool:hover, #PanelUI-button:hover, #tabs-newtab-button:hover { background: rgba(255,255,255,.08); }
+  #urlbar-container { height: 32px; }
+  #urlbar { height: 32px; }
+  .urlbar-input-container {
+    height: 32px; border-radius: 8px; background: #55565f; border: 1px solid #777780;
+    display: flex; align-items: center; gap: 8px; padding: 0 10px; color: #c8c8cd;
+    white-space: nowrap; overflow: hidden;
+  }
+  #tabbrowser-tabs, #tabbrowser-arrowscrollbox { align-items: center; height: 32px; }
+  #tabbrowser-arrowscrollbox { gap: 6px; flex: 1 1 auto; }
+  .tabbrowser-tab { flex: 1 1 160px; width: 160px; height: 32px; }
+  .tab-stack, .tab-content { width: 100%; height: 32px; display: flex; align-items: center; }
+  .tab-background { position: absolute; inset: 0; height: 32px; border-radius: 8px; background: #4c4d55 !important; }
+  .tabbrowser-tab[selected] .tab-background { background: #666770 !important; }
+  .tab-label { position: relative; z-index: 1; display: block; flex: 1; padding: 7px 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white; }
+  .tab-close-button { position: relative; z-index: 2; display: block; }
+  #tabbrowser-arrowscrollbox-periphery { align-items: center; }
+  .titlebar-buttonbox-container, .titlebar-buttonbox { display: flex; }
+  .titlebar-button { position: relative; background: transparent; color: #e8e8ea; font: 16px/1 "Segoe UI"; }
+  #nav-bar .titlebar-min::after { content: "−"; position: absolute; inset: 0; display: grid; place-items: center; }
+  #nav-bar .titlebar-max::after { content: "□"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 11px; }
+  #nav-bar .titlebar-close::after { content: "×"; position: absolute; inset: 0; display: grid; place-items: center; }
+  #nav-bar .titlebar-button:hover { background: rgba(255,255,255,.08) !important; }
+  #nav-bar .titlebar-close:hover { background: #c42b1c !important; }
+  .content { height: calc(100vh - 48px); display: grid; place-items: center; color: #aaa; }
+  #report { position: fixed; bottom: 8px; left: 8px; color: transparent; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="window">
+  <toolbox id="navigator-toolbox">
+    <!-- Current Firefox source order: TabsToolbar before nav-bar. -->
+    <toolbar id="TabsToolbar" class="browser-toolbar browser-titlebar">
+      <hbox class="titlebar-spacer" type="pre-tabs"></hbox>
+      <hbox flex="1" class="toolbar-items">
+        <hbox id="TabsToolbar-customization-target" flex="1">
+          <tabs id="tabbrowser-tabs" orient="horizontal">
+            <arrowscrollbox id="tabbrowser-arrowscrollbox" orient="horizontal" flex="1">
+              <div class="tabbrowser-tab" fadein="">
+                <div class="tab-stack">
+                  <div class="tab-background"></div>
+                  <div class="tab-content"><span class="tab-label">Windows-compatible WhiteSur</span><span class="tab-close-button"></span></div>
+                </div>
+              </div>
+              <div class="tabbrowser-tab closing-test-tab">
+                <div class="tab-stack">
+                  <div class="tab-background"></div>
+                  <div class="tab-content"><span class="tab-label">Closing tab placeholder</span><span class="tab-close-button"></span></div>
+                </div>
+              </div>
+              <div class="tabbrowser-tab" selected="" visuallyselected="" fadein="">
+                <div class="tab-stack">
+                  <div class="tab-background"></div>
+                  <div class="tab-content"><span class="tab-label">New Tab</span><span class="tab-close-button"></span></div>
+                </div>
+              </div>
+              <hbox id="tabbrowser-arrowscrollbox-periphery">
+                <button id="tabs-newtab-button">＋</button>
+                <spacer class="closing-tabs-spacer" style="width: 180px;"></spacer>
+              </hbox>
+            </arrowscrollbox>
+          </tabs>
+          <button id="new-tab-button" class="toolbarbutton-1" hidden>＋</button>
+          <toolbarspring></toolbarspring>
+          <button id="alltabs-button">⌄</button>
+        </hbox>
+      </hbox>
+      <hbox class="titlebar-buttonbox-container duplicate-controls"><hbox class="titlebar-buttonbox">
+        <button class="titlebar-button titlebar-min"></button><button class="titlebar-button titlebar-max"></button><button class="titlebar-button titlebar-close"></button>
+      </hbox></hbox>
+    </toolbar>
+
+    <toolbar id="nav-bar" class="browser-toolbar chromeclass-location">
+      <hbox id="nav-bar-customization-target" flex="1">
+        <button id="back-button" class="nav-button">←</button>
+        <button id="forward-button" class="nav-button" disabled="true">→</button>
+        <toolbaritem id="stop-reload-button"><button class="nav-button">↻</button></toolbaritem>
+        <toolbarspring></toolbarspring><toolbarspring id="vertical-spacer"></toolbarspring>
+        <toolbaritem id="urlbar-container" class="urlbar-container"><div id="urlbar"><div class="urlbar-input-container"><span>◉</span><span>Search with Google or enter address</span></div></div></toolbaritem>
+        <toolbarspring></toolbarspring>
+        <button id="downloads-button" class="tool">⇩</button>
+        <button id="unified-extensions-button" class="tool">♧</button>
+      </hbox>
+      <button id="nav-bar-overflow-button" class="tool" hidden>»</button>
+      <toolbaritem id="PanelUI-button"><button class="tool">☰</button></toolbaritem>
+      <toolbarpaletteitem id="wrapper-customizableui-special-spring-test"><toolbarspring id="artifact-spring"></toolbarspring></toolbarpaletteitem>
+      <hbox class="titlebar-buttonbox-container native-controls"><hbox class="titlebar-buttonbox">
+        <button class="titlebar-button titlebar-min" aria-label="Minimize"></button>
+        <button class="titlebar-button titlebar-max" aria-label="Maximize"></button>
+        <button class="titlebar-button titlebar-close" aria-label="Close"></button>
+      </hbox></hbox>
+    </toolbar>
+  </toolbox>
+  <div class="content">One-row Monterey Adaptive layout</div>
+  <pre id="report"></pre>
+</div>
+<script>
+addEventListener('load', () => requestAnimationFrame(() => {
+  const box = selector => {
+    const r = document.querySelector(selector).getBoundingClientRect();
+    return {x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};
+  };
+  const navLeft = box('#urlbar-container');
+  const tabs = box('#TabsToolbar');
+  const controls = box('#nav-bar > .native-controls');
+  const navBar = box('#nav-bar');
+  const duplicate = getComputedStyle(document.querySelector('#TabsToolbar > .duplicate-controls')).display;
+  const toolbarPointerEvents = getComputedStyle(document.querySelector('#TabsToolbar')).pointerEvents;
+  const tabsPointerEvents = getComputedStyle(document.querySelector('#tabbrowser-tabs')).pointerEvents;
+  const closingTab = box('.closing-test-tab');
+  const closingSpacerStyle = getComputedStyle(document.querySelector('.closing-tabs-spacer'));
+  const selectedCloseStyle = getComputedStyle(document.querySelector('.tabbrowser-tab[selected] .tab-close-button'));
+  const report = {
+    width: innerWidth,
+    navBar, urlbar: navLeft, tabs, controls, duplicate,
+    toolbarPointerEvents, tabsPointerEvents, closingTab,
+    closingSpacerDisplay: closingSpacerStyle.display,
+    selectedCloseListStyleImage: selectedCloseStyle.listStyleImage,
+    checks: {
+      single_row_48px: navBar.y === 0 && tabs.y === 0 && navBar.height === 48 && tabs.height === 48,
+      urlbar_before_tabs: navLeft.right <= tabs.x,
+      tabs_before_controls: tabs.right <= controls.x,
+      controls_flush_right: Math.abs(controls.right - innerWidth) < 1,
+      duplicate_controls_hidden: duplicate === 'none',
+      tabs_visible: tabs.width >= 180,
+      urlbar_visible: navLeft.width >= 150,
+      transparent_toolbar_does_not_capture: toolbarPointerEvents === 'none' && tabsPointerEvents === 'auto',
+      closing_tab_collapses: closingTab.width <= 1,
+      closing_spacer_removed: closingSpacerStyle.display === 'none',
+      simple_close_icon: selectedCloseStyle.listStyleImage.includes('close-12.svg')
+    }
+  };
+  document.querySelector('#report').textContent = JSON.stringify(report);
+}));
+</script>
+</body>
+</html>

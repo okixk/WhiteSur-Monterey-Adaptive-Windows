@@ -1,0 +1,72 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Firefox 153 URLbar geometry fixture</title>
+<style>
+  :root {
+    --whitesur-header-height: 48px;
+    --whitesur-urlbar-width: 360px;
+    --urlbar-width: 360px;
+    --gnome-urlbar-background: #56565f;
+    --gnome-urlbar-border-color: #777780;
+    --gnome-hover-urlbar-border-color: #9a9aa4;
+    --gnome-focused-urlbar-border-color: #00b7ff;
+    --gnome-inactive-urlbar-background: #4c4c54;
+    --gnome-inactive-urlbar-border-color: #666670;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#292832; color:#fff; font:14px sans-serif; }
+  #navigator-toolbox { position:relative; width:1264px; height:48px; background:#34343a; }
+  #nav-bar { position:relative; display:flex; align-items:center; height:48px; padding:8px 142px 8px 8px; }
+  #nav-bar-customization-target { display:flex; align-items:center; flex:1; min-width:0; height:32px; }
+  .button { width:32px; height:32px; display:grid; place-items:center; }
+  #urlbar-container { width:360px; height:32px; margin-left:4px; }
+
+  /* Current Firefox 153 essentials. */
+  .urlbar { display:flex; flex:1; box-sizing:border-box; }
+  .urlbar[breakout] { display:block; position:absolute; height:32px; width:var(--urlbar-width); }
+  .urlbar, .urlbar-input-container, .urlbarView { position:relative; }
+  .urlbar-background { display:block; position:absolute; inset:0; border:2px solid #00b7ff; border-radius:8px; }
+  .urlbar-input-container { min-width:0; display:flex; align-items:center; flex:1; height:32px; border-radius:8px; overflow:clip; }
+  .urlbar[breakout] > .urlbar-input-container { width:100%; height:100%; }
+  .urlbar:not([open]) > .urlbarView { display:none; }
+  .urlbarView { margin-top:6px; width:100%; height:150px; background:#333; border-radius:10px; }
+
+  /* Exact regression introduced by the imported Linux sheet. */
+  #urlbar[breakout] { position:static !important; width:calc(100vw - 104px) !important; }
+
+  #tabs { position:absolute; left:480px; right:300px; top:8px; height:32px; display:flex; gap:4px; }
+  .tab { height:32px; padding:0 24px; border:0; border-radius:8px; background:#5a5a62; color:#fff; }
+  #tools { position:absolute; right:142px; top:8px; display:flex; gap:4px; }
+  #caption { position:absolute; right:0; top:0; width:138px; height:48px; display:flex; }
+  #caption span { width:46px; display:grid; place-items:center; }
+</style>
+<link rel="stylesheet" href="../chrome/windows.css">
+<div id="navigator-toolbox">
+  <div id="nav-bar">
+    <div id="nav-bar-customization-target">
+      <div class="button">←</div><div class="button">↻</div>
+      <div id="urlbar-container" class="urlbar-container">
+        <div id="urlbar" class="urlbar" breakout breakout-extend focused style="--urlbar-width:350px">
+          <div id="urlbar-background" class="urlbar-background"></div>
+          <div id="urlbar-input-container" class="urlbar-input-container"><span>◉</span><span style="margin-left:10px;opacity:.75">chatgpt.com</span><span style="margin-left:auto">☆</span></div>
+          <div class="urlbarView"><div style="padding:16px">Suggestions</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="TabsToolbar"><div class="toolbar-items"><div id="TabsToolbar-customization-target"><div id="tabbrowser-tabs"><div id="tabbrowser-arrowscrollbox"><div id="tabs"><button id="tab-a" class="tab">ChatGPT</button><button class="tab">New Tab</button></div></div></div></div></div></div>
+  <div id="tools"><div class="button">＋</div><div class="button">🧩</div><div class="button">☰</div></div>
+  <div id="caption"><span>—</span><span>□</span><span>×</span></div>
+</div>
+<div style="padding:60px 30px">fixture content</div>
+<script>
+  window.fixture = {
+    setState(state) {
+      const u = document.querySelector('#urlbar');
+      u.toggleAttribute('focused', state.includes('focused'));
+      u.toggleAttribute('open', state.includes('open'));
+    },
+    clicks: 0,
+  };
+  document.querySelector('#tab-a').addEventListener('click', () => window.fixture.clicks++);
+</script>

@@ -1,0 +1,39 @@
+/*
+ * WhiteSur Monterey Adaptive visual layer.
+ *
+ * The Linux-only toolbox/CSD/title-button files are intentionally not loaded
+ * on Windows. They reposition entire Firefox toolbars and were the source of
+ * the duplicated caption controls and two-row spacing regressions. Windows
+ * geometry and native caption controls are handled by chrome/windows.css.
+ */
+@import "parts/buttons.css";
+@import "parts/entries.css";
+@import "parts/controls.css";
+@import "parts/headerbar-urlbar.css";
+@import "parts/headerbar-private-urlbar.css";
+@import "parts/headerbar.css";
+@import "parts/popups.css";
+@import "parts/tabsbar.css";
+@import "parts/findbar.css";
+@import "parts/sidebar.css";
+@import "parts/dialogs.css";
+@import "parts/notification.css";
+@import "parts/infobar.css";
+@import "parts/video-player.css";
+@import "parts/remove-white-flash.css";
+@import "parts/icons.css";
+@import "colors/light-adaptive.css";
+@import "colors/dark-adaptive.css";
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+#customization-footer::before {
+  background: none;
+  content: "Firefox Monterey Adaptive · Windows v15";
+  padding: 10px;
+}
+
+#customization-container {
+  background-color: var(--gnome-browser-before-load-background) !important;
+  color: var(--gnome-toolbar-color) !important;
+  background-image: none !important;
+}

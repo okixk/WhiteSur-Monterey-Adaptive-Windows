@@ -1,0 +1,1013 @@
+/*
+ * WhiteSur Monterey Adaptive for Firefox on Windows 10/11
+ * Windows integration layer — revision 2026.07.28-15.
+ *
+ * This revision deliberately does not reuse WhiteSur's Linux CSD/toolbox
+ * geometry. Current Firefox places titlebar items in both TabsToolbar and
+ * nav-bar; on Windows we keep only nav-bar's native caption buttons and place
+ * TabsToolbar directly into the unused centre of the same 48 px row.
+ */
+
+:root {
+  --whitesur-header-height: 48px;
+  --whitesur-toolbar-padding: 8px;
+  --whitesur-native-controls-width: 138px;
+
+  /* Three non-overlapping zones: navigation | tabs | Windows controls/tools. */
+  --whitesur-left-zone: 510px;
+  --whitesur-right-zone: 300px;
+  --whitesur-urlbar-width: 350px;
+
+  --ext-theme-background-transition: none !important;
+  --inactive-window-transition: none !important;
+  font-family: "Segoe UI Variable Text", "Segoe UI", sans-serif !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Continuous adaptive header surface
+ * ---------------------------------------------------------------------- */
+
+#navigator-toolbox {
+  position: relative !important;
+  min-height: var(--whitesur-header-height) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--gnome-toolbar-border-color) !important;
+  background-color: var(--gnome-headerbar-background, var(--lwt-accent-color)) !important;
+  background-image: none !important;
+  color: var(--gnome-toolbar-color) !important;
+}
+
+:root:-moz-window-inactive #navigator-toolbox {
+  background-color: var(--gnome-inactive-headerbar-background, var(--lwt-accent-color)) !important;
+}
+
+#nav-bar,
+#TabsToolbar {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+#tabbrowser-tabbox,
+.browserContainer {
+  box-shadow: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Navigation toolbar: the only normal-flow toolbar in the header
+ * ---------------------------------------------------------------------- */
+
+#nav-bar {
+  position: relative !important;
+  z-index: 2 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  min-height: var(--whitesur-header-height) !important;
+  height: var(--whitesur-header-height) !important;
+  max-height: var(--whitesur-header-height) !important;
+  margin: 0 !important;
+  padding: var(--whitesur-toolbar-padding)
+           calc(var(--whitesur-native-controls-width) + 4px)
+           var(--whitesur-toolbar-padding)
+           var(--whitesur-toolbar-padding) !important;
+  overflow: visible !important;
+}
+
+#nav-bar-customization-target {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  overflow: visible !important;
+}
+
+/* Current Firefox ships springs around the URL bar. Replace them with one
+ * predictable auto margin so the left and right control clusters stay tidy. */
+#nav-bar-customization-target > toolbarspring,
+#vertical-spacer {
+  display: none !important;
+}
+
+#urlbar-container,
+.urlbar-container,
+#wrapper-urlbar-container,
+.wrapper-urlbar-container {
+  box-sizing: border-box !important;
+  flex: 0 1 var(--whitesur-urlbar-width) !important;
+  width: var(--whitesur-urlbar-width) !important;
+  min-width: 180px !important;
+  max-width: var(--whitesur-urlbar-width) !important;
+  margin-inline: 4px auto !important;
+}
+
+#urlbar {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+}
+
+/*
+ * Keep the forward button's toolbar slot even while navigation cannot move
+ * forward. Firefox normally collapses the disabled button; when it later
+ * appears, the URL field shifts roughly one button-width into the absolutely
+ * positioned tab strip. Preserve the 32 px slot invisibly so the URL/tab
+ * boundary never changes between history states.
+ */
+#forward-button[disabled="true"],
+#forward-button[disabled] {
+  display: flex !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Tabs: directly overlay the centre zone of the same row
+ * ---------------------------------------------------------------------- */
+
+#TabsToolbar {
+  position: absolute !important;
+  z-index: 4 !important;
+  inset-block-start: 0 !important;
+  inset-inline-start: var(--whitesur-left-zone) !important;
+  inset-inline-end: var(--whitesur-right-zone) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: var(--whitesur-header-height) !important;
+  height: var(--whitesur-header-height) !important;
+  max-height: var(--whitesur-header-height) !important;
+  margin: 0 !important;
+  padding: 8px 0 !important;
+  overflow: hidden !important;
+}
+
+#TabsToolbar > .toolbar-items {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  overflow: hidden !important;
+}
+
+#TabsToolbar-customization-target {
+  display: flex !important;
+  align-items: center !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 32px !important;
+  overflow: hidden !important;
+}
+
+/* A toolbar spring after the new-tab button caused giant gaps in v4. */
+#TabsToolbar-customization-target > toolbarspring {
+  display: none !important;
+}
+
+#tabbrowser-tabs,
+#tabbrowser-arrowscrollbox,
+#pinned-tabs-container {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+#tabbrowser-tabs {
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+  --tab-min-width: 88px !important;
+  --tab-max-width: 220px !important;
+}
+
+#tabbrowser-arrowscrollbox {
+  overflow: hidden !important;
+}
+
+
+#TabsToolbar .titlebar-spacer,
+#TabsToolbar .titlebar-placeholder {
+  display: none !important;
+}
+
+/* Keep the list-all-tabs button only when Firefox actually needs it. */
+#alltabs-button:not([overflowing="true"]) {
+  display: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Native Windows caption controls on the right — one copy only
+ * ---------------------------------------------------------------------- */
+
+#TabsToolbar > .titlebar-buttonbox-container,
+#toolbar-menubar > .titlebar-buttonbox-container {
+  display: none !important;
+}
+
+:root[tabsintitlebar]:not([inFullscreen]) #nav-bar > .titlebar-buttonbox-container,
+:root[customtitlebar]:not([inFullscreen]) #nav-bar > .titlebar-buttonbox-container {
+  -moz-appearance: none !important;
+  appearance: none !important;
+  display: flex !important;
+  position: absolute !important;
+  inset-block-start: 0 !important;
+  inset-inline-end: 0 !important;
+  width: var(--whitesur-native-controls-width) !important;
+  min-width: var(--whitesur-native-controls-width) !important;
+  height: var(--whitesur-header-height) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 20 !important;
+}
+
+#nav-bar .titlebar-buttonbox {
+  -moz-appearance: none !important;
+  appearance: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  width: var(--whitesur-native-controls-width) !important;
+  height: var(--whitesur-header-height) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#nav-bar .titlebar-min {
+  order: 0 !important;
+  -moz-default-appearance: -moz-window-button-minimize !important;
+}
+
+#nav-bar .titlebar-max {
+  order: 1 !important;
+  -moz-default-appearance: -moz-window-button-maximize !important;
+}
+
+#nav-bar .titlebar-restore {
+  order: 1 !important;
+  -moz-default-appearance: -moz-window-button-restore !important;
+}
+
+#nav-bar .titlebar-close {
+  order: 2 !important;
+  -moz-default-appearance: -moz-window-button-close !important;
+}
+
+#nav-bar .titlebar-button {
+  list-style-image: none !important;
+  box-sizing: border-box !important;
+  width: 46px !important;
+  min-width: 46px !important;
+  max-width: 46px !important;
+  height: var(--whitesur-header-height) !important;
+  min-height: var(--whitesur-header-height) !important;
+  max-height: var(--whitesur-header-height) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+#nav-bar .titlebar-button > *,
+#nav-bar .titlebar-button image,
+#nav-bar .titlebar-button .toolbarbutton-icon {
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+  fill: currentColor !important;
+}
+
+/* -------------------------------------------------------------------------
+ * Responsive values — still one row, never the old two-row fallback
+ * ---------------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  :root {
+    --whitesur-left-zone: 390px;
+    --whitesur-right-zone: 290px;
+    --whitesur-urlbar-width: 270px;
+  }
+
+
+  .tabbrowser-tab:not([selected="true"]):not(:hover) .tab-close-button {
+    display: none !important;
+  }
+}
+
+@media (max-width: 850px) {
+  :root {
+    --whitesur-left-zone: 340px;
+    --whitesur-right-zone: 290px;
+    --whitesur-urlbar-width: 215px;
+  }
+
+  #nav-bar {
+    padding-inline-start: 4px !important;
+  }
+
+  #urlbar-container {
+    min-width: 150px !important;
+    margin-inline: 2px auto !important;
+  }
+
+  #nav-bar toolbarbutton,
+  #TabsToolbar .toolbarbutton-1 {
+    margin-inline: 1px !important;
+  }
+
+}
+
+@media (max-width: 720px) {
+  :root {
+    --whitesur-left-zone: 300px;
+    --whitesur-right-zone: 220px;
+    --whitesur-urlbar-width: 185px;
+  }
+
+  #unified-extensions-button,
+  #nav-bar-overflow-button {
+    display: none !important;
+  }
+
+}
+
+
+:root[sizemode="normal"] #navigator-toolbox {
+  border-radius: 10px 10px 0 0 !important;
+  overflow: clip !important;
+}
+
+:root[sizemode="maximized"] #navigator-toolbox,
+:root[inFullscreen] #navigator-toolbox {
+  border-radius: 0 !important;
+}
+
+
+/* -------------------------------------------------------------------------
+ * v6 interaction and tab-close fixes
+ * ---------------------------------------------------------------------- */
+
+/*
+ * WhiteSur's Linux tabsbar marks the navigation target and tab strip as
+ * draggable titlebar regions. On Windows this can create a transparent
+ * hit-test layer in a restored (non-maximized) window. Keep only genuinely
+ * empty toolbar surface draggable and explicitly return every control to
+ * normal hit testing.
+ */
+:root[sizemode="normal"][tabsintitlebar] #navigator-toolbox,
+:root[sizemode="normal"][tabsintitlebar] #nav-bar,
+:root[sizemode="normal"][tabsintitlebar] #nav-bar-customization-target,
+:root[sizemode="normal"][tabsintitlebar] #TabsToolbar,
+:root[sizemode="normal"][tabsintitlebar] #TabsToolbar > .toolbar-items,
+:root[sizemode="normal"][tabsintitlebar] #TabsToolbar-customization-target,
+:root[sizemode="normal"][tabsintitlebar] #tabbrowser-tabs,
+:root[sizemode="normal"][tabsintitlebar] #tabbrowser-arrowscrollbox,
+:root[sizemode="normal"][tabsintitlebar] #pinned-tabs-container {
+  -moz-window-dragging: drag !important;
+}
+
+/*
+ * Keep every interactive child out of the draggable region. The containers
+ * above remain draggable only in their genuinely empty gaps, including the
+ * stable gutter between the URL field and first tab and the space after the
+ * new-tab button.
+ */
+#nav-bar-customization-target > *,
+#nav-bar toolbarbutton,
+#nav-bar toolbaritem,
+#nav-bar-overflow-button,
+#PanelUI-button,
+#nav-bar > .titlebar-buttonbox-container,
+#urlbar-container,
+#urlbar,
+#urlbar-input-container,
+.urlbar-input-container,
+#TabsToolbar-customization-target > *,
+.tabbrowser-tab,
+.tab-stack,
+.tab-content,
+#tabs-newtab-button,
+#new-tab-button,
+#alltabs-button,
+#tabbrowser-tabs toolbarbutton,
+.scrollbutton-up,
+.scrollbutton-down {
+  -moz-window-dragging: no-drag !important;
+}
+
+/* Do not let the transparent toolbar shell steal clicks outside actual tabs. */
+#TabsToolbar,
+#TabsToolbar > .toolbar-items,
+#TabsToolbar-customization-target {
+  pointer-events: none !important;
+}
+
+#tabbrowser-tabs,
+#tabbrowser-arrowscrollbox,
+#pinned-tabs-container,
+.tabbrowser-tab,
+#tabs-newtab-button,
+#new-tab-button,
+#alltabs-button,
+#TabsToolbar toolbarbutton {
+  pointer-events: auto !important;
+}
+
+/*
+ * Firefox animates a closing tab by removing its [fadein] attribute and
+ * temporarily changing min/max-width. v5 overrode those widths with
+ * !important rules, leaving invisible tabs and large gaps behind.
+ */
+#tabbrowser-tabs {
+  --tab-min-width: 88px !important;
+  --tab-max-width: 220px !important;
+}
+
+.tabbrowser-tab:not([pinned]):not([fadein]) {
+  min-width: 0.1px !important;
+  max-width: 0.1px !important;
+  padding-inline: 0 !important;
+  margin-inline: 0 !important;
+}
+
+/* Reflow immediately after a close instead of retaining Firefox's hover spacer. */
+#tabbrowser-arrowscrollbox-periphery > .closing-tabs-spacer {
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  transition: none !important;
+}
+
+#tabbrowser-arrowscrollbox-periphery {
+  flex: 0 0 auto !important;
+  min-width: 0 !important;
+}
+
+/* Simple 12 px native-style cross, with only a subtle hover target. */
+.tab-close-button {
+  -moz-appearance: none !important;
+  appearance: none !important;
+  list-style-image: url("resource://content-accessible/close-12.svg") !important;
+  -moz-context-properties: fill, fill-opacity !important;
+  box-sizing: border-box !important;
+  width: 18px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  margin-inline: 4px -2px !important;
+  padding: 3px !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  fill: currentColor !important;
+  fill-opacity: 0.72 !important;
+  opacity: 1 !important;
+}
+
+.tabbrowser-tab:not([pinned]) .tab-close-button {
+  visibility: hidden !important;
+}
+
+.tabbrowser-tab:not([pinned]):is([selected], [visuallyselected], :hover) .tab-close-button {
+  visibility: visible !important;
+}
+
+.tab-close-button:hover {
+  background-color: color-mix(in srgb, currentColor 10%, transparent) !important;
+  fill-opacity: 1 !important;
+}
+
+.tab-close-button:active {
+  background-color: color-mix(in srgb, currentColor 18%, transparent) !important;
+}
+
+@media (max-width: 1100px) {
+  #tabbrowser-tabs {
+    --tab-min-width: 78px !important;
+    --tab-max-width: 190px !important;
+  }
+}
+
+@media (max-width: 850px) {
+  #tabbrowser-tabs {
+    --tab-min-width: 70px !important;
+    --tab-max-width: 150px !important;
+  }
+}
+
+@media (max-width: 720px) {
+  #tabbrowser-tabs {
+    --tab-min-width: 64px !important;
+    --tab-max-width: 130px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #navigator-toolbox,
+  #TabsToolbar,
+  #nav-bar,
+  #PersonalToolbar,
+  .tab-background,
+  .urlbar-background,
+  findbar {
+    transition: none !important;
+  }
+}
+
+/* -------------------------------------------------------------------------
+ * v7 compact-window fallback and arrowscrollbox containment
+ * ---------------------------------------------------------------------- */
+
+/*
+ * Current Firefox implements the tab strip as an arrowscrollbox with shadow
+ * parts.  The legacy WhiteSur rule only targeted the old light-DOM indicator
+ * classes, so Firefox could still paint a native scrollbar thumb/grip far
+ * below the header.  Constrain the actual shadow scrollbox to the 32 px tab
+ * row and remove only its overflow fades/scrollbar chrome.
+ */
+#tabbrowser-tabs,
+#tabbrowser-arrowscrollbox,
+#pinned-tabs-container {
+  block-size: 32px !important;
+  min-block-size: 32px !important;
+  max-block-size: 32px !important;
+  overflow: clip !important;
+}
+
+#tabbrowser-arrowscrollbox::part(scrollbox),
+#pinned-tabs-container::part(scrollbox) {
+  block-size: 32px !important;
+  min-block-size: 32px !important;
+  max-block-size: 32px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: none !important;
+}
+
+#tabbrowser-arrowscrollbox::part(overflow-start-indicator),
+#tabbrowser-arrowscrollbox::part(overflow-end-indicator),
+#pinned-tabs-container::part(overflow-start-indicator),
+#pinned-tabs-container::part(overflow-end-indicator) {
+  display: none !important;
+  visibility: hidden !important;
+  inline-size: 0 !important;
+  min-inline-size: 0 !important;
+  max-inline-size: 0 !important;
+}
+
+#tabbrowser-arrowscrollbox::part(scrollbutton-up),
+#tabbrowser-arrowscrollbox::part(scrollbutton-down),
+#pinned-tabs-container::part(scrollbutton-up),
+#pinned-tabs-container::part(scrollbutton-down) {
+  block-size: 32px !important;
+  min-block-size: 32px !important;
+  max-block-size: 32px !important;
+  overflow: clip !important;
+  align-self: center !important;
+}
+
+/*
+ * A one-line browser chrome cannot remain readable once the restored window
+ * becomes narrower than the navigation controls, URL field, one useful tab,
+ * menu and Windows caption buttons combined.  Instead of compressing all of
+ * them into an unusable strip, use a deliberate navigation-only compact mode.
+ * Tabs remain available through Ctrl+Tab / Ctrl+Shift+Tab and reappear as soon
+ * as the window is widened beyond this breakpoint.
+ */
+@media (max-width: 820px) {
+  #TabsToolbar {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  #nav-bar {
+    padding-inline-start: 4px !important;
+    padding-inline-end: calc(var(--whitesur-native-controls-width) + 4px) !important;
+  }
+
+  #nav-bar-customization-target {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #urlbar-container,
+  .urlbar-container,
+  #wrapper-urlbar-container,
+  .wrapper-urlbar-container {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: none !important;
+    margin-inline: 3px !important;
+  }
+
+  /* Keep only essential navigation in very narrow restored windows. */
+  #nav-bar-customization-target > :is(
+    #downloads-button,
+    #home-button,
+    #library-button,
+    #bookmarks-menu-button,
+    #sidebar-button,
+    #firefox-view-button,
+    #fxa-toolbar-menu-button,
+    #unified-extensions-button,
+    #ai-window-toggle,
+    #taskbar-tabs-audio,
+    #smartwindow-group-tabs-button,
+    #smartwindow-ask-button,
+    .content-analysis-indicator
+  ),
+  #nav-bar-overflow-button {
+    display: none !important;
+  }
+}
+
+
+/* -------------------------------------------------------------------------
+ * v8 narrow-width handoff and flexible-space artifact removal
+ * ---------------------------------------------------------------------- */
+
+/*
+ * At 821–1100 px v7 reduced the left reservation to 390 px even though the
+ * real navigation cluster (back/reload + 350 px URL field) still occupied
+ * roughly 460 px.  The tab toolbar therefore started inside the URL field.
+ * Keep the proven desktop reservation until the compact handoff instead of
+ * trying to squeeze both regions into the same pixels.
+ */
+@media (min-width: 981px) and (max-width: 1100px) {
+  :root {
+    --whitesur-left-zone: 510px;
+    --whitesur-right-zone: 290px;
+    --whitesur-urlbar-width: 350px;
+  }
+}
+
+/*
+ * Below this width a useful URL field, at least one tab, right-side tools and
+ * native Windows caption buttons no longer fit reliably in one line.  Hide
+ * the tab strip before any overlap can begin; keyboard tab switching remains
+ * available and the strip returns immediately when the window is widened.
+ */
+@media (max-width: 980px) {
+  #TabsToolbar {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  #nav-bar {
+    padding-inline-start: 4px !important;
+    padding-inline-end: calc(var(--whitesur-native-controls-width) + 4px) !important;
+  }
+
+  #nav-bar-customization-target {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #urlbar-container,
+  .urlbar-container,
+  #wrapper-urlbar-container,
+  .wrapper-urlbar-container {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: none !important;
+    margin-inline: 3px !important;
+  }
+
+  #nav-bar-customization-target > :is(
+    #downloads-button,
+    #home-button,
+    #library-button,
+    #bookmarks-menu-button,
+    #sidebar-button,
+    #firefox-view-button,
+    #fxa-toolbar-menu-button,
+    #unified-extensions-button,
+    #ai-window-toggle,
+    #taskbar-tabs-audio,
+    #smartwindow-group-tabs-button,
+    #smartwindow-ask-button,
+    .content-analysis-indicator
+  ),
+  #nav-bar-overflow-button {
+    display: none !important;
+  }
+}
+
+/*
+ * The seven horizontal strokes visible over web content match Firefox's
+ * flexible-space/spring grip, not the tab arrowscrollbox.  CustomizableUI can
+ * wrap a spring in a toolbarpaletteitem, so the old direct-child selectors
+ * hid the inner spring in some layouts while leaving its wrapper and grip
+ * painted.  This theme does not use springs for geometry, therefore remove
+ * every spring and every spring-only wrapper inside browser chrome.
+ */
+#navigator-toolbox toolbarspring,
+#navigator-toolbox toolbarpaletteitem:has(> toolbarspring),
+#navigator-toolbox toolbarpaletteitem[id^="wrapper-customizableui-special-spring"],
+#navigator-toolbox toolbarpaletteitem[id*="vertical-spacer"],
+#navigator-toolbox #wrapper-vertical-spacer,
+#navigator-toolbox #vertical-spacer {
+  -moz-appearance: none !important;
+  appearance: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  position: static !important;
+  flex: 0 0 0 !important;
+  -moz-box-flex: 0 !important;
+  inline-size: 0 !important;
+  min-inline-size: 0 !important;
+  max-inline-size: 0 !important;
+  block-size: 0 !important;
+  min-block-size: 0 !important;
+  max-block-size: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+#navigator-toolbox toolbarspring::before,
+#navigator-toolbox toolbarspring::after,
+#navigator-toolbox toolbarpaletteitem:has(> toolbarspring)::before,
+#navigator-toolbox toolbarpaletteitem:has(> toolbarspring)::after,
+#navigator-toolbox toolbarpaletteitem[id^="wrapper-customizableui-special-spring"]::before,
+#navigator-toolbox toolbarpaletteitem[id^="wrapper-customizableui-special-spring"]::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+
+
+/* -------------------------------------------------------------------------
+ * v14 URL-bar focus-ring containment
+ * ---------------------------------------------------------------------- */
+
+/*
+ * The imported Monterey sheet painted its focused outline on #urlbar itself.
+ * Current Firefox implements that element as a manual popover host.  In a
+ * restored Windows window the host's painted box can span from the address
+ * field to the far-right window edge even though the visible input container
+ * is only the configured URL-bar width.  That produced the long top/bottom
+ * lines and the stacked right edge visible over the +, extensions and menu
+ * controls.
+ *
+ * Never decorate the popover host.  Paint the two-pixel focus ring on the
+ * actual input container, which owns the shield, site identity, URL text,
+ * star and page-action buttons and therefore has the correct endpoint.
+ */
+#urlbar,
+#urlbar[focused],
+#urlbar[breakout],
+#urlbar[breakout][breakout-extend],
+#urlbar[open] {
+  outline: none !important;
+  outline-width: 0 !important;
+  outline-offset: 0 !important;
+  -moz-outline-radius: 0 !important;
+  transition-property: none !important;
+}
+
+#urlbar[focused]:not([suppress-focus-border]) > :is(
+  #urlbar-input-container,
+  .urlbar-input-container
+),
+#urlbar[breakout][breakout-extend][focused]:not([suppress-focus-border]) > :is(
+  #urlbar-input-container,
+  .urlbar-input-container
+) {
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 0 2px var(--gnome-focused-urlbar-border-color) !important;
+  outline: none !important;
+  overflow: clip !important;
+}
+
+/* The background keeps the normal Monterey surface but must not add a second
+ * ring around the top-layer host. */
+#urlbar[focused]:not([suppress-focus-border]) > :is(
+  #urlbar-background,
+  .urlbar-background
+) {
+  outline: none !important;
+  border-color: transparent !important;
+}
+
+/* -------------------------------------------------------------------------
+ * v14 URL-bar geometry reset — eliminate the detached background rectangle
+ * ---------------------------------------------------------------------- */
+
+/*
+ * Root cause reproduced from the real Firefox 153 model:
+ *   - Firefox's .urlbar[breakout] is an absolutely positioned popover host.
+ *   - the imported Linux WhiteSur sheet changed that host to position: static.
+ *   - .urlbar-background is itself position:absolute; inset:0.
+ *
+ * Once the host lost its positioning context, the background/border could be
+ * painted from the visible address field all the way to the far window edge.
+ * Its right border is the vertical "stack of lines" seen over the +, puzzle
+ * and menu buttons.  Restore Firefox's positioning model and make the stretched
+ * background incapable of painting or intercepting input.
+ */
+
+#urlbar-container,
+.urlbar-container,
+#wrapper-urlbar-container,
+.wrapper-urlbar-container {
+  position: relative !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+/* Normal non-breakout state fills only its toolbar item. */
+#urlbar:not([breakout]) {
+  position: relative !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Let Firefox/UrlbarInput own --urlbar-width and the popover anchoring. */
+#urlbar[breakout] {
+  position: absolute !important;
+  width: var(--urlbar-width) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  inset: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+}
+
+#urlbar[breakout]:not([open]) {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+}
+
+#urlbar[breakout][open] {
+  height: auto !important;
+  max-height: none !important;
+}
+
+/*
+ * The native background is the element that stretched in the broken layout.
+ * WhiteSur already gives the input field and results panel their own surfaces,
+ * so disabling this one is both safe and deterministic in every URLbar state.
+ */
+#urlbar > #urlbar-background,
+#urlbar > .urlbar-background,
+#urlbar[breakout] > #urlbar-background,
+#urlbar[breakout] > .urlbar-background {
+  display: none !important;
+  visibility: collapse !important;
+  opacity: 0 !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: none !important;
+  pointer-events: none !important;
+}
+
+/* The visible field becomes the only painted URL-bar rectangle. */
+#urlbar > #urlbar-input-container,
+#urlbar > .urlbar-input-container,
+#urlbar[breakout] > #urlbar-input-container,
+#urlbar[breakout] > .urlbar-input-container {
+  position: relative !important;
+  z-index: 1 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  margin: 0 !important;
+  padding: 0 3px !important;
+  overflow: clip !important;
+  border: 1px solid var(--gnome-urlbar-border-color) !important;
+  border-radius: 8px !important;
+  background: var(--gnome-urlbar-background) !important;
+  box-shadow: none !important;
+  outline: none !important;
+  pointer-events: auto !important;
+}
+
+#urlbar:hover > #urlbar-input-container,
+#urlbar:hover > .urlbar-input-container {
+  border-color: var(--gnome-hover-urlbar-border-color) !important;
+}
+
+#urlbar[focused]:not([suppress-focus-border]) > #urlbar-input-container,
+#urlbar[focused]:not([suppress-focus-border]) > .urlbar-input-container {
+  border-color: transparent !important;
+  box-shadow: inset 0 0 0 2px var(--gnome-focused-urlbar-border-color) !important;
+}
+
+:root:-moz-window-inactive #urlbar > #urlbar-input-container,
+:root:-moz-window-inactive #urlbar > .urlbar-input-container {
+  background: var(--gnome-inactive-urlbar-background) !important;
+  border-color: var(--gnome-inactive-urlbar-border-color) !important;
+}
+
+/* Re-enable interaction only on the actual search UI, never on its host box. */
+#urlbar > .urlbarView,
+#urlbar > #urlbar-input-container,
+#urlbar > .urlbar-input-container {
+  pointer-events: auto !important;
+}
+
+#urlbar > .urlbarView {
+  z-index: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: clip !important;
+}
+
+
+/* -------------------------------------------------------------------------
+ * v15 stable navigation spacing and restored-window drag regions
+ * ---------------------------------------------------------------------- */
+
+/*
+ * Standard Firefox can toggle the forward button between collapsed and
+ * visible as browsing history changes. Because this theme overlays TabsToolbar
+ * at a fixed inline start, collapsing that slot changes the real URLbar end
+ * point and can push page-action icons into the first tab. The disabled-state
+ * rule above keeps its slot stable; this desktop reservation leaves a small
+ * explicit drag gutter after the field in both states.
+ */
+@media (min-width: 981px) {
+  :root {
+    --whitesur-left-zone: 510px;
+  }
+
+  #urlbar-container,
+  .urlbar-container,
+  #wrapper-urlbar-container,
+  .wrapper-urlbar-container {
+    margin-inline-start: 4px !important;
+    margin-inline-end: auto !important;
+  }
+}
+
+/*
+ * Imported Linux rules mark broad control groups as draggable. Reassert the
+ * Windows model at the end of the cascade: empty toolbar containers drag the
+ * restored window, while every actual control remains a normal click target.
+ */
+:root[sizemode="normal"][tabsintitlebar] :is(
+  #navigator-toolbox,
+  #nav-bar,
+  #nav-bar-customization-target,
+  #TabsToolbar,
+  #TabsToolbar > .toolbar-items,
+  #TabsToolbar-customization-target,
+  #tabbrowser-tabs,
+  #tabbrowser-arrowscrollbox,
+  #pinned-tabs-container
+) {
+  -moz-window-dragging: drag !important;
+}
+
+:root[sizemode="normal"][tabsintitlebar] :is(
+  #nav-bar-customization-target > *,
+  #nav-bar-overflow-button,
+  #PanelUI-button,
+  #nav-bar > .titlebar-buttonbox-container,
+  #TabsToolbar-customization-target > *,
+  .tabbrowser-tab,
+  .tab-stack,
+  .tab-content,
+  #tabs-newtab-button,
+  #new-tab-button,
+  #alltabs-button,
+  #tabbrowser-tabs toolbarbutton,
+  .scrollbutton-up,
+  .scrollbutton-down
+) {
+  -moz-window-dragging: no-drag !important;
+}

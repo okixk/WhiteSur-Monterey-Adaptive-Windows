@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+.DS_Store
+Thumbs.db
+*.log
+
+# Local generated test output
+/tests/preview-*.png
+/tests/layout-report.json
+/tests/navigation-spacing-report.json
+/tests/urlbar-geometry-report.json
+/tests/RENDERED-LAYOUT-RESULTS.txt
