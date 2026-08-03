@@ -1,6 +1,6 @@
 /*
  * WhiteSur Monterey Adaptive for Firefox on Windows 10/11
- * Windows integration layer — revision 2026.07.28-15.
+ * Windows integration layer — revision 2026.08.03-16.
  *
  * This revision deliberately does not reuse WhiteSur's Linux CSD/toolbox
  * geometry. Current Firefox places titlebar items in both TabsToolbar and
@@ -14,7 +14,7 @@
   --whitesur-native-controls-width: 138px;
 
   /* Three non-overlapping zones: navigation | tabs | Windows controls/tools. */
-  --whitesur-left-zone: 510px;
+  --whitesur-left-zone: 498px;
   --whitesur-right-zone: 300px;
   --whitesur-urlbar-width: 350px;
 
@@ -651,7 +651,7 @@
  */
 @media (min-width: 981px) and (max-width: 1100px) {
   :root {
-    --whitesur-left-zone: 510px;
+    --whitesur-left-zone: 498px;
     --whitesur-right-zone: 290px;
     --whitesur-urlbar-width: 350px;
   }
@@ -949,7 +949,7 @@
 
 
 /* -------------------------------------------------------------------------
- * v15 stable navigation spacing and restored-window drag regions
+ * v16 stable spacing, tab dragging and autoscroll polish
  * ---------------------------------------------------------------------- */
 
 /*
@@ -962,7 +962,7 @@
  */
 @media (min-width: 981px) {
   :root {
-    --whitesur-left-zone: 510px;
+    --whitesur-left-zone: 498px;
   }
 
   #urlbar-container,
@@ -977,37 +977,160 @@
 /*
  * Imported Linux rules mark broad control groups as draggable. Reassert the
  * Windows model at the end of the cascade: empty toolbar containers drag the
- * restored window, while every actual control remains a normal click target.
+ * window, while every actual control remains a normal click target.
+ *
+ * The empty tab-strip surface stays draggable while idle. Firefox's native
+ * movingtab state temporarily returns the whole strip to no-drag so tab
+ * reorder/detach does not compete with native window hit-testing.
  */
-:root[sizemode="normal"][tabsintitlebar] :is(
+:root[tabsintitlebar]:not([inFullscreen]) :is(
   #navigator-toolbox,
   #nav-bar,
   #nav-bar-customization-target,
   #TabsToolbar,
   #TabsToolbar > .toolbar-items,
-  #TabsToolbar-customization-target,
-  #tabbrowser-tabs,
-  #tabbrowser-arrowscrollbox,
-  #pinned-tabs-container
+  #TabsToolbar-customization-target
 ) {
+  pointer-events: auto !important;
   -moz-window-dragging: drag !important;
 }
 
-:root[sizemode="normal"][tabsintitlebar] :is(
-  #nav-bar-customization-target > *,
-  #nav-bar-overflow-button,
-  #PanelUI-button,
-  #nav-bar > .titlebar-buttonbox-container,
-  #TabsToolbar-customization-target > *,
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs:not([movingtab]),
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs:not([movingtab]) :is(
+  #tabbrowser-arrowscrollbox,
+  #pinned-tabs-container,
+  #tabbrowser-arrowscrollbox-periphery
+),
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs:not([movingtab]) #tabbrowser-arrowscrollbox::part(scrollbox),
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs:not([movingtab]) #pinned-tabs-container::part(scrollbox) {
+  pointer-events: auto !important;
+  -moz-window-dragging: drag !important;
+}
+
+:root[tabsintitlebar]:not([inFullscreen]) :is(
   .tabbrowser-tab,
   .tab-stack,
   .tab-content,
+  .tab-close-button,
   #tabs-newtab-button,
   #new-tab-button,
   #alltabs-button,
+  #firefox-view-button,
   #tabbrowser-tabs toolbarbutton,
-  .scrollbutton-up,
-  .scrollbutton-down
+  #tabbrowser-tabs .scrollbutton-up,
+  #tabbrowser-tabs .scrollbutton-down,
+  #nav-bar toolbarbutton,
+  #urlbar-container,
+  #urlbar,
+  #search-container,
+  .titlebar-buttonbox-container,
+  .titlebar-buttonbox,
+  .titlebar-button
 ) {
+  pointer-events: auto !important;
   -moz-window-dragging: no-drag !important;
+}
+
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs[movingtab],
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs[movingtab] :is(
+  #tabbrowser-arrowscrollbox,
+  #pinned-tabs-container,
+  #tabbrowser-arrowscrollbox-periphery
+),
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs[movingtab] #tabbrowser-arrowscrollbox::part(scrollbox),
+:root[tabsintitlebar]:not([inFullscreen]) #tabbrowser-tabs[movingtab] #pinned-tabs-container::part(scrollbox) {
+  -moz-window-dragging: no-drag !important;
+}
+
+/* Firefox normally grows the drag area 15px downward while moving a tab.
+ * This theme uses a fixed 32px overlaid strip, so keep its geometry stable. */
+#tabbrowser-tabs[orient="horizontal"][movingtab] {
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  --tab-dragover-transition: none !important;
+}
+
+/* -------------------------------------------------------------------------
+ * v16 macOS-style autoscroll indicator
+ * ---------------------------------------------------------------------- */
+
+/*
+ * Firefox creates panel#autoscroller at 40 x 40 CSS px. The artwork is a
+ * complete light/dark puck with CUR-inspired direction glyphs. Keeping the
+ * full result in one image avoids partial rendering of context-stroke SVGs.
+ */
+:root panel#autoscroller.autoscroller {
+  appearance: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  -moz-window-shadow: none !important;
+  pointer-events: none !important;
+
+  --panel-padding: 0 !important;
+  --panel-border-color: transparent !important;
+  --panel-border-radius: 0 !important;
+  --panel-box-shadow: none !important;
+  --panel-box-shadow-margin: 0px !important;
+  --panel-shadow: none !important;
+  --panel-shadow-margin: 0px !important;
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-all-light.png") !important;
+  --panel-background-color: var(--autoscroll-background-image) center / 40px 40px no-repeat transparent !important;
+  --panel-background: var(--autoscroll-background-image) center / 40px 40px no-repeat transparent !important;
+}
+
+:root panel#autoscroller.autoscroller::part(content) {
+  box-sizing: border-box !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: var(--autoscroll-background-image) center / 40px 40px no-repeat transparent !important;
+  background-clip: border-box !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+:root panel#autoscroller.autoscroller[scrolldir="NS"] {
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-vertical-light.png") !important;
+}
+
+:root panel#autoscroller.autoscroller[scrolldir="EW"] {
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-horizontal-light.png") !important;
+}
+
+:root:is([lwtheme-brighttext], [lwt-popup="dark"]) panel#autoscroller.autoscroller {
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-all-dark.png") !important;
+}
+
+:root:is([lwtheme-brighttext], [lwt-popup="dark"]) panel#autoscroller.autoscroller[scrolldir="NS"] {
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-vertical-dark.png") !important;
+}
+
+:root:is([lwtheme-brighttext], [lwt-popup="dark"]) panel#autoscroller.autoscroller[scrolldir="EW"] {
+  --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-horizontal-dark.png") !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([lwt-popup="light"]) panel#autoscroller.autoscroller {
+    --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-all-dark.png") !important;
+  }
+
+  :root:not([lwt-popup="light"]) panel#autoscroller.autoscroller[scrolldir="NS"] {
+    --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-vertical-dark.png") !important;
+  }
+
+  :root:not([lwt-popup="light"]) panel#autoscroller.autoscroller[scrolldir="EW"] {
+    --autoscroll-background-image: url("Monterey/assets/autoscroll-filled-horizontal-dark.png") !important;
+  }
 }

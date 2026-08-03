@@ -17,7 +17,8 @@ Es kombiniert eine kompakte Safari-artige Ein-Zeilen-Toolbar mit den echten Wind
 - Tabs verschwinden bei zu schmalen Fenstern, bevor sich Elemente überschneiden
 - stabiles Spacing bei Vorwärts-, Sicherheits-, Stern- und Page-Action-Symbolen
 - sauberes Schliessen von Tabs ohne unsichtbare Lücken
-- freie Toolbar-Bereiche können zum Ziehen des Fensters verwendet werden
+- freie Toolbar- und Tab-Leisten-Bereiche können das Fenster ziehen, ohne Tab-Reihenfolge oder Tab-Abtrennen zu stören
+- macOS-inspirierte helle/dunkle Mittelklick-Autoscroll-Anzeige
 - adaptive Farben über Firefox-Theme-Variablen
 - automatische Erkennung des tatsächlich aktiven Firefox-Profils
 - Backup und Wiederherstellung eines vorhandenen `chrome`-Ordners
@@ -55,7 +56,7 @@ Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seinen ve
 
 Das Projekt wurde **stark mit ChatGPT vibe-codiert** und danach iterativ in echtem Firefox unter Windows getestet und korrigiert. Besonders intensiv getestet wurden URLbar-Geometrie, Tab-Schliessen, schmale Fenster, dynamisch erscheinende Toolbar-Symbole, Spacing und Fenster-Dragging.
 
-Die detaillierten Notizen zur aktuellen Version findest du unter [`docs/VERSION-15-NOTES.de.md`](docs/VERSION-15-NOTES.de.md).
+Die detaillierten Notizen zur aktuellen Version findest du unter [`docs/VERSION-16-NOTES.de.md`](docs/VERSION-16-NOTES.de.md).
 
 ## Basis und Inspiration
 

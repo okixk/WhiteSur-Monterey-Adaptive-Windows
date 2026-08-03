@@ -14,3 +14,6 @@ Thumbs.db
 /tests/navigation-spacing-report.json
 /tests/urlbar-geometry-report.json
 /tests/RENDERED-LAYOUT-RESULTS.txt
+
+# Local UI patch backups
+/.local-patch-backups/

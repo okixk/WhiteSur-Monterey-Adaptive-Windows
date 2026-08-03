@@ -145,7 +145,7 @@ addEventListener('load', () => requestAnimationFrame(() => {
       duplicate_controls_hidden: duplicate === 'none',
       tabs_visible: tabs.width >= 180,
       urlbar_visible: navLeft.width >= 150,
-      transparent_toolbar_does_not_capture: toolbarPointerEvents === 'none' && tabsPointerEvents === 'auto',
+      draggable_toolbar_keeps_tabs_interactive: toolbarPointerEvents === 'auto' && tabsPointerEvents === 'auto',
       closing_tab_collapses: closingTab.width <= 1,
       closing_spacer_removed: closingSpacerStyle.display === 'none',
       simple_close_icon: selectedCloseStyle.listStyleImage.includes('close-12.svg')

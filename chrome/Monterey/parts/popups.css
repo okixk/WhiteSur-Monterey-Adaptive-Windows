@@ -4,7 +4,7 @@
 @namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 /* Style menus */
-menupopup, panel {
+menupopup, panel:not(.autoscroller) {
 	-moz-appearance: none !important;
 	--panel-background: var(--gnome-menu-background) !important;
 	--panel-background-color: var(--gnome-menu-background) !important;
@@ -37,7 +37,7 @@ menupopup {
 }
 
 @media (prefers-color-scheme: dark) {
-	menupopup, panel {
+	menupopup, panel:not(.autoscroller) {
 		--panel-border-color: rgba(255, 255, 255, 0.06) !important;
 		--arrowpanel-border-color: rgba(255, 255, 255, 0.06) !important;
 	}
@@ -114,14 +114,14 @@ menupopup menu[disabled="true"]:hover {
 	padding: 6px !important;
 }
 
-panel:not([remote]), #BMB_bookmarksPopup {
+panel:not([remote]):not(.autoscroller), #BMB_bookmarksPopup {
 	--panel-background: var(--gnome-popover-background) !important;
 	--panel-background-color: var(--gnome-popover-background) !important;
 	--arrowpanel-background: var(--gnome-popover-background) !important;
 }
 
 /* Adjust popovers position */
-panel[type="arrow"] {
+panel[type="arrow"]:not(.autoscroller) {
 	appearance: none !important;
 	background-color: transparent !important;
 	margin: 0 -18px !important;

@@ -17,7 +17,8 @@ It combines a compact Safari-inspired single-row toolbar with native Windows win
 - Responsive compact mode that hides tabs before they overlap
 - Stable spacing when navigation and page-action icons appear
 - Clean tab closing without invisible gaps
-- Draggable empty toolbar regions in restored windows
+- Draggable empty toolbar and tab-strip regions without interfering with tab reordering or detaching
+- macOS-inspired light/dark middle-click autoscroll indicator
 - Adaptive colours through Firefox theme variables
 - Automatic Firefox profile detection
 - Existing `chrome` folder backup and restoration
@@ -60,7 +61,7 @@ Close Firefox and run `Uninstall.cmd`. The installer removes its managed prefere
 
 ## Compatibility
 
-This release was developed for current Firefox on Windows 11 and is packaged as version `2026.07.28-15`.
+This release was developed for current Firefox on Windows 11 and is packaged as version `2026.08.03-16`.
 
 Firefox does not officially support third-party browser chrome CSS as a stable public API. A future Firefox update can rename UI elements or change layout behaviour. Please report theme-specific breakage here rather than to Mozilla.
 

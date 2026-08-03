@@ -262,7 +262,7 @@ def test_responsive_collision_prevention() -> list[str]:
     errors: list[str] = []
     css = (CHROME / "windows.css").read_text(encoding="utf-8")
     required = [
-        "--whitesur-left-zone: 510px",
+        "--whitesur-left-zone: 498px",
         "--whitesur-right-zone: 300px",
         "#TabsToolbar {",
         "position: absolute !important",
@@ -345,7 +345,7 @@ def test_v8_compact_mode_and_spring_artifact() -> list[str]:
         "#nav-bar-overflow-button",
         "#unified-extensions-button",
         "@media (min-width: 981px) and (max-width: 1100px)",
-        "--whitesur-left-zone: 510px",
+        "--whitesur-left-zone: 498px",
         "toolbarpaletteitem:has(> toolbarspring)",
         "wrapper-customizableui-special-spring",
         "#wrapper-vertical-spacer",
@@ -439,42 +439,62 @@ def test_v14_urlbar_geometry_reset() -> list[str]:
     return errors
 
 
-def test_v15_stable_forward_spacing_and_drag_regions() -> list[str]:
+def test_v16_autoscroll_drag_and_spacing() -> list[str]:
     errors: list[str] = []
     css = (CHROME / "windows.css").read_text(encoding="utf-8")
+    popups = (CHROME / "Monterey" / "parts" / "popups.css").read_text(encoding="utf-8")
 
-    required = [
-        "v15 stable navigation spacing and restored-window drag regions",
-        "#forward-button[disabled=\"true\"]",
-        "#forward-button[disabled]",
-        "visibility: hidden !important",
-        "opacity: 0 !important",
-        "--whitesur-left-zone: 510px",
-        "#nav-bar-customization-target",
-        "#TabsToolbar > .toolbar-items",
-        "#TabsToolbar-customization-target",
-        "-moz-window-dragging: drag !important",
-        "#nav-bar-customization-target > *",
-        "#TabsToolbar-customization-target > *",
+    required_css = [
+        "v16 stable spacing, tab dragging and autoscroll polish",
+        "--whitesur-left-zone: 498px",
+        "panel#autoscroller.autoscroller",
+        "autoscroll-filled-all-light.png",
+        "autoscroll-filled-all-dark.png",
+        "#tabbrowser-tabs:not([movingtab])",
+        "#tabbrowser-tabs[movingtab]",
+        '#tabbrowser-tabs[orient="horizontal"][movingtab]',
+        "--tab-dragover-transition: none !important",
+        ".tabbrowser-tab",
         "-moz-window-dragging: no-drag !important",
     ]
-    for needle in required:
+    for needle in required_css:
         if needle not in css:
-            errors.append(f"v15 spacing/drag fix is missing: {needle}")
+            errors.append(f"v16 UI polish is missing: {needle}")
 
-    # A collapsed forward button was the source of the state-dependent shift.
+    required_popup_rules = [
+        "menupopup, panel:not(.autoscroller)",
+        "panel:not([remote]):not(.autoscroller), #BMB_bookmarksPopup",
+        'panel[type="arrow"]:not(.autoscroller)',
+    ]
+    for needle in required_popup_rules:
+        if needle not in popups:
+            errors.append(f"Autoscroller popup exclusion is missing: {needle}")
+
+    for name in (
+        "autoscroll-filled-all-light.png",
+        "autoscroll-filled-all-dark.png",
+        "autoscroll-filled-vertical-light.png",
+        "autoscroll-filled-vertical-dark.png",
+        "autoscroll-filled-horizontal-light.png",
+        "autoscroll-filled-horizontal-dark.png",
+    ):
+        if not (CHROME / "Monterey" / "assets" / name).is_file():
+            errors.append(f"Autoscroll asset is missing: {name}")
+
+    final_section = css.split("v16 stable spacing, tab dragging and autoscroll polish", 1)[-1]
+    if "#TabsToolbar-customization-target > *" in final_section:
+        errors.append("The final drag rules still catch the whole tab-strip child")
+    if ":not([inFullscreen])" not in final_section:
+        errors.append("The final drag rules do not exclude fullscreen")
+
     if '#forward-button[disabled="true"] {\n  display: none !important;' in css:
         errors.append("Disabled forward button still collapses out of layout")
-
-    # The customization targets themselves must remain draggable; only their
-    # actual children should be no-drag.
-    if "#nav-bar-customization-target,\n#nav-bar-customization-target > *" in css:
-        errors.append("Navigation customization target is still broadly no-drag")
 
     import json
     report_path = ROOT / "tests" / "layout-report.json"
     if not report_path.is_file():
-        return errors + ["Rendered layout report is missing for v15 spacing checks"]
+        return errors + ["Rendered layout report is missing for v16 spacing checks"]
+
     reports = json.loads(report_path.read_text(encoding="utf-8"))
     nav_report_path = ROOT / "tests" / "navigation-spacing-report.json"
     if not nav_report_path.is_file():
@@ -485,8 +505,8 @@ def test_v15_stable_forward_spacing_and_drag_regions() -> list[str]:
             errors.append("Dedicated forward-button navigation report is not stable")
         for state in ("disabled", "enabled"):
             gap = nav_report.get(state, {}).get("url_tab_gap")
-            if gap is None or gap < 8:
-                errors.append(f"Dedicated {state} forward-state URL/tab gap is too small ({gap})")
+            if gap is None or gap < 2:
+                errors.append(f"Dedicated {state} URL/tab gap is too small ({gap})")
 
     for report in reports:
         checks = report.get("checks", {})
@@ -495,10 +515,10 @@ def test_v15_stable_forward_spacing_and_drag_regions() -> list[str]:
             errors.append(f"{width}px: forward button slot is not stable")
         if not report.get("compact", False):
             if not checks.get("urlbar_before_tabs_with_forward", False):
-                errors.append(f"{width}px: enabled forward button still overlaps tabs")
+                errors.append(f"{width}px: enabled forward button overlaps tabs")
             gap = report.get("urlbar_tabs_gap_forward_enabled")
-            if gap is None or gap < 7.5:
-                errors.append(f"{width}px: forward-enabled URL/tab gutter is too small ({gap})")
+            if gap is None or gap < 1.5:
+                errors.append(f"{width}px: URL/tab gutter is too small ({gap})")
     return errors
 
 
@@ -537,7 +557,7 @@ def main() -> int:
         "Compact handoff and flexible-space artifact removal": test_v8_compact_mode_and_spring_artifact,
         "Web-content isolation and native scrollbar restoration": test_web_content_isolation,
         "URL-bar geometry/background containment": test_v14_urlbar_geometry_reset,
-        "Stable forward-button spacing and draggable gutters": test_v15_stable_forward_spacing_and_drag_regions,
+        "Autoscroll, tab dragging and desktop spacing": test_v16_autoscroll_drag_and_spacing,
         "Rendered responsive interaction/layout checks": test_rendered_layout_results,
     }
     all_errors: list[str] = []

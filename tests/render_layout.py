@@ -166,8 +166,8 @@ def main() -> int:
                                 "tabs_before_right_tools": tabs_right_tools_gap >= 7.5,
                                 "tabs_before_controls": tabs_controls_gap >= -0.6,
                                 "tabs_visible": tabs_toolbar["width"] >= 180,
-                                "transparent_toolbar_does_not_capture": (
-                                    toolbar_pointer_events == "none" and tabs_pointer_events == "auto"
+                                "draggable_toolbar_keeps_tabs_interactive": (
+                                    toolbar_pointer_events == "auto" and tabs_pointer_events == "auto"
                                 ),
                                 "closing_tab_collapses": closing_tab["width"] <= 1,
                             }
@@ -223,7 +223,7 @@ def main() -> int:
 
     (ROOT / "layout-report.json").write_text(json.dumps(reports, indent=2), encoding="utf-8")
 
-    lines = ["WhiteSur Monterey Adaptive Windows v15 rendered interaction/layout test", ""]
+    lines = ["WhiteSur Monterey Adaptive Windows v16 rendered interaction/layout test", ""]
     for report in reports:
         checks = report["checks"]
         status = "PASS" if all(checks.values()) else "FAIL"
