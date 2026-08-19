@@ -300,7 +300,7 @@
   }
 
 
-  .tabbrowser-tab:not([selected="true"]):not(:hover) .tab-close-button {
+  .tabbrowser-tab:not([selected]):not(:hover) .tab-close-button {
     display: none !important;
   }
 }

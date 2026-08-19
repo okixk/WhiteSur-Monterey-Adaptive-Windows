@@ -46,11 +46,11 @@
 	background-image: none !important;
 }
 
-.tabbrowser-tab:not([visuallyselected="true"], [multiselected]), .tabbrowser-tab:-moz-lwtheme {
+.tabbrowser-tab:not([visuallyselected], [visually-selected], [multiselected]), .tabbrowser-tab:-moz-lwtheme {
 	color: var(--gnome-tabbar-tab-color) !important;
 }
 
-.tabbrowser-tab .tab-background:not([selected=true]) {
+.tabbrowser-tab .tab-background:not([selected]) {
 	color: var(--gnome-tabbar-tab-active-color) !important;
 }
 
@@ -64,25 +64,30 @@
 	margin: 0 !important;
 }
 
-.tabbrowser-tab:not([selected=true]) .tab-background {
+.tabbrowser-tab:not([selected], [visuallyselected], [visually-selected], [multiselected]) .tab-background:not([selected], [multiselected]) {
 	background: var(--gnome-tabbar-tab-background) !important;
 }
 
-.tabbrowser-tab:not([selected=true]) .tab-background:-moz-window-inactive {
+.tabbrowser-tab:not([selected], [visuallyselected], [visually-selected], [multiselected]) .tab-background:not([selected], [multiselected]):-moz-window-inactive {
 	background: var(--gnome-inactive-tabbar-tab-background) !important;
 }
 
 /* Tab hover */
-.tabbrowser-tab:not([selected=true]):hover .tab-background {
+.tabbrowser-tab:not([selected], [visuallyselected], [visually-selected], [multiselected]):hover .tab-background:not([selected], [multiselected]) {
 	background: var(--gnome-tabbar-tab-hover-background) !important;
 }
 
 /* Active tab */
-.tab-background:is([selected]) {
+/* Firefox 154+: selected/visuallyselected are boolean tab states.
+ * Anchor the active appearance to the tab element as well as tab-background,
+ * so internal state propagation changes cannot make the active tab look idle. */
+.tabbrowser-tab:is([selected], [visuallyselected], [visually-selected], [multiselected]) > .tab-stack > .tab-background,
+.tab-background:is([selected], [multiselected]) {
 	background: var(--gnome-tabbar-tab-active-background) !important;
 }
 
-.tab-background:is([selected]):-moz-window-inactive {
+.tabbrowser-tab:is([selected], [visuallyselected], [visually-selected], [multiselected]) > .tab-stack > .tab-background:-moz-window-inactive,
+.tab-background:is([selected], [multiselected]):-moz-window-inactive {
 	background: var(--gnome-inactive-tabbar-tab-active-background) !important;
 }
 
@@ -151,8 +156,8 @@ tab[selected]:-moz-window-inactive .tab-label {
 	margin-top: 0 !important;
 }
 
-.tabbrowser-tab[soundplaying="true"] .tab-icon-image,
-.tabbrowser-tab[muted="true"] .tab-icon-image {
+.tabbrowser-tab[soundplaying] .tab-icon-image,
+.tabbrowser-tab[muted] .tab-icon-image {
 	margin-top: 3px !important;
 	margin-left: 2px !important;
 }
@@ -181,7 +186,7 @@ tab[selected]:-moz-window-inactive .tab-label {
 	background-color: transparent !important;
 }
 
-.tabbrowser-tab[selected=true] .tab-icon-overlay:not([crashed]):is([soundplaying], [muted], [activemedia-blocked]) {
+.tabbrowser-tab[selected] .tab-icon-overlay:not([crashed]):is([soundplaying], [muted], [activemedia-blocked]) {
 	background-color: transparent !important;
 }
 
@@ -207,7 +212,7 @@ tab[selected]:-moz-window-inactive .tab-label {
 }
 
 /* Tab attention dot */
-.tabbrowser-tab:is([image], [pinned]) > .tab-stack > .tab-content[attention]:not([selected="true"]), .tabbrowser-tab > .tab-stack > .tab-content[pinned][titlechanged]:not([selected="true"]), #firefox-view-button[attention] {
+.tabbrowser-tab:is([image], [pinned]) > .tab-stack > .tab-content[attention]:not([selected]), .tabbrowser-tab > .tab-stack > .tab-content[pinned][titlechanged]:not([selected]), #firefox-view-button[attention] {
 	background-image: radial-gradient(circle, var(--gnome-tab-attention-icon-color), var(--gnome-tab-attention-icon-color) 2px, transparent 2px) !important;
 	background-position: center bottom 3px !important;
 	background-size: 4px 4px;

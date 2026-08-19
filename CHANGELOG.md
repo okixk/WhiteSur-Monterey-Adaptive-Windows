@@ -1,4 +1,9 @@
 # Changelog
+## 2026.08.19-17
+
+- Fixed selected-tab styling on Firefox 154 by replacing string-valued pseudo-boolean selectors with boolean tab-state selectors.
+- Anchored the active tab background to the tab's selected/visual state as well as the tab-background node.
+- Added a Firefox 154 selected-tab regression test.
 ## 2026.08.03-16
 
 - Added a macOS-inspired middle-click autoscroll puck with separate light, dark, vertical, horizontal, and four-direction artwork.
