@@ -1,0 +1,72 @@
+<!doctype html>
+<html tabsintitlebar sizemode="maximized">
+<head>
+<meta charset="utf-8">
+<style>
+* { box-sizing: border-box; }
+:root {
+  --whitesur-left-zone: 498px;
+  --whitesur-right-zone: 396px;
+}
+body { margin:0; background:#202127; color:white; font:13px sans-serif; }
+#navigator-toolbox { width:1285px; height:48px; position:relative; background:#292a33; }
+#nav-bar { position:absolute; inset:0; display:flex; align-items:center; }
+#nav-bar-customization-target { display:flex; flex:1; align-items:center; }
+#downloads-button { display:none; }
+#right-tools { position:absolute; right:138px; top:8px; width:72px; height:32px; background:#3b3c44; }
+#native { position:absolute; right:0; top:0; width:138px; height:48px; background:#24252b; }
+
+#TabsToolbar {
+  position:absolute;
+  top:0;
+  left:var(--whitesur-left-zone);
+  right:var(--whitesur-right-zone);
+  height:48px;
+  display:flex;
+  align-items:center;
+}
+.toolbar-items, #TabsToolbar-customization-target, #tabbrowser-tabs, #tabbrowser-arrowscrollbox {
+  display:flex;
+  flex:1 1 auto;
+  min-width:0;
+  height:32px;
+}
+.tabbrowser-tab { width:160px; flex:0 0 160px; height:32px; margin-right:4px; border-radius:8px; background:#55565f; }
+#tabbrowser-arrowscrollbox-periphery { display:flex; height:32px; }
+#tabs-newtab-button { width:32px; height:32px; }
+#tail-probe { flex:1 1 auto; min-width:0; background:rgba(0,180,255,.12); }
+
+@media (min-width:981px) {
+  :root { --whitesur-right-zone:300px !important; }
+  :root:has(#downloads-button[hidden]) { --whitesur-right-zone:224px !important; }
+}
+</style>
+</head>
+<body>
+<div id="navigator-toolbox">
+  <div id="nav-bar">
+    <div id="nav-bar-customization-target">
+      <button id="downloads-button" hidden>download</button>
+    </div>
+    <div id="right-tools"></div>
+    <div id="native"></div>
+  </div>
+  <div id="TabsToolbar">
+    <div class="toolbar-items">
+      <div id="TabsToolbar-customization-target">
+        <div id="tabbrowser-tabs">
+          <div id="tabbrowser-arrowscrollbox">
+            <div class="tabbrowser-tab"></div>
+            <div class="tabbrowser-tab"></div>
+            <div id="tabbrowser-arrowscrollbox-periphery">
+              <button id="tabs-newtab-button">+</button>
+            </div>
+            <div id="tail-probe"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

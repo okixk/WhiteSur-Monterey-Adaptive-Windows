@@ -1,6 +1,6 @@
 /*
  * WhiteSur Monterey Adaptive for Firefox on Windows 10/11
- * Windows integration layer — revision 2026.08.03-16.
+ * Windows integration layer — revision 2026.08.21-18.
  *
  * This revision deliberately does not reuse WhiteSur's Linux CSD/toolbox
  * geometry. Current Firefox places titlebar items in both TabsToolbar and
@@ -1134,3 +1134,300 @@
     --autoscroll-background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADoUlEQVR4nO2YX0xTVxzHv+f29pTsjRgjkxJm5h9qiy8GRY1xTz4YFLHW8sdS5jTGf6Agw4e9zT/AhiZqYqKoqSSUPxcKQhhjMXFx2RT/RkR94QFbkGRxZi+j3Lb37KHcpWHr7b131E3Tz1PTe+45n35P77m/c4AUKVK835D56GQ8MFUQ71q2OaP/3/TN670xVqrc/cURhXZ/fdYjqyvB8cBUgZJUPG54rl7QKqlJUE5Nj5zMDc/VC4D6NFUL6k0tHmrT5NR0Nt9yQHQWlB4uGVWC/yUJBZORnoyaFBUFE8mZKOUAoLamynKt+dLG2O8qDx9YUXXk4AoAoNQYd5xEkrqnmFIjNyOKksNeZF6/Lj+LN/AcABAu2iXP8+SzTRuzHfYisyiGJCVJJXQt1JQaOVEMSU6HPavYudMCAIxJjBACEgWSJAEASkt2rSSEkA6h2y/fp2WsuL8q3vTKg+zYvi2z2LnT8ujxk9cAYDKZeMYYpqenI4wx0Nmpvv/g4WRJscOyvXBrZrwklaZZc4KiGJK2FmxZ7NpdYvUHJn7/+lTDiE/wfmwymXif4N08t/3p+m+fnWtq+MjtKrVKUoTd7BuY1DKeZsHCbQWLK8rLbG/e/PZH5dHj93ieJ98NDo2tyrUtBADCEcIYY4QQMjIy+iulRu5YTd3wxfNN+Z+7XTZRDEmD3/8wlWgc3YIV5WU2ANi7/9BPlBq5UCgsXW6+PgZg7J/aE0JAqZE7XFlz1yd4N+/ft2dVUgU9La2jblep9VxTw5pjNXXDPM8Te1GhOSdnebqBMxAQACza9vnLl2+Frh6/KIaks9+cyQOAK83Xn2oZT7NgT2/fBGOMVZSX2RrrT67+8sRXD+UneS65udZFbe3Cq8b6k6uXLPkk3dPSOjowOKQ6PV2ClBq53pv9kwaDgbjKiq11tdVWABBFMeIsdd+S29XVVlvz1+ZlHq+usixb+ukCT0vraE9v34TWpSauYLY5o388MPW30kpeKrp9vROUGg1Ohz0HAILBYIgQgrS0NEMwGIzMzMxEAGDD+vystnbhhZKcUmWja3WXJdvahVfets4XAEAIRxhjYFHAzb5RWr0dz9s7u3Qt0roFZUkTpVyH0O3/+Ze7/nAkLAEAm32DhMNhdvvHO+OdXb6AXjlARcGazGoGSFy4Jkww25zRL5fp842aqvr9L1iB5KSodk/y4ezqYvnf7otjUXuyEPvXeGcnC3NJ5tlMihQpEvAnAhe/uTTTLR4AAAAASUVORK5CYII=") !important;
   }
 }
+
+/* BEGIN v18-r7 real shadow-scrollbox drag */
+@media (min-width: 981px) {
+  /*
+   * r5/r6 over-reserved the entire right side to make room for toolbar icons.
+   * Keep the proven v16 reserve when Downloads is actually present, but reclaim
+   * that unused width when Firefox has the Downloads button hidden.
+   *
+   * This is not a flexible-space widget. It moves the real TabsToolbar edge.
+   */
+  :root {
+    --whitesur-right-zone: 300px !important;
+  }
+
+  @media (max-width: 1100px) {
+    :root {
+      --whitesur-right-zone: 290px !important;
+    }
+  }
+
+  :root:has(#downloads-button[hidden]) {
+    --whitesur-right-zone: 224px !important;
+  }
+
+  @media (max-width: 1100px) {
+    :root:has(#downloads-button[hidden]) {
+      --whitesur-right-zone: 220px !important;
+    }
+  }
+
+  /*
+   * The base v8 code already removes every CustomizableUI toolbarspring and
+   * spring wrapper. Do not manufacture or stretch a replacement spring.
+   */
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #TabsToolbar-customization-target > toolbarspring,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #TabsToolbar-customization-target > toolbarpaletteitem:has(> toolbarspring) {
+    display: none !important;
+    visibility: hidden !important;
+    flex: 0 0 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /*
+   * Restore the actual tab browser to the full TabsToolbar width.
+   * These declarations intentionally neutralise the r5 max-content experiment.
+   */
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-tabs {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-width: 0 !important;
+    min-inline-size: 0 !important;
+    max-width: 100% !important;
+    max-inline-size: 100% !important;
+  }
+
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    inline-size: 100% !important;
+    min-width: 0 !important;
+    min-inline-size: 0 !important;
+    max-width: 100% !important;
+    max-inline-size: 100% !important;
+  }
+
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox-periphery {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-inline-end: 0 !important;
+  }
+
+  /*
+   * IMPORTANT r7 change:
+   *
+   * The visible empty tail belongs to the arrowscrollbox's SHADOW scrollbox
+   * frame. Mark that actual painted frame as draggable. Firefox's window-drag
+   * region is built from drag frame rectangles minus no-drag frame rectangles,
+   * so the real tab/new-tab controls below subtract themselves from this area.
+   */
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #TabsToolbar,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #TabsToolbar > .toolbar-items,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #TabsToolbar-customization-target,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-tabs,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox-periphery,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox::part(scrollbox) {
+    -moz-window-dragging: drag !important;
+  }
+
+  /* The actual controls remain ordinary client-area controls. */
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    :is(
+      .tabbrowser-tab,
+      .tab-stack,
+      .tab-content,
+      #tabs-newtab-button,
+      #new-tab-button,
+      #alltabs-button,
+      #firefox-view-button,
+      #pinned-tabs-container,
+      .scrollbutton-up,
+      .scrollbutton-down
+    ),
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox::part(scrollbutton-up),
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-arrowscrollbox::part(scrollbutton-down) {
+    -moz-window-dragging: no-drag !important;
+  }
+
+  /*
+   * Overflow/reorder states belong to native tab scrolling and tab dragging.
+   */
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-tabs:is([overflow], [movingtab]),
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-tabs:is([overflow], [movingtab]) #tabbrowser-arrowscrollbox,
+  :root:is([tabsintitlebar], [customtitlebar]):not([inFullscreen]):not([taskbartab])
+    #tabbrowser-tabs:is([overflow], [movingtab]) #tabbrowser-arrowscrollbox::part(scrollbox) {
+    -moz-window-dragging: no-drag !important;
+  }
+
+  /* Keep the private-window alignment that tested well in r6. */
+  :root[privatebrowsingmode="temporary"]:not([taskbartab])
+    #tabbrowser-tabs {
+    margin-inline-start: 1px !important;
+  }
+}
+
+/* Keep the successful r6 Taskbar-Tab cleanup. */
+:root[taskbartab] #taskbar-tabs-button {
+  display: none !important;
+}
+/* END v18-r7 real shadow-scrollbox drag */
+
+/* BEGIN v18-r8 taskbar-action-icon */
+/*
+ * Firefox 154 exposes "Add tab to taskbar" as a URL-bar page action containing
+ * a single image. Keep it visually consistent with the surrounding URL-bar
+ * icons instead of styling it as a standalone button/pill.
+ */
+:root:not([taskbartab]) #taskbar-tabs-button:not([hidden]) {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  width: 28px !important;
+  min-width: 28px !important;
+  max-width: 28px !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+
+  margin: 0 1px !important;
+  padding: 6px !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+  border-radius: 7px !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+
+  color: inherit !important;
+  opacity: 0.92 !important;
+}
+
+:root:not([taskbartab]) #taskbar-tabs-button:not([hidden]):hover {
+  background: color-mix(in srgb, currentColor 10%, transparent) !important;
+  opacity: 1 !important;
+}
+
+:root:not([taskbartab]) #taskbar-tabs-button:not([hidden]):active {
+  background: color-mix(in srgb, currentColor 16%, transparent) !important;
+}
+
+:root:not([taskbartab]) #taskbar-tabs-button > .urlbar-icon {
+  list-style-image: url("chrome://browser/skin/taskbar-tabs-add-tab.svg") !important;
+  -moz-context-properties: fill, fill-opacity !important;
+  fill: currentColor !important;
+
+  width: 16px !important;
+  min-width: 16px !important;
+  max-width: 16px !important;
+  height: 16px !important;
+  min-height: 16px !important;
+  max-height: 16px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Inside an existing Taskbar Tab Firefox changes this page action into the
+ * eject/close action. Keep that redundant control hidden there. */
+:root[taskbartab] #taskbar-tabs-button {
+  display: none !important;
+}
+/* END v18-r8 taskbar-action-icon */
+
+/* BEGIN v18-r9 toolbar-integration */
+/*
+ * The r7 hidden-Downloads reclaim modelled the right-side tools as a fixed
+ * 72px cluster. Firefox 154 also places Unified Extensions and every pinned
+ * WebExtension in that cluster. Reserve their real 44px toolbar slots so the
+ * overlaid TabsToolbar always finishes before the first visible tool.
+ *
+ * 246px covers Windows controls + application menu + Unified Extensions and
+ * keeps at least an 8px gutter in both Firefox chrome and the package fixture.
+ */
+@media (min-width: 981px) {
+  :root {
+    --whitesur-download-reserve: 44px;
+    --whitesur-pinned-extension-reserve: 0px;
+  }
+
+  :root:has(#downloads-button[hidden]) {
+    --whitesur-download-reserve: 0px;
+  }
+
+  :root:has(
+    #nav-bar-customization-target > toolbaritem[id$="-browser-action"]:not([hidden])
+  ) {
+    --whitesur-pinned-extension-reserve: 44px;
+  }
+
+  :root:has(
+    #nav-bar-customization-target > toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+  ) {
+    --whitesur-pinned-extension-reserve: 88px;
+  }
+
+  :root:has(
+    #nav-bar-customization-target > toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+  ) {
+    --whitesur-pinned-extension-reserve: 132px;
+  }
+
+  :root:has(
+    #nav-bar-customization-target > toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+      ~ toolbaritem[id$="-browser-action"]:not([hidden])
+  ) {
+    --whitesur-pinned-extension-reserve: 176px;
+  }
+
+  /* Two live chrome IDs give this final boundary more specificity than r7's
+   * historical #downloads-button[hidden] override. */
+  :root:has(#navigator-toolbox):has(#nav-bar-customization-target) {
+    --whitesur-right-zone:
+      calc(
+        246px +
+        var(--whitesur-download-reserve) +
+        var(--whitesur-pinned-extension-reserve)
+      ) !important;
+  }
+}
+
+/* Match the taskbar action to Firefox's neighboring 28 x 26px URL-bar
+ * actions. Removing its private 1px margins also restores a regular 28px
+ * cadence across Add to taskbar, Translate and Bookmark. */
+:root:not([taskbartab]) #taskbar-tabs-button:not([hidden]) {
+  height: 26px !important;
+  min-height: 26px !important;
+  max-height: 26px !important;
+  margin: 0 !important;
+  padding: 5px 6px !important;
+}
+/* END v18-r9 toolbar-integration */

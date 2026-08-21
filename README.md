@@ -61,7 +61,7 @@ Close Firefox and run `Uninstall.cmd`. The installer removes its managed prefere
 
 ## Compatibility
 
-This release was developed for current Firefox on Windows 11 and is packaged as version `2026.08.03-16`.
+This release was developed and live-tested with Firefox 154 on Windows 11 and is packaged as version `2026.08.21-18`.
 
 Firefox does not officially support third-party browser chrome CSS as a stable public API. A future Firefox update can rename UI elements or change layout behaviour. Please report theme-specific breakage here rather than to Mozilla.
 
@@ -77,6 +77,12 @@ py -m playwright install chromium
 py tests/render_layout.py
 py tests/test_navigation_states.py
 py tests/test_urlbar_geometry.py
+py tests/test_tab_selected_firefox154.py
+py tests/test_v18_r7_regressions.py
+py tests/test_v18_r8_regressions.py
+py tests/test_v18_r9_toolbar_integration.py
+py tests/render_v18_r7_fixture.py
+py tests/render_v18_r9_fixture.py
 py test_package.py
 ```
 

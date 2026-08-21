@@ -1,4 +1,13 @@
 # Changelog
+
+## 2026.08.21-18
+
+- Restored native window dragging across the real post-tab shadow-scrollbox tail on Firefox 154, including windows that expose `customtitlebar` instead of `tabsintitlebar`.
+- Kept tabs, New Tab, overflow buttons, private-window tabs, reordering, and detaching as native no-drag controls.
+- Styled Firefox's Add tab to taskbar page action as a compact URL-bar icon aligned with Translate and Bookmark.
+- Reserved the actual Downloads, Unified Extensions, and pinned-extension toolbar slots so the overlaid tab strip cannot cover the puzzle icon or extension controls.
+- Added live-geometry-backed r7–r9 regression fixtures for tab-tail dragging, taskbar-action styling, and toolbar collision prevention.
+
 ## 2026.08.19-17
 
 - Fixed selected-tab styling on Firefox 154 by replacing string-valued pseudo-boolean selectors with boolean tab-state selectors.

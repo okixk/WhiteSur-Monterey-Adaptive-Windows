@@ -34,6 +34,15 @@ jobs:
           python tests/render_layout.py
           python tests/test_navigation_states.py
           python tests/test_urlbar_geometry.py
+          python tests/test_tab_selected_firefox154.py
+          python tests/render_v18_r7_fixture.py
+          python tests/render_v18_r9_fixture.py
+
+      - name: Run Firefox 154 regressions
+        run: |
+          python tests/test_v18_r7_regressions.py
+          python tests/test_v18_r8_regressions.py
+          python tests/test_v18_r9_toolbar_integration.py
 
       - name: Run package checks
         run: python test_package.py

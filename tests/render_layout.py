@@ -223,7 +223,7 @@ def main() -> int:
 
     (ROOT / "layout-report.json").write_text(json.dumps(reports, indent=2), encoding="utf-8")
 
-    lines = ["WhiteSur Monterey Adaptive Windows v16 rendered interaction/layout test", ""]
+    lines = ["WhiteSur Monterey Adaptive Windows v18 rendered interaction/layout test", ""]
     for report in reports:
         checks = report["checks"]
         status = "PASS" if all(checks.values()) else "FAIL"
