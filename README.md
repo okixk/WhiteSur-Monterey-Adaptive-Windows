@@ -61,7 +61,7 @@ Close Firefox and run `Uninstall.cmd`. The installer removes its managed prefere
 
 ## Compatibility
 
-This release was developed and live-tested with Firefox 154 on Windows 11 and is packaged as version `2026.08.21-18`.
+This beta is packaged as version `2026.09.29-19` (`v0.1.0-beta.3`) and was live-tested with Firefox 156 on Windows 11. Earlier versions were tested with Firefox 154.
 
 Firefox does not officially support third-party browser chrome CSS as a stable public API. A future Firefox update can rename UI elements or change layout behaviour. Please report theme-specific breakage here rather than to Mozilla.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.09.29-19 (v0.1.0-beta.3)
+
+- Kept Firefox 156's "Not Secure" address-bar label on one line.
+- Restored Firefox's native anchoring for notification permission prompts.
+- Gave executable-file dialogs an opaque background, removing the dark rectangle seen with MSI downloads.
+
 ## 2026.08.21-18
 
 - Restored native window dragging across the real post-tab shadow-scrollbox tail on Firefox 154, including windows that expose `customtitlebar` instead of `tabsintitlebar`.

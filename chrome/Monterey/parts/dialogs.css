@@ -27,8 +27,10 @@ window {
 }
 
 /* Dialog */
+/* A transparent dialog root lets the Windows window surface show through in
+ * Firefox's "Open Executable File?" prompt. Paint an opaque theme surface. */
 window[role="dialog"] {
-	background: none !important;
+	background: var(--in-content-page-background, var(--gnome-toolbar-background, Canvas)) !important;
 	border: none !important;
 	box-shadow: none !important;
 	padding: 0 !important;
@@ -50,6 +52,8 @@ dialog[subdialog] {
 }
 
 .dialogBox {
+	/* In-content prompts need the same surface behind their transparent body. */
+	background: var(--in-content-page-background, var(--gnome-toolbar-background, Canvas)) !important;
 	border-radius: 12px !important;
 	margin: 0 !important;
 

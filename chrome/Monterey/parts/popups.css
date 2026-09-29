@@ -120,11 +120,16 @@ panel:not([remote]):not(.autoscroller), #BMB_bookmarksPopup {
 	--arrowpanel-background: var(--gnome-popover-background) !important;
 }
 
-/* Adjust popovers position */
+/* WhiteSur's offset for generic popovers. */
 panel[type="arrow"]:not(.autoscroller) {
 	appearance: none !important;
 	background-color: transparent !important;
 	margin: 0 -18px !important;
+}
+
+/* Permission doorhangers are anchored to the URL-bar notification icon. */
+#notification-popup {
+	margin-inline: 0 !important;
 }
 
 /* Style popovers */

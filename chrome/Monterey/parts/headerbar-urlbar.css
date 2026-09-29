@@ -219,6 +219,18 @@ toolbarspring {
 	border-radius: 5px !important;
 }
 
+/* Firefox 156 puts the "Not Secure" label inside this button.  The shared
+ * 28px icon rule above leaves room for the shield alone and wraps the label. */
+#trust-icon-container:has(#trust-label:not([hidden])) {
+	width: auto !important;
+	min-width: max-content !important;
+}
+
+#trust-label {
+	flex: none !important;
+	white-space: nowrap !important;
+}
+
 .urlbar-page-action {
 	padding: 5px 6px !important;
 }
