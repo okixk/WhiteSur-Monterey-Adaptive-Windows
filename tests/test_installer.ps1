@@ -58,6 +58,21 @@ try {
     Check ([IO.File]::ReadAllText((Join-Path $runtime 'application.ini')).Contains('159.0.1')) 'update does not downgrade a newer binary copy'
     & $installer -ProfilePath $first -FirefoxPath (Join-Path $runtime 'firefox.exe') -RuntimeDirectory $runtime -ShortcutDirectory $shortcuts -Force
     Check (Test-Path -LiteralPath (Join-Path $first '.whitesur-editable-tabs.json')) 'a completed owned runtime can be reused as the source'
+    Add-Type -TypeDefinition @'
+using System.Text;
+using System.Runtime.InteropServices;
+public static class WhiteSurInstallerTestPaths {
+    [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
+    public static extern uint GetShortPathName(string longPath, StringBuilder buffer, uint size);
+}
+'@
+    $shortBuffer = [Text.StringBuilder]::new(4096)
+    if ([WhiteSurInstallerTestPaths]::GetShortPathName($first, $shortBuffer, 4096) -eq 0) {
+        throw 'Could not resolve the installer short-path fixture.'
+    }
+    Install $shortBuffer.ToString()
+    Check (Test-Path -LiteralPath (Join-Path $first '.whitesur-editable-tabs.json')) 'profile paths accept Windows 8.3 aliases without weakening the chrome guard'
+    $state = Get-Content (Join-Path $first '.whitesur-editable-tabs.json') -Raw | ConvertFrom-Json
     & $installer -ProfilePath $first -Diagnose
     Check ($LASTEXITCODE -eq 0) 'diagnostics work for editable-tabs installations'
 

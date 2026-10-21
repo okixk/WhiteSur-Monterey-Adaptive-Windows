@@ -34,7 +34,7 @@ Current result: **18 checks passed**, with zero measured vertical offset. Fresh-
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
 ```
 
-Runs under Windows PowerShell 5.1. Uses temporary fake executable files that are never launched, and real filesystem/preferences/shortcut operations. Covers default install, profile launchers, UTF-8/LF loader files, update preservation, binary upgrades without downgrades, owned-runtime reuse, diagnostics, multiple profiles, classic mode, uninstall restoration, unrelated preferences, modified launchers, older Firefox, AutoConfig conflicts, and unmanaged directories. Shared runtime retention is intentional. Current result: **26 checks passed**.
+Runs under Windows PowerShell 5.1. Uses temporary fake executable files that are never launched, and real filesystem/preferences/shortcut operations. Covers default install, profile launchers, UTF-8/LF loader files, update preservation, binary upgrades without downgrades, owned-runtime reuse, Windows 8.3 profile paths, diagnostics, multiple profiles, classic mode, uninstall restoration, unrelated preferences, modified launchers, older Firefox, AutoConfig conflicts, and unmanaged directories. Shared runtime retention is intentional. Current result: **27 checks passed**.
 
 ## Classic layout and package checks
 

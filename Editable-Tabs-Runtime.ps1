@@ -185,7 +185,9 @@ function Set-EditableTabsLauncher {
 
 function Assert-ProfileChromePath {
     param([string]$ProfileDirectory)
-    $profileRoot = (Resolve-Path -LiteralPath $ProfileDirectory).Path.TrimEnd('\')
+    # .NET expands existing 8.3 segments (e.g. RUNNER~1) when normalizing the
+    # chrome path. Normalize its parent the same way before comparing them.
+    $profileRoot = [IO.Path]::GetFullPath((Resolve-Path -LiteralPath $ProfileDirectory).ProviderPath).TrimEnd('\')
     $chromePath = [IO.Path]::GetFullPath((Join-Path $profileRoot 'chrome'))
     if (-not (Test-PathEquals -Left (Split-Path -Parent $chromePath) -Right $profileRoot)) {
         throw 'The chrome directory is outside the selected profile.'
