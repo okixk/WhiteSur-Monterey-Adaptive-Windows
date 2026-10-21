@@ -4,6 +4,8 @@ A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
 The selected tab becomes Firefox's native address/search field. Click a tab and type a URL or search, while other tabs stay compact. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
+**v0.2.0-beta.1 is a larger interface update:** editable tabs replace the separate address bar on supported Firefox. After installing, use the new WhiteSur Firefox desktop shortcut. See the [release notes](docs/releases/v0.2.0-beta.1.md) for the changes from the 0.1 betas.
+
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
 > [!IMPORTANT]
@@ -76,7 +78,7 @@ Close Firefox and run `Uninstall.cmd`. It removes its managed preferences and ow
 
 ## Compatibility
 
-Version `2026.10.21-20` was tested with Firefox 158.0.1 on Windows 11. Editable tabs require Firefox 158+ with horizontal tabs. Older versions and detected AutoConfig conflicts receive the classic CSS layout, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+Version `2026.10.21-21` (`v0.2.0-beta.1`) was tested with Firefox 158.0.1 on Windows 11. Editable tabs require Firefox 158+ with horizontal tabs. Older versions and detected AutoConfig conflicts receive the classic CSS layout, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
 
 Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
 
@@ -91,6 +93,7 @@ Native Windows checks use a disposable profile and runtime. Run with Firefox 158
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
 py tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+py tests/test_search_mode_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 ```
 
 See [testing notes](docs/TESTING.md) for coverage and artifacts. The classic layout and package checks run with:

@@ -4,6 +4,8 @@ Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
 Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklicken und eine Adresse oder Suche eingeben; die übrigen Tabs bleiben kompakt. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
+**v0.2.0-beta.1 ist ein grösseres Oberflächen-Update:** Auf unterstützten Firefox-Versionen ersetzen editierbare Tabs die separate Adressleiste. Nach der Installation die neue WhiteSur-Firefox-Verknüpfung verwenden. Änderungen gegenüber den 0.1-Betas stehen in den [Release Notes](docs/releases/v0.2.0-beta.1.md) (Englisch).
+
 ![WhiteSur Monterey Adaptive in Firefox unter Windows](docs/screenshot.png)
 
 > [!IMPORTANT]
@@ -68,7 +70,7 @@ Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine ver
 
 ## Kompatibilität
 
-Version `2026.10.21-20` wurde mit Firefox 158.0.1 unter Windows 11 getestet. Editierbare Tabs benötigen Firefox 158+ mit horizontalen Tabs. Ältere Versionen, vertikale Tabs und erkannte AutoConfig-Konflikte behalten das klassische CSS-Layout mit den bisherigen Firefox-154/156-Korrekturen.
+Version `2026.10.21-21` (`v0.2.0-beta.1`) wurde mit Firefox 158.0.1 unter Windows 11 getestet. Editierbare Tabs benötigen Firefox 158+ mit horizontalen Tabs. Ältere Versionen, vertikale Tabs und erkannte AutoConfig-Konflikte behalten das klassische CSS-Layout mit den bisherigen Firefox-154/156-Korrekturen.
 
 Adaptive Tab Bar Color bleibt kompatibel: beide Layouts verwenden Firefox-Theme-Variablen. Die nativen Tests prüfen helle und dunkle Farbwechsel; das Verhalten einzelner Erweiterungen hängt auch von deren Einstellungen ab.
 

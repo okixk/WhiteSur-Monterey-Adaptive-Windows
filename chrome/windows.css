@@ -1,6 +1,6 @@
 /*
  * WhiteSur Monterey Adaptive for Firefox on Windows 10/11
- * Windows integration layer — revision 2026.09.29-19.
+ * Windows integration layer — revision 2026.10.21-21.
  *
  * This revision deliberately does not reuse WhiteSur's Linux CSD/toolbox
  * geometry. Current Firefox places titlebar items in both TabsToolbar and
@@ -1431,3 +1431,30 @@
   padding: 5px 6px !important;
 }
 /* END v18-r9 toolbar-integration */
+
+/* Issue #4: the themed inner button is 26px tall while Firefox's modern
+ * switcher host is 24px. Centre a matching host instead of letting its shadow
+ * button overflow downward. Keep native icon, label, colours and visibility. */
+#nav-bar #urlbar .searchmode-switcher {
+  align-self: center !important;
+  box-sizing: border-box !important;
+  height: 26px !important;
+  min-height: 0 !important;
+  margin-block: 0 !important;
+}
+
+#nav-bar #urlbar .searchmode-switcher::part(button) {
+  box-sizing: border-box !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  padding-block: 0 !important;
+  align-items: center !important;
+}
+
+/* Fresh profiles include a sidebar toggle before the address field. Reserve
+ * its native 44px toolbar slot in the classic desktop layout as well. */
+@media (min-width: 981px) {
+  :root:has(#nav-bar-customization-target > #sidebar-button:not([hidden]):not([collapsed]) ~ #urlbar-container) {
+    --whitesur-left-zone: 542px;
+  }
+}

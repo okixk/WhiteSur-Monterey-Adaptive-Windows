@@ -81,10 +81,16 @@ jobs:
           python tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Test search-engine pill in editable and classic Firefox
+        shell: pwsh
+        run: |
+          python tests/test_search_mode_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Upload Firefox test report and screenshot
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: native-firefox-results
-          path: tests/artifacts/editable-tabs/
+          path: tests/artifacts/
           if-no-files-found: ignore

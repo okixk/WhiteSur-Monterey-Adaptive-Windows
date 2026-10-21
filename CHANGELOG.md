@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026.10.21-21 (v0.2.0-beta.1 — Editable Tabs Update)
+
+This is a larger interface update from the 0.1 betas, including the editable-tab implementation developed in v20 below.
+
+- Fixed issue #4: the modern search-engine pill's inner button no longer overflows its shorter host, keeping the icon, engine name, and close control centred.
+- Retained native search-engine switching, close behaviour, and theme colours in editable and classic layouts.
+- Added installer-backed Firefox regression checks for default/Google/DuckDuckGo controls in normal, maximized, and narrow windows.
+- Reserved the default sidebar button in the classic desktop layout so a fresh Firefox profile cannot place tabs over the address field.
+- Packaged editable tabs, adaptive 300–260 px selected-tab sizing, compact background tabs, close/switch stability fixes, and the user-local runtime installer as the new beta default.
+- Updated setup documentation and release notes to explain the new launcher and compatibility fallback.
+
 ## 2026.10.21-20
 
 - Made the selected tab the native address/search field, with native icons, suggestions, default-engine search, and optional `g`/`q` search prefixes.
