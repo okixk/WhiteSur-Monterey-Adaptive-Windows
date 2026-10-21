@@ -69,8 +69,15 @@ jobs:
         run: |
           $setup = Join-Path $env:RUNNER_TEMP 'Firefox-Setup.exe'
           Invoke-WebRequest 'https://download.mozilla.org/?product=firefox-latest-ssl&os=win64&lang=en-US' -OutFile $setup
-          $result = Start-Process -FilePath $setup -ArgumentList '/S' -WindowStyle Hidden -Wait -PassThru
+          # The runner's preinstalled Firefox has its own AutoConfig. Install
+          # a clean source separately so the real conflict guard stays intact.
+          $sourceDirectory = Join-Path $env:RUNNER_TEMP 'firefox-source'
+          $installerArguments = '/S /InstallDirectoryPath="' + $sourceDirectory + '"'
+          $result = Start-Process -FilePath $setup -ArgumentList $installerArguments -WindowStyle Hidden -Wait -PassThru
           if ($result.ExitCode -ne 0) { throw "Firefox setup failed: $($result.ExitCode)" }
+          $sourceExecutable = Join-Path $sourceDirectory 'firefox.exe'
+          if (-not (Test-Path -LiteralPath $sourceExecutable)) { throw 'The clean Firefox source is missing' }
+          "WHITESUR_TEST_FIREFOX=$sourceExecutable" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
           $archive = Join-Path $env:RUNNER_TEMP 'geckodriver.zip'
           Invoke-WebRequest 'https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-win64.zip' -OutFile $archive
           Expand-Archive -LiteralPath $archive -DestinationPath (Join-Path $env:RUNNER_TEMP 'geckodriver')
@@ -78,13 +85,13 @@ jobs:
       - name: Test editable tabs in native Firefox
         shell: pwsh
         run: |
-          python tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          python tests/test_editable_tabs_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test search-engine pill in editable and classic Firefox
         shell: pwsh
         run: |
-          python tests/test_search_mode_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          python tests/test_search_mode_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload Firefox test report and screenshot
