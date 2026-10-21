@@ -236,6 +236,7 @@ def run(browser, artifacts):
                        "gBrowser.selectedBrowser.focus();")
             maximum = 0
             immediate_maximum = 0
+            outliers = []
             for key in ("t", "w", "\ue004", "\ue00f", "w", "t") * 4:
                 browser.chord(key)
                 # Observe the next frame, when native selection/scroll work is
@@ -245,13 +246,19 @@ def run(browser, artifacts):
                     "const measure=()=>{let t=gBrowser.selectedTab,r=t.getBoundingClientRect(),"
                     "c=t.querySelector('.tab-content').getBoundingClientRect(),"
                     "e=gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect();"
-                    "return Math.abs(e.left-Math.max(r.left+4,c.left));};"
+                    "return {error:Math.abs(e.left-Math.max(r.left+4,c.left)),field:e.left,"
+                    "expected:Math.max(r.left+4,c.left),count:gBrowser.tabs.length,"
+                    "selected:[...gBrowser.tabs].indexOf(t),"
+                    "scroll:gBrowser.tabContainer.arrowScrollbox.scrollPosition,"
+                    "nativeFramePending:gBrowser.tabContainer.arrowScrollbox._ensureElementIsVisibleAnimationFrame};};"
                     "const immediate=measure();requestAnimationFrame(()=>done({immediate,frame:measure()}));",
                     asynchronous=True)
-                maximum = max(maximum, sample["frame"])
-                immediate_maximum = max(immediate_maximum, sample["immediate"])
+                maximum = max(maximum, sample["frame"]["error"])
+                immediate_maximum = max(immediate_maximum, sample["immediate"]["error"])
+                if sample["frame"]["error"] >= 2:
+                    outliers.append({"key": key, **sample})
             check(f"rapid Ctrl+W/T/Tab/PageDown stays aligned at {width}px", maximum < 2,
-                  {"frameMaxError": maximum, "immediateMaxError": immediate_maximum})
+                  {"frameMaxError": maximum, "immediateMaxError": immediate_maximum, "outliers": outliers})
 
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
         browser.js("gBrowser.selectedTab=gBrowser.tabs[0];gBrowser.pinTab(gBrowser.selectedTab);TabSearch.edit();")

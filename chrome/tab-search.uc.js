@@ -32,8 +32,6 @@
     target.addEventListener(name, callback, { ...listeners, capture });
 
   function layout() {
-    if (frame) cancelAnimationFrame(frame);
-    frame = 0;
     if (root.hasAttribute('customizing')) return;
     // Native close/focus work can change selection after the original event.
     // Never position the field using a detached or previously selected tab.
@@ -96,7 +94,9 @@
       set('clip-right', viewport ? Math.max(0, end - viewport.right) : 0);
     }
   }
-  function schedule() { if (!frame) frame = requestAnimationFrame(layout); }
+  function schedule() {
+    if (!frame) frame = requestAnimationFrame(() => { frame = 0; layout(); });
+  }
   function reveal() {
     if (root.hasAttribute('customizing')) return;
     suspended = false;
@@ -108,7 +108,10 @@
     if (!root.hasAttribute('tabsearch-editing')) root.setAttribute('tabsearch-editing', 'true');
     layout();
     // Firefox scrolls the newly selected tab in its own animation frame.
-    // Follow that single native scroll before the next paint.
+    // Queue behind that native scroll, even if TabOpen queued an earlier
+    // update. Synchronous close/resize layouts must not cancel this follow-up.
+    if (frame) cancelAnimationFrame(frame);
+    frame = 0;
     schedule();
   }
   function hide({ revert = false } = {}) {

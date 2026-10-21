@@ -8,6 +8,7 @@ This is a larger interface update from the 0.1 betas, including the editable-tab
 - Retained native search-engine switching, close behaviour, and theme colours in editable and classic layouts.
 - Added installer-backed Firefox regression checks for default/Google/DuckDuckGo controls in normal, maximized, and narrow windows.
 - Reserved the default sidebar button in the classic desktop layout so a fresh Firefox profile cannot place tabs over the address field.
+- Preserved the layout frame queued after Firefox's native selection scroll, fixing a rapid close/switch race found by Windows CI.
 - Packaged editable tabs, adaptive 300–260 px selected-tab sizing, compact background tabs, close/switch stability fixes, and the user-local runtime installer as the new beta default.
 - Updated setup documentation and release notes to explain the new launcher and compatibility fallback.
 
