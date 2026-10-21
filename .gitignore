@@ -9,6 +9,7 @@ Thumbs.db
 *.log
 
 # Local generated test output
+/tests/artifacts/
 /tests/preview-*.png
 /tests/layout-report.json
 /tests/navigation-spacing-report.json

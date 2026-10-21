@@ -2,7 +2,7 @@
 
 A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
-It combines a compact Safari-inspired single-row toolbar with native Windows window controls, responsive tab handling, a PowerShell installer, safe profile detection, backups, and clean uninstall support.
+The selected tab becomes Firefox's native address/search field. Click a tab and type a URL or search, while other tabs stay compact. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
@@ -13,8 +13,10 @@ It combines a compact Safari-inspired single-row toolbar with native Windows win
 
 - Monterey-inspired Firefox appearance on Windows
 - Native Windows minimise, maximise, and close buttons on the right
-- Single-row address bar and tabs on normal desktop widths
-- Responsive compact mode that hides tabs before they overlap
+- Editable selected tabs with native address-bar icons and suggestions
+- Compact background tabs that shrink as space fills; selected tabs stay open
+- Stable switching and closing without animated width changes
+- Compatible CSS toolbar for older Firefox, vertical tabs, and existing AutoConfig setups
 - Stable spacing when navigation and page-action icons appear
 - Clean tab closing without invisible gaps
 - Draggable empty toolbar and tab-strip regions without interfering with tab reordering or detaching
@@ -40,28 +42,43 @@ Without the extension, the theme still works, but the colours remain based on Fi
 1. Download or clone this repository.
 2. Fully close Firefox. Make sure no `firefox.exe` process remains.
 3. Run `Install.cmd`.
-4. Start Firefox again.
+4. Open the new **WhiteSur Firefox - &lt;profile&gt;** desktop shortcut.
 
 The installer:
 
 - finds the Firefox profile selected by Firefox's `installs.ini`;
 - backs up an existing `chrome` directory;
 - installs the theme;
-- enables `toolkit.legacyUserProfileCustomizations.stylesheets` through a managed `user.js` block.
+- enables the necessary preferences through a managed `user.js` block;
+- on Firefox 158+, creates a user-local Firefox copy with the editable-tab loader and a profile-specific desktop shortcut.
+
+The copy lives in `%LOCALAPPDATA%\Programs\WhiteSur Firefox`. The original Firefox installation is preserved. Use the WhiteSur shortcut for editable tabs; opening the original binary uses the CSS toolbar. Close Firefox before switching launchers for the same profile.
+
+Type an address or search into the selected tab. Normal searches use your Firefox default engine; `g search terms` uses Google and `q search terms` uses Qwant. `Ctrl+L`, `Alt+D`, and `F6` focus the field; `Esc` cancels the draft and keeps the field visible.
+
+To install just the classic adaptive toolbar:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-WhiteSur-Monterey-Adaptive.ps1 -ClassicToolbar
+```
+
+See [editable-tab setup and compatibility](docs/EDITABLE-TABS.md) for custom paths and loader details.
 
 Use `Check-Installation.cmd` to verify the active profile and installed version.
 
 ## Updating
 
-Close Firefox and run `Install.cmd` from the newer release. A user-created `customChrome.css` is preserved.
+Close Firefox and run `Install.cmd` from the newer release. A user-created `customChrome.css` is preserved. The installer refreshes its loader and copies a newer source Firefox when available; it does not downgrade a newer WhiteSur copy.
 
 ## Uninstalling
 
-Close Firefox and run `Uninstall.cmd`. The installer removes its managed preference block and restores the previous `chrome` backup when available.
+Close Firefox and run `Uninstall.cmd`. It removes its managed preferences and owned profile launcher, and restores the previous `chrome` backup when available. The shared Firefox copy remains for other profiles. Once no profiles use it, you may remove `%LOCALAPPDATA%\Programs\WhiteSur Firefox` manually.
 
 ## Compatibility
 
-This beta is packaged as version `2026.09.29-19` (`v0.1.0-beta.3`) and was live-tested with Firefox 156 on Windows 11. Earlier versions were tested with Firefox 154.
+Version `2026.10.21-20` was tested with Firefox 158.0.1 on Windows 11. Editable tabs require Firefox 158+ with horizontal tabs. Older versions and detected AutoConfig conflicts receive the classic CSS layout, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+
+Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
 
 Firefox does not officially support third-party browser chrome CSS as a stable public API. A future Firefox update can rename UI elements or change layout behaviour. Please report theme-specific breakage here rather than to Mozilla.
 
@@ -69,7 +86,14 @@ Firefox does not officially support third-party browser chrome CSS as a stable p
 
 This project was **heavily vibe-coded with ChatGPT**, then iteratively tested and corrected in real Firefox sessions on Windows. The final layout was shaped by repeated visual testing, especially around URL-bar geometry, tab closing, responsive widths, toolbar spacing, and native window dragging.
 
-The repository also contains automated checks and local rendered fixtures. To run the complete suite:
+Native Windows checks use a disposable profile and runtime. Run with Firefox 158+ and [geckodriver](https://github.com/mozilla/geckodriver/releases) 0.37+:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
+py tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+See [testing notes](docs/TESTING.md) for coverage and artifacts. The classic layout and package checks run with:
 
 ```powershell
 py -m pip install -r requirements-dev.txt

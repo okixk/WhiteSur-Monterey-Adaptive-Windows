@@ -1,0 +1,86 @@
+/* Applied only after tab-search.uc.js starts successfully. */
+:root#main-window[tabsearch-ready] #navigator-toolbox { overflow: visible !important; }
+:root#main-window[tabsearch-ready] #nav-bar { z-index: auto !important; }
+:root#main-window[tabsearch-ready] #nav-bar-customization-target { overflow: visible !important; }
+:root#main-window[tabsearch-ready]:not([customizing]) #TabsToolbar {
+  display: flex !important;
+  visibility: visible !important;
+  inset-inline-start: var(--tabsearch-strip-left, 188px) !important;
+  inset-inline-end: var(--tabsearch-strip-right, 246px) !important;
+}
+:root#main-window[tabsearch-ready] #tabsearch-spacer {
+  display: flex !important;
+  flex: 1 1 auto !important;
+  min-width: 40px !important;
+  pointer-events: none !important;
+}
+:root#main-window[tabsearch-ready] #tabbrowser-arrowscrollbox::part(scrollbox) {
+  scroll-behavior: auto !important;
+}
+:root#main-window[tabsearch-ready]:not([customizing]) #urlbar-container {
+  position: fixed !important;
+  inset: auto !important;
+  left: var(--tabsearch-x, 188px) !important;
+  top: var(--tabsearch-y, 8px) !important;
+  width: var(--tabsearch-width, 350px) !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: var(--tabsearch-height, 32px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 50 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  clip-path: inset(0 var(--tabsearch-clip-right, 0px) 0 var(--tabsearch-clip-left, 0px));
+}
+:root#main-window[tabsearch-ready][tabsearch-editing] #urlbar-container {
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+:root#main-window[tabsearch-ready] #urlbar {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 7px !important;
+  --urlbar-background-overhang-open: 0px !important;
+}
+:root#main-window[tabsearch-ready] #urlbar .urlbar-input-container {
+  min-width: 0 !important;
+  height: 100% !important;
+  padding-block: 0 !important;
+}
+:root#main-window[tabsearch-ready] #urlbar .urlbar-input-box { min-width: 20px !important; }
+:root#main-window[tabsearch-ready] #urlbar .urlbar-input {
+  font-size: 13px !important;
+  text-align: start !important;
+  padding-inline: 4px !important;
+}
+/* Preserve Firefox's native visibility rules for all address-bar icons. */
+:root#main-window[tabsearch-ready] #urlbar .urlbarView {
+  min-width: min(560px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+}
+:root#main-window[tabsearch-ready] #tabbrowser-tabs .tabbrowser-tab[fadein]:not([pinned]):not([closing]) {
+  min-width: var(--tabsearch-tab-width, 280px) !important;
+  max-width: var(--tabsearch-tab-width, 280px) !important;
+  transition: none !important;
+}
+:root#main-window[tabsearch-ready] #tabbrowser-tabs .tabbrowser-tab[fadein][tabsearch-editing]:not([pinned]):not([closing]) {
+  min-width: var(--tabsearch-active-width, 280px) !important;
+  max-width: var(--tabsearch-active-width, 280px) !important;
+}
+:root#main-window[tabsearch-ready] .tabbrowser-tab[tabsearch-editing]:not([pinned]) .tab-label-container {
+  opacity: 0 !important;
+}
+:root#main-window[tabsearch-ready] .tabbrowser-tab[tabsearch-editing]:not([pinned]) .tab-icon-stack {
+  opacity: 0 !important;
+}
+:root#main-window[tabsearch-ready][customizing] #tabsearch-spacer { display: none !important; }
+
+@media (max-width: 700px) {
+  :root#main-window[tabsearch-ready] #nav-bar-customization-target > :is(#sidebar-button, #firefox-view-button) { display: none !important; }
+}

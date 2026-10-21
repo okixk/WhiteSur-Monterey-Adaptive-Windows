@@ -1,66 +1,35 @@
-# Testing notes — version 2026.07.28-15
+# Testing — 2026.10.21-20
 
-## Test environment
+## Native Firefox on Windows
 
-The package is tested in a Linux container using Python, Chromium/Playwright fixtures, CSS/static checks and simulated Firefox profile filesystem flows. Native Windows non-client hit testing cannot be executed in this environment.
+Run with Python 3.13+, Firefox 158+, and geckodriver 0.37+:
 
-## New v15 regression: optional forward button
+```powershell
+py tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
 
-The browser fixture is rendered with the standard Firefox navigation order:
+This suite has no Python package dependencies. It invokes the real PowerShell installer with a disposable profile, runtime copy, and shortcut directory. Firefox loads the installed AutoConfig itself; initial activation is not injected by the test. WebDriver chrome context is enabled only for this test session.
 
-- Back
-- Forward
-- Stop/Reload
-- URL bar
-- tabs
+Coverage includes native navigation, focus and Escape, Google/Qwant routing without network requests, light/dark adaptive colour variables, normal/private windows, field alignment at 600/800/1368/1384 pixels, constant strip allocation across selections, rapid native Ctrl+W/T/Tab/PageDown, pinned tabs, vertical-tab fallback, disabling, and reinitialization. Console checks catch loader errors and ResizeObserver loops. Search routing checks capture destinations; they do not assert external search-service availability.
 
-The forward button is first disabled and then enabled without reloading the fixture.
+Results are written to ignored `tests/artifacts/editable-tabs/firefox-report.json` and `firefox.png`, including on assertion failure. `--artifacts` selects another directory. The test waits for Firefox to exit before removing its temporary runtime.
 
-Expected result:
+Keyboard alignment is measured in the next animation frame, after the scheduled selection/scroll layout. Immediate offsets sampled before that frame are also retained in the report; those intermediate tasks can run before the updated layout is painted.
 
-- disabled forward slot width: 32 px
-- enabled forward slot width: 32 px
-- URLbar x coordinate does not change
-- first tab boundary does not change
-- URL/tab gap remains at least 8 px
+On Windows 11 with Firefox 158.0.1: **23 checks passed**, with zero measured field offset and zero total-width drift in the selection cases. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
 
-Observed at 1310 px:
+## Windows installer
 
-- disabled URL/tab gap: 40 px
-- enabled URL/tab gap: 40 px
-- geometry stable: true
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
+```
 
-Artifacts:
+Runs under Windows PowerShell 5.1. Uses temporary fake executable files that are never launched, and real filesystem/preferences/shortcut operations. Covers default install, profile launchers, UTF-8/LF loader files, update preservation, binary upgrades without downgrades, owned-runtime reuse, diagnostics, multiple profiles, classic mode, uninstall restoration, unrelated preferences, modified launchers, older Firefox, AutoConfig conflicts, and unmanaged directories. Shared runtime retention is intentional. Current result: **26 checks passed**.
 
-- `tests/navigation-forward-disabled.png`
-- `tests/navigation-forward-enabled.png`
-- `tests/navigation-spacing-report.json`
+## Classic layout and package checks
 
-## Restored-window drag model
+Install `requirements-dev.txt` and Playwright Chromium, then run the commands in the README. These fixtures model the classic CSS toolbar; they do not substitute for native editable-tab tests. They cover 15 widths from 600 through 1668 pixels, navigation-button stability, URL-bar containment, selected-tab styling, tab-close spacing, window-drag CSS, popup styling, extension toolbar reservations, imports, assets, and installer/package structure.
 
-Static checks require:
+Current results: all rendered widths passed, r7 **8/8**, r8 **5/5**, r9 **5/5**, package **16/16 groups**. On Linux, `CHROMIUM_EXECUTABLE` can select a system browser instead of the bundled Chromium.
 
-- navigation and tabstrip containers use `-moz-window-dragging: drag`;
-- all real controls and tabs use `-moz-window-dragging: no-drag`;
-- `#tabbrowser-tabs` and its arrowscrollbox remain draggable containers;
-- individual `.tabbrowser-tab` elements and toolbar buttons remain non-draggable controls.
-
-This creates empty native drag regions without turning clickable controls into caption areas.
-
-## Existing regression suites
-
-- CSS imports and local assets
-- CSS delimiter balance
-- PowerShell installer structure
-- fresh/empty `user.js`
-- install, update, uninstall and backup restoration
-- active Firefox Install-default profile selection
-- Windows-only visual import boundary
-- native Windows caption controls
-- responsive one-row layout and compact handoff
-- tab close animation and closing spacer
-- web-content isolation
-- v14 URLbar host/background containment
-- rendered widths from 600 through 1668 px
-
-Final result: 16/16 test groups passed.
+GitHub Actions retains these Linux checks and adds Windows installer and native Firefox checks. Remote CI results are separate from the local validation recorded here.

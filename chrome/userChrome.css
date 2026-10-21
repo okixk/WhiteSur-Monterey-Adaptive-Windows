@@ -1,4 +1,5 @@
 /* WhiteSur Monterey Adaptive for Windows 10/11 */
 @import "Monterey/theme-adaptive.css";
 @import "windows.css";
+@import "tab-search.css";
 @import "customChrome.css";

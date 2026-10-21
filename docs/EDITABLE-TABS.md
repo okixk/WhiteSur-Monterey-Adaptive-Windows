@@ -1,0 +1,51 @@
+# Editable tabs
+
+The default installer enables editable tabs on Firefox 158+ for Windows. The selected tab contains Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. It stays visible after navigation and Escape. Background tabs display their titles.
+
+Selected tabs are at most 280 CSS pixels wide. Background tabs use 88–180 pixels depending on available space, then overflow through Firefox's native tab strip. Selecting another tab preserves the total allocated width. Pinned tabs keep their icon size and show their field immediately below the icon.
+
+## Files and startup
+
+- `chrome/tab-search.uc.js`: privileged window script; observes tab geometry and positions the field without moving it out of its native toolbar DOM.
+- `chrome/tab-search.css`: overrides gated by `tabsearch-ready`; imported before `customChrome.css` so user overrides remain last.
+- `firefox/whitesur.cfg`: AutoConfig loader; starts after window initialization, only loads profiles marked by this installer, and skips Firefox Troubleshoot Mode.
+- `firefox/defaults/pref/whitesur-autoconfig.js`: selects the loader and enables AutoConfig scripting in the managed copy.
+- `Editable-Tabs-Runtime.ps1`: runtime installation, ownership checks, and profile launchers.
+
+The installer copies Firefox into `%LOCALAPPDATA%\Programs\WhiteSur Firefox`, adds its two loader files, and creates a desktop shortcut tied to the selected profile. It preserves the source Firefox installation. The copy uses the same selected profile, including extensions and preferences. Each installed profile has a separate shortcut and `.whitesur-editable-tabs.json` record; the binary copy is shared.
+
+CSS alone cannot make a tab an editable native address field. Opening the original Firefox binary gives the existing adaptive CSS toolbar. Open the **WhiteSur Firefox** shortcut for editable tabs. Close the browser before switching binaries for the same profile.
+
+## Adaptive colours and compatibility
+
+The existing Monterey light/dark styles and Firefox theme variables supply colours, including `--lwt-accent-color`, `--toolbar-color`, and `--toolbar-text-color`. Adaptive Tab Bar Color can continue to supply those values; no separate palette is imposed. Native integration tests verify light and dark variable changes.
+
+The installer selects classic CSS for Firefox below 158, missing installations, or a detected existing AutoConfig loader. Unsupported browser windows and vertical tabs do not activate the script. Required DOM capabilities are checked before activation. `chrome/windows.css` remains the fallback with the previous Firefox 154/156 fixes.
+
+Existing AutoConfig files are preserved. Using this script with a custom loader requires configuring that loader yourself; this installer does not replace it. Custom toolbar extensions and future Firefox UI changes may need adjustments.
+
+Enabling vertical tabs or setting `userChrome.tabSearch.enabled` to `false` restores the standard toolbar immediately. After returning to horizontal tabs or re-enabling the preference, open a new window or restart Firefox. The managed preference block is reapplied on restart; use `-ClassicToolbar` for a persistent classic installation.
+
+## Installation options
+
+Close Firefox, then use `Install.cmd`, or choose explicit paths:
+
+```powershell
+.\Install-WhiteSur-Monterey-Adaptive.ps1 `
+  -ProfilePath 'D:\Firefox Profiles\Personal' `
+  -FirefoxPath 'C:\Program Files\Mozilla Firefox\firefox.exe' `
+  -RuntimeDirectory 'D:\Apps\WhiteSur Firefox' `
+  -ShortcutDirectory "$env:USERPROFILE\Desktop"
+```
+
+`-ClassicToolbar` installs only the CSS layout. `-AllProfiles` installs into all detected profiles. `-Diagnose` reports profile, theme, runtime, loader, and launcher paths. `-Force` bypasses the running-Firefox check and is intended for isolated test profiles.
+
+## Updating and removal
+
+Rerun the installer with Firefox closed to update the theme and loader. It refreshes the binary copy when the source Firefox version is newer and does not downgrade a newer copy. Firefox's own updates can also update the copy; rerun the installer if an update removes loader files. The original installation keeps its normal update mechanism.
+
+Uninstall removes managed preferences and the unmodified owned launcher, then restores the earlier chrome backup when available. A launcher repurposed by the user is preserved. The shared binary copy remains for other profiles. Once no installed profile uses it, it can be removed manually. Existing `customChrome.css` is preserved during theme updates.
+
+## Tab-close behaviour
+
+Native add/remove operations use Firefox's non-animated paths while editable tabs are active. Merely suppressing CSS transitions can leave closing tabs waiting for an event that never arrives. The script restores original browser methods and observers when destroyed. Layout updates synchronize the currently connected selected tab and run before paint on observed geometry changes, avoiding stale fields after quick close/switch sequences.

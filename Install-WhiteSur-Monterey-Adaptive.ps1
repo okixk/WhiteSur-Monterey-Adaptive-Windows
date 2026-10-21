@@ -7,6 +7,9 @@ Installs WhiteSur Monterey Adaptive into the active Firefox profile on Windows 1
 Finds the profile selected by Firefox's Install section, backs up an existing
 chrome directory, copies the Windows-compatible Monterey Adaptive package, and
 manages the required Firefox user preferences in user.js.
+On supported Firefox versions, creates a user-local runtime with AutoConfig
+and a profile-specific launcher for native editable tabs. Use -ClassicToolbar
+for the CSS-only layout.
 #>
 [CmdletBinding()]
 param(
@@ -27,7 +30,19 @@ param(
     [switch]$Force,
 
     [Parameter()]
-    [switch]$NoBackup
+    [switch]$NoBackup,
+
+    [Parameter()]
+    [switch]$ClassicToolbar,
+
+    [Parameter()]
+    [string]$FirefoxPath,
+
+    [Parameter()]
+    [string]$RuntimeDirectory,
+
+    [Parameter()]
+    [string]$ShortcutDirectory
 )
 
 Set-StrictMode -Version Latest
@@ -38,6 +53,8 @@ $ChromeSource = Join-Path $PackageRoot 'chrome'
 $ThemeMarkerName = '.whitesur-monterey-adaptive-windows'
 $PreferenceBegin = '// BEGIN WhiteSur Monterey Adaptive Windows'
 $PreferenceEnd = '// END WhiteSur Monterey Adaptive Windows'
+. (Join-Path $PackageRoot 'Editable-Tabs-Runtime.ps1')
+$EditableTabsRuntime = $null
 
 function Write-Status {
     param(
@@ -307,7 +324,10 @@ function Set-ManagedPreferences {
         [string]$FirefoxProfilePath,
 
         [Parameter(Mandatory)]
-        [bool]$Enabled
+        [bool]$Enabled,
+
+        [Parameter()]
+        [bool]$EditableTabs = $false
     )
 
     $userJs = Join-Path $FirefoxProfilePath 'user.js'
@@ -323,12 +343,14 @@ function Set-ManagedPreferences {
     $clean = $clean.TrimEnd()
 
     if ($Enabled) {
+        $editableValue = if ($EditableTabs) { 'true' } else { 'false' }
         $block = @"
 $PreferenceBegin
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("browser.tabs.drawInTitlebar", true);
 user_pref("browser.uidensity", 0);
 user_pref("svg.context-properties.content.enabled", true);
+user_pref("userChrome.tabSearch.enabled", $editableValue);
 $PreferenceEnd
 "@
 
@@ -376,6 +398,8 @@ function Get-ProfileStatus {
         UserChromeCss = Test-Path -LiteralPath $userChrome -PathType Leaf
         WhiteSurMarker = Test-Path -LiteralPath $marker -PathType Leaf
         PreferenceInUserJs = $prefEnabled
+        EditableTabsState = Test-Path -LiteralPath (Get-EditableTabsStatePath -ProfileDirectory $Profile.Path) -PathType Leaf
+        EditableTabsScript = Test-Path -LiteralPath (Join-Path $chrome 'tab-search.uc.js') -PathType Leaf
     }
 }
 
@@ -401,6 +425,14 @@ function Show-Diagnostics {
         Write-Host "  userChrome.css:     $($status.UserChromeCss)"
         Write-Host "  WhiteSur marker:    $($status.WhiteSurMarker)"
         Write-Host "  user.js preference: $($status.PreferenceInUserJs)"
+        Write-Host "  Editable-tabs script: $($status.EditableTabsScript)"
+        Write-Host "  Editable-tabs launcher metadata: $($status.EditableTabsState)"
+        if ($status.EditableTabsState) {
+            $state = Get-Content -LiteralPath (Get-EditableTabsStatePath -ProfileDirectory $profile.Path) -Raw | ConvertFrom-Json
+            Write-Host "  Firefox executable: $($state.Executable)"
+            Write-Host "  Launcher exists: $(Test-Path -LiteralPath $state.Shortcut -PathType Leaf)"
+            Write-Host "  Loader exists: $(Test-Path -LiteralPath (Join-Path (Split-Path -Parent $state.Executable) 'whitesur.cfg') -PathType Leaf)"
+        }
     }
 
     Write-Host ''
@@ -417,6 +449,7 @@ function Install-ThemeForProfile {
     )
 
     $targetChrome = Join-Path $Profile.Path 'chrome'
+    Assert-ProfileChromePath -ProfileDirectory $Profile.Path
     $marker = Join-Path $targetChrome $ThemeMarkerName
     $preservedCustomChrome = $null
 
@@ -456,10 +489,12 @@ function Install-ThemeForProfile {
         'WhiteSur Monterey Adaptive for Windows'
         "Installed: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
         "Package: $PackageRoot"
+        "Version: $([IO.File]::ReadAllText((Join-Path $PackageRoot 'VERSION.txt')).Trim())"
         "Profile: $($Profile.Path)"
     ) | Set-Content -LiteralPath $marker -Encoding UTF8
 
-    Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $true
+    Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $true -EditableTabs $EditableTabsRuntime.Enabled
+    Set-EditableTabsLauncher -Profile $Profile -Runtime $EditableTabsRuntime -ShortcutDirectory $ShortcutDirectory
 
     $status = Get-ProfileStatus -Profile $Profile
     if (-not ($status.UserChromeCss -and $status.WhiteSurMarker -and $status.PreferenceInUserJs)) {
@@ -476,9 +511,11 @@ function Uninstall-ThemeForProfile {
     )
 
     $targetChrome = Join-Path $Profile.Path 'chrome'
+    Assert-ProfileChromePath -ProfileDirectory $Profile.Path
     $marker = Join-Path $targetChrome $ThemeMarkerName
 
     Write-Status "Removing from '$($Profile.Name)' ($($Profile.Path))"
+    Remove-EditableTabsLauncher -ProfileDirectory $Profile.Path
     Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $false
 
     if (Test-Path -LiteralPath $marker -PathType Leaf) {
@@ -494,6 +531,9 @@ function Uninstall-ThemeForProfile {
         Select-Object -First 1
 
     if ($null -ne $backup) {
+        if ($backup.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            throw 'The previous chrome backup is a junction or symbolic link; it was left untouched.'
+        }
         Move-Item -LiteralPath $backup.FullName -Destination $targetChrome
         Write-Status "Restored '$($backup.Name)' as the active chrome directory." Green
     }
@@ -517,6 +557,14 @@ if (($runningFirefox.Count -gt 0) -and -not $Force) {
 }
 
 $selectedProfiles = @(Get-SelectedProfiles)
+if (-not $Uninstall) {
+    try {
+        $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory -Classic:$ClassicToolbar
+    } catch {
+        $EditableTabsRuntime = [pscustomobject]@{ Enabled=$false; Executable=$null; Reason="Editable-tabs runtime setup failed: $($_.Exception.Message) Using the compatible CSS layout." }
+    }
+    Write-Status $EditableTabsRuntime.Reason $(if ($EditableTabsRuntime.Enabled) { [ConsoleColor]::Green } else { [ConsoleColor]::Yellow })
+}
 foreach ($profile in $selectedProfiles) {
     if ($Uninstall) {
         Uninstall-ThemeForProfile -Profile $profile
@@ -530,5 +578,10 @@ if ($Uninstall) {
     Write-Status 'Uninstallation complete. Start Firefox again.' Green
 }
 else {
-    Write-Status 'Installation complete. Start Firefox again. Adaptive Tab Bar Colour is only needed for website-based colours.' Green
+    if ($EditableTabsRuntime.Enabled) {
+        Write-Status 'Installation complete. Use the WhiteSur Firefox shortcut for editable tabs. Adaptive Tab Bar Colour is only needed for website-based colours.' Green
+    } else {
+        Write-Status 'Installation complete with the compatible CSS layout. Start Firefox again.' Green
+    }
 }
+exit 0
