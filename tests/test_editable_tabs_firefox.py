@@ -144,7 +144,7 @@ def run(browser, artifacts):
     try:
         check("AutoConfig starts the packaged script", browser.js("return !!window.TabSearch;"))
         check("the selected field remains compact", browser.js(
-            "return gBrowser.selectedTab.getBoundingClientRect().width<=281;"))
+            "return gBrowser.selectedTab.getBoundingClientRect().width<=301;"))
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
         browser.js("gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
                    "gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
@@ -204,6 +204,7 @@ def run(browser, artifacts):
             check(f"new window loads and cleans up (private={private})", correct_privacy)
             browser.js("delete window.whiteSurExtra;")
 
+        sizes = {}
         for width, count in ((1384, 4), (1368, 14), (800, 8), (600, 6)):
             browser.call("POST", "window/rect", {"width": width, "height": 800})
             browser.js("gBrowser.selectedTab=gBrowser.tabs[0];"
@@ -222,6 +223,12 @@ def run(browser, artifacts):
                 "done({maxError,drift});})().catch(e=>done({error:String(e)}));", count * 2, asynchronous=True)
             check(f"selection stays aligned at {width}px with {count} tabs",
                   not geometry.get("error") and geometry["maxError"] < 2 and geometry["drift"] < 1, geometry)
+            sizes[count] = browser.js("return {tab:gBrowser.selectedTab.getBoundingClientRect().width,"
+                "field:gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect().width};")
+
+        check("the address gets more room with few tabs and shrinks in a crowded strip",
+              280 < sizes[4]["tab"] <= 301 and 259 <= sizes[14]["tab"] < 280
+              and sizes[4]["field"] > sizes[14]["field"] + 20, sizes)
 
         for width in (1384, 800):
             browser.call("POST", "window/rect", {"width": width, "height": 800})

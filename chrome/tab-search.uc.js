@@ -62,7 +62,11 @@
     // change the width calculation and repeatedly toggle itself on and off.
     const budget = Math.max(100, space.width - pinnedWidth - 112);
     const count = Math.max(1, ordinary.length);
-    const activeWidth = Math.min(280, budget);
+    // Give the address a little extra room in a sparse strip, then gradually
+    // trim it as tabs fill the available space. Use the fixed budget/count,
+    // not measured tab widths, so selection and overflow cannot feed back.
+    const crowding = Math.max(0, Math.min(1, (180 - budget / count) / 92));
+    const activeWidth = Math.min(budget, Math.round(300 - 40 * crowding));
     const backgroundWidth = Math.max(88, Math.min(180,
       Math.floor((budget - activeWidth) / Math.max(1, count - 1))));
     set('tab-width', backgroundWidth);

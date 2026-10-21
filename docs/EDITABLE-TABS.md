@@ -2,7 +2,7 @@
 
 The default installer enables editable tabs on Firefox 158+ for Windows. The selected tab contains Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. It stays visible after navigation and Escape. Background tabs display their titles.
 
-Selected tabs are at most 280 CSS pixels wide. Background tabs use 88–180 pixels depending on available space, then overflow through Firefox's native tab strip. Selecting another tab preserves the total allocated width. Pinned tabs keep their icon size and show their field immediately below the icon.
+Selected tabs adapt from 300 CSS pixels with plenty of room to 260 pixels as the strip fills up, and shrink further when the window cannot fit that width. Background tabs use 88–180 pixels depending on available space, then overflow through Firefox's native tab strip. Selecting another tab preserves the total allocated width. Pinned tabs keep their icon size and show their field immediately below the icon.
 
 ## Files and startup
 

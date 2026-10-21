@@ -3,7 +3,7 @@
 ## 2026.10.21-20
 
 - Made the selected tab the native address/search field, with native icons, suggestions, default-engine search, and optional `g`/`q` search prefixes.
-- Kept the selected field visible, limited selected tabs to 280 px, and made background tabs shrink from 180 to 88 px as space fills.
+- Kept the selected field visible, made selected tabs adapt from 300 to 260 px as space fills, and made background tabs shrink from 180 to 88 px.
 - Fixed stale geometry after rapid Ctrl+W/T/Tab and width/overflow oscillation using native non-animated tab insertion/removal and stable strip allocation.
 - Added an administrator-free user-local Firefox copy, profile launchers, loader updates, diagnostics, and uninstall cleanup.
 - Retained adaptive theme variables and the classic CSS fallback for older Firefox, vertical tabs, and detected AutoConfig conflicts. Existing AutoConfig files are preserved.
