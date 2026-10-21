@@ -49,3 +49,5 @@ Uninstall removes managed preferences and the unmodified owned launcher, then re
 ## Tab-close behaviour
 
 Native add/remove operations use Firefox's non-animated paths while editable tabs are active. Merely suppressing CSS transitions can leave closing tabs waiting for an event that never arrives. The script restores original browser methods and observers when destroyed. Layout updates synchronize the currently connected selected tab and run before paint on observed geometry changes, avoiding stale fields after quick close/switch sequences.
+
+Each native tab-visibility request queues a matching position update after Firefox's scroll frame, including requests made after tab selection. Synchronous geometry updates preserve that follow-up, and disabling the customization restores the original visibility method.

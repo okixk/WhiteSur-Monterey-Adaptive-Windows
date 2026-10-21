@@ -13,6 +13,7 @@
       Services.prefs.getBoolPref('sidebar.verticalTabs', false) ||
       !tabs.arrowScrollbox?.scrollbox || !gURLBar.inputField || !gURLBar.view ||
       typeof gBrowser.addTab !== 'function' || typeof gBrowser.removeTab !== 'function' ||
+      typeof tabs.arrowScrollbox.ensureElementIsVisible !== 'function' ||
       typeof ResizeObserver !== 'function' || typeof AbortController !== 'function') return;
   const abort = new AbortController();
   const listeners = { signal: abort.signal };
@@ -227,6 +228,22 @@
   // transitionend (which Firefox otherwise needs to finish removing a tab).
   const nativeAddTab = gBrowser.addTab;
   const nativeRemoveTab = gBrowser.removeTab;
+  const nativeEnsureVisible = scrollbox.ensureElementIsVisible;
+  let nativeScrollFrame = 0;
+  function ensureVisibleWithEditor(...args) {
+    const result = nativeEnsureVisible.apply(this, args);
+    if (!abort.signal.aborted && !window.closed) {
+      // Firefox can request visibility after TabSelect, replacing its earlier
+      // scroll frame. Follow each actual request, independently of the normal
+      // layout queue, so its final scroll always precedes our position update.
+      cancelAnimationFrame(nativeScrollFrame);
+      nativeScrollFrame = requestAnimationFrame(() => {
+        nativeScrollFrame = 0;
+        if (!abort.signal.aborted && !window.closed) layout();
+      });
+    }
+    return result;
+  }
   function addTabInstant(url, options = {}) {
     try { return nativeAddTab.call(this, url, { ...options, skipAnimation: true }); }
     finally { if (!window.closed) layout(); }
@@ -237,6 +254,7 @@
   }
   gBrowser.addTab = addTabInstant;
   gBrowser.removeTab = removeTabInstant;
+  scrollbox.ensureElementIsVisible = ensureVisibleWithEditor;
   root.setAttribute('tabsearch-ready', 'true');
   layout();
   window.TabSearch = {
@@ -247,6 +265,8 @@
       Services.prefs.removeObserver('sidebar.verticalTabs', modeChanged);
       if (gBrowser.addTab === addTabInstant) gBrowser.addTab = nativeAddTab;
       if (gBrowser.removeTab === removeTabInstant) gBrowser.removeTab = nativeRemoveTab;
+      if (scrollbox.ensureElementIsVisible === ensureVisibleWithEditor) scrollbox.ensureElementIsVisible = nativeEnsureVisible;
+      cancelAnimationFrame(nativeScrollFrame);
       cancelAnimationFrame(frame); spacer.remove(); root.removeAttribute('tabsearch-ready');
       if (originalSmoothScroll === null) scrollbox.removeAttribute('smoothscroll');
       else scrollbox.setAttribute('smoothscroll', originalSmoothScroll);

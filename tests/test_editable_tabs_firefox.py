@@ -230,6 +230,20 @@ def run(browser, artifacts):
               280 < sizes[4]["tab"] <= 301 and 259 <= sizes[14]["tab"] < 280
               and sizes[4]["field"] > sizes[14]["field"] + 20, sizes)
 
+        browser.call("POST", "window/rect", {"width": 1384, "height": 800})
+        late_scroll = browser.js("const done=arguments[arguments.length-1];"
+            "while(gBrowser.tabs.length<14)gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
+            "const box=gBrowser.tabContainer.arrowScrollbox;"
+            "box.scrollbox.scrollTo({left:0,behavior:'instant'});"
+            "gBrowser.selectedTab=gBrowser.tabs[0];gBrowser.selectedTab=gBrowser.tabs.at(-1);"
+            "box.ensureElementIsVisible(gBrowser.selectedTab,true);"
+            "requestAnimationFrame(()=>{const t=gBrowser.selectedTab,r=t.getBoundingClientRect(),"
+            "c=t.querySelector('.tab-content').getBoundingClientRect(),"
+            "e=gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect();"
+            "done({error:Math.abs(e.left-Math.max(r.left+4,c.left)),scroll:box.scrollPosition});});",
+            asynchronous=True)
+        check("the editor follows a native visibility scroll queued after selection", late_scroll["error"] < 2, late_scroll)
+
         for width in (1384, 800):
             browser.call("POST", "window/rect", {"width": width, "height": 800})
             browser.js("while(gBrowser.tabs.length<8)gBrowser.addTrustedTab('about:newtab',{skipAnimation:true});"
@@ -276,7 +290,8 @@ def run(browser, artifacts):
         browser.js("Services.prefs.setBoolPref('userChrome.tabSearch.enabled',false);")
         check("disabling editable tabs removes all active layout changes", browser.js(
             "return !window.TabSearch&&!document.documentElement.hasAttribute('tabsearch-ready')"
-            "&&!document.getElementById('tabsearch-spacer')&&gBrowser.addTab.name!=='addTabInstant';"))
+            "&&!document.getElementById('tabsearch-spacer')&&gBrowser.addTab.name!=='addTabInstant'"
+            "&&gBrowser.tabContainer.arrowScrollbox.ensureElementIsVisible.name!=='ensureVisibleWithEditor';"))
         browser.js("Services.prefs.setBoolPref('userChrome.tabSearch.enabled',true);"
                    "Services.scriptloader.loadSubScript('resource://whitesur/tab-search.uc.js?test='+Date.now(),window,'UTF-8');")
         check("native browser methods and runtime can be reinitialized", browser.js("return !!window.TabSearch;"))

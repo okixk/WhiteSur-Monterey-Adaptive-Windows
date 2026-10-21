@@ -16,7 +16,7 @@ Results are written to ignored `tests/artifacts/editable-tabs/firefox-report.jso
 
 Keyboard alignment is measured in the next animation frame, after the scheduled selection/scroll layout. Immediate offsets sampled before that frame are also retained in the report; those intermediate tasks can run before the updated layout is painted.
 
-On Windows 11 with Firefox 158.0.1: **24 checks passed**, including a wider address field with few tabs and a narrower field with many tabs, with zero measured field offset and zero total-width drift in the selection cases. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
+On Windows 11 with Firefox 158.0.1: **25 checks passed**, including a wider address field with few tabs, a narrower field with many tabs, and a native visibility-scroll request queued after selection, with zero measured field offset and zero total-width drift in the selection cases. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
 
 ## Search-engine pill (issue #4)
 
