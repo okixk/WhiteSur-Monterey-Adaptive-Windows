@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026.10.22-22 (v0.2.0-beta.2)
+
+- `Install.cmd` opens the configured WhiteSur Firefox with the installed profile automatically after successful installation.
+- Require editable-tab runtime setup by default; unsupported Firefox, AutoConfig conflicts, and runtime errors stop installation before replacing the profile theme.
+- Keep classic CSS available explicitly with `Install.cmd -ClassicToolbar` and forward command-line options from the CMD launcher.
+- Add installer regression coverage for automatic launch and failed setup leaving profile themes untouched.
+
 ## 2026.10.21-21 (v0.2.0-beta.1 — Editable Tabs Update)
 
 This is a larger interface update from the 0.1 betas, including the editable-tab implementation developed in v20 below.

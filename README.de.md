@@ -4,7 +4,7 @@ Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
 Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklicken und eine Adresse oder Suche eingeben; die übrigen Tabs bleiben kompakt. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
-**v0.2.0-beta.1 ist ein grösseres Oberflächen-Update:** Auf unterstützten Firefox-Versionen ersetzen editierbare Tabs die separate Adressleiste. Nach der Installation die neue WhiteSur-Firefox-Verknüpfung verwenden. Änderungen gegenüber den 0.1-Betas stehen in den [Release Notes](docs/releases/v0.2.0-beta.1.md) (Englisch).
+**v0.2.0-beta.2 installiert editierbare Tabs standardmässig und öffnet den eingerichteten Firefox automatisch.** Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.2.md) (Englisch).
 
 ![WhiteSur Monterey Adaptive in Firefox unter Windows](docs/screenshot.png)
 
@@ -44,7 +44,7 @@ Ohne die Erweiterung funktioniert das Layout weiterhin, aber die Farben bleiben 
 1. Repository herunterladen oder klonen.
 2. Firefox vollständig schliessen; im Task-Manager darf kein `firefox.exe` mehr laufen.
 3. `Install.cmd` starten.
-4. Die neue Desktop-Verknüpfung **WhiteSur Firefox - &lt;Profil&gt;** öffnen.
+4. WhiteSur Firefox öffnet sich automatisch. Bei späteren Starts die neue Desktop-Verknüpfung **WhiteSur Firefox - &lt;Profil&gt;** verwenden.
 
 Ab Firefox 158 erstellt der Installer eine benutzereigene Firefox-Kopie unter `%LOCALAPPDATA%\Programs\WhiteSur Firefox` und richtet dort den Loader ein. Die ursprüngliche Installation bleibt erhalten. Für editierbare Tabs die WhiteSur-Verknüpfung verwenden; das ursprüngliche Programm verwendet die klassische CSS-Toolbar. Vor einem Wechsel des Launchers Firefox vollständig schliessen.
 
@@ -70,7 +70,7 @@ Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine ver
 
 ## Kompatibilität
 
-Version `2026.10.21-21` (`v0.2.0-beta.1`) wurde mit Firefox 158.0.1 unter Windows 11 getestet. Editierbare Tabs benötigen Firefox 158+ mit horizontalen Tabs. Ältere Versionen, vertikale Tabs und erkannte AutoConfig-Konflikte behalten das klassische CSS-Layout mit den bisherigen Firefox-154/156-Korrekturen.
+Version `2026.10.22-22` (`v0.2.0-beta.2`) benötigt für editierbare Tabs Firefox 158+ mit horizontalen Tabs. Bei älteren Versionen, fehlendem Firefox, AutoConfig-Konflikten oder Fehlern beim Einrichten der Laufzeit bricht die Standardinstallation vor Änderungen am Profil ab. Das klassische CSS-Layout wird ausdrücklich mit `Install.cmd -ClassicToolbar` gewählt. Vertikale Tabs aktivieren das Skript nicht. `Install.cmd` öffnet den eingerichteten Firefox nach erfolgreicher Installation automatisch und leitet zusätzliche Parameter weiter.
 
 Adaptive Tab Bar Color bleibt kompatibel: beide Layouts verwenden Firefox-Theme-Variablen. Die nativen Tests prüfen helle und dunkle Farbwechsel; das Verhalten einzelner Erweiterungen hängt auch von deren Einstellungen ab.
 

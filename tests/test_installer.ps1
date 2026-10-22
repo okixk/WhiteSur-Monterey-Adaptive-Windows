@@ -45,6 +45,21 @@ try {
     Check (-not ($prefBytes -contains 13) -and $prefBytes[0] -eq 112) 'AutoConfig preferences use LF and UTF-8 without BOM'
     Check ([IO.File]::ReadAllText((Join-Path $runtime 'whitesur.cfg')).StartsWith('//')) 'AutoConfig starts with the required comment'
 
+    # Capture the process launch without executing the fake browser fixture.
+    $launchCapture = [pscustomobject]@{ Executable=$null; Arguments=$null }
+    function Start-Process {
+        param([string]$FilePath, [string]$ArgumentList)
+        $launchCapture.Executable = $FilePath
+        $launchCapture.Arguments = $ArgumentList
+    }
+    try {
+        Install $first @{Launch=$true}
+        Check ($launchCapture.Executable -eq $state.Executable) 'automatic launch uses the Firefox copy containing the loader'
+        Check ($launchCapture.Arguments -eq $state.Arguments) 'automatic launch explicitly uses the installed profile'
+    } finally {
+        Remove-Item Function:\Start-Process
+    }
+
     [IO.File]::WriteAllText((Join-Path $first 'chrome\customChrome.css'), '/* keep my overrides */')
     Install $first
     Check ([IO.File]::ReadAllText((Join-Path $first 'chrome\customChrome.css')) -eq '/* keep my overrides */') 'update preserves customChrome.css'
@@ -99,24 +114,59 @@ public static class WhiteSurInstallerTestPaths {
 
     $old = Fake-Firefox 'source-old' '156.0'
     $olderProfile = Profile 'older'
-    & $installer -ProfilePath $olderProfile -FirefoxPath $old -RuntimeDirectory (Join-Path $testRoot 'old-runtime') -ShortcutDirectory $shortcuts -Force
-    Check (-not (Test-Path -LiteralPath (Join-Path $olderProfile '.whitesur-editable-tabs.json'))) 'older Firefox falls back to CSS without a runtime launcher'
-    Check ([IO.File]::ReadAllText((Join-Path $olderProfile 'user.js')).Contains('tabSearch.enabled", false')) 'older Firefox retains the classic toolbar'
+    $oldFailed = $false
+    try {
+        & $installer -ProfilePath $olderProfile -FirefoxPath $old -RuntimeDirectory (Join-Path $testRoot 'old-runtime') -ShortcutDirectory $shortcuts -Force
+    } catch { $oldFailed = $_.Exception.Message -match 'Firefox 158\+' }
+    Check $oldFailed 'unsupported Firefox reports that editable tabs could not be installed'
+    Check (-not (Test-Path -LiteralPath (Join-Path $olderProfile 'chrome'))) 'unsupported Firefox does not replace the profile theme'
+    $cmdProfile = Profile 'cmd profile with spaces'
+    $cmdStart = New-Object System.Diagnostics.ProcessStartInfo
+    $cmdStart.FileName = $env:ComSpec
+    $cmdStart.Arguments = '/d /c ""' + (Join-Path $repository 'Install.cmd') + '" -ProfilePath "' + $cmdProfile + '" -FirefoxPath "' + $old + '" -Force"'
+    $cmdStart.UseShellExecute = $false
+    $cmdStart.CreateNoWindow = $true
+    $cmdStart.RedirectStandardInput = $true
+    $cmdStart.RedirectStandardOutput = $true
+    $cmdStart.RedirectStandardError = $true
+    $cmdProcess = [Diagnostics.Process]::Start($cmdStart)
+    try {
+        $cmdProcess.StandardInput.WriteLine()
+        $cmdProcess.StandardInput.Close()
+        $cmdOutput = $cmdProcess.StandardOutput.ReadToEnd() + $cmdProcess.StandardError.ReadToEnd()
+        $cmdProcess.WaitForExit()
+        Check ($cmdProcess.ExitCode -ne 0) 'Install.cmd propagates editable-tab setup failure as a nonzero exit code'
+        Check ($cmdOutput -match 'Firefox 158\+') 'Install.cmd forwards quoted Firefox and profile paths to the installer'
+        Check (-not (Test-Path -LiteralPath (Join-Path $cmdProfile 'chrome'))) 'failed CMD installation leaves the selected profile untouched'
+    } finally {
+        $cmdProcess.Dispose()
+    }
+    & $installer -ProfilePath $olderProfile -FirefoxPath $old -ClassicToolbar -Force
+    Check ([IO.File]::ReadAllText((Join-Path $olderProfile 'user.js')).Contains('tabSearch.enabled", false')) 'older Firefox supports explicitly selected classic mode'
 
     $conflicting = Fake-Firefox 'source-configured' '158.0.1'
     $foreignPref = Join-Path (Split-Path -Parent $conflicting) 'defaults\pref\corporate.js'
     $foreignText = 'pref("general.config.filename", "corporate.cfg");'
     [IO.File]::WriteAllText($foreignPref, $foreignText)
     $configuredProfile = Profile 'configured'
-    & $installer -ProfilePath $configuredProfile -FirefoxPath $conflicting -RuntimeDirectory (Join-Path $testRoot 'foreign-runtime') -Force
+    $configFailed = $false
+    try {
+        & $installer -ProfilePath $configuredProfile -FirefoxPath $conflicting -RuntimeDirectory (Join-Path $testRoot 'foreign-runtime') -Force
+    } catch { $configFailed = $_.Exception.Message -match 'AutoConfig' }
+    Check $configFailed 'AutoConfig conflicts report a failed editable-tabs installation'
     Check ([IO.File]::ReadAllText($foreignPref) -eq $foreignText) 'existing AutoConfig remains untouched'
-    Check (-not (Test-Path -LiteralPath (Join-Path $configuredProfile '.whitesur-editable-tabs.json'))) 'AutoConfig conflicts use the classic fallback'
+    Check (-not (Test-Path -LiteralPath (Join-Path $configuredProfile 'chrome'))) 'AutoConfig conflicts leave the profile theme untouched'
 
     $unmanaged = Join-Path $testRoot 'unmanaged-runtime'
     New-Item -ItemType Directory -Path $unmanaged | Out-Null
     [IO.File]::WriteAllText((Join-Path $unmanaged 'sentinel.txt'), 'keep me')
     $guardedProfile = Profile 'guarded'
-    & $installer -ProfilePath $guardedProfile -FirefoxPath $modern -RuntimeDirectory $unmanaged -Force
+    $runtimeFailed = $false
+    try {
+        & $installer -ProfilePath $guardedProfile -FirefoxPath $modern -RuntimeDirectory $unmanaged -Force
+    } catch { $runtimeFailed = $_.Exception.Message -match 'unmanaged directory' }
+    Check $runtimeFailed 'runtime setup errors fail instead of reporting a successful CSS installation'
+    Check (-not (Test-Path -LiteralPath (Join-Path $guardedProfile 'chrome'))) 'runtime setup errors leave the profile theme untouched'
     Check ([IO.File]::ReadAllText((Join-Path $unmanaged 'sentinel.txt')) -eq 'keep me') 'unmanaged runtime directories are preserved'
     Check (-not (Test-Path -LiteralPath (Join-Path $unmanaged 'firefox.exe'))) 'failed runtime setup cannot overwrite an unrelated directory'
     Write-Host "Result: $checks installer checks passed"

@@ -1,6 +1,6 @@
 # Editable tabs
 
-The default installer enables editable tabs on Firefox 158+ for Windows. The selected tab contains Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. It stays visible after navigation and Escape. Background tabs display their titles.
+The default installer enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. The selected tab contains Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. It stays visible after navigation and Escape. Background tabs display their titles.
 
 Selected tabs adapt from 300 CSS pixels with plenty of room to 260 pixels as the strip fills up, and shrink further when the window cannot fit that width. Background tabs use 88–180 pixels depending on available space, then overflow through Firefox's native tab strip. Selecting another tab preserves the total allocated width. Pinned tabs keep their icon size and show their field immediately below the icon.
 
@@ -20,7 +20,7 @@ CSS alone cannot make a tab an editable native address field. Opening the origin
 
 The existing Monterey light/dark styles and Firefox theme variables supply colours, including `--lwt-accent-color`, `--toolbar-color`, and `--toolbar-text-color`. Adaptive Tab Bar Color can continue to supply those values; no separate palette is imposed. Native integration tests verify light and dark variable changes.
 
-The installer selects classic CSS for Firefox below 158, missing installations, or a detected existing AutoConfig loader. Unsupported browser windows and vertical tabs do not activate the script. Required DOM capabilities are checked before activation. `chrome/windows.css` remains the fallback with the previous Firefox 154/156 fixes.
+The default installer stops before changing the profile theme for Firefox below 158, missing installations, a detected existing AutoConfig loader, or runtime setup errors. It reports the failure instead of silently installing classic CSS. Choose `-ClassicToolbar` explicitly for the classic layout. Unsupported browser windows and vertical tabs do not activate the script. Required DOM capabilities are checked before activation. `chrome/windows.css` remains the fallback with the previous Firefox 154/156 fixes.
 
 Existing AutoConfig files are preserved. Using this script with a custom loader requires configuring that loader yourself; this installer does not replace it. Custom toolbar extensions and future Firefox UI changes may need adjustments.
 
@@ -38,7 +38,7 @@ Close Firefox, then use `Install.cmd`, or choose explicit paths:
   -ShortcutDirectory "$env:USERPROFILE\Desktop"
 ```
 
-`-ClassicToolbar` installs only the CSS layout. `-AllProfiles` installs into all detected profiles. `-Diagnose` reports profile, theme, runtime, loader, and launcher paths. `-Force` bypasses the running-Firefox check and is intended for isolated test profiles.
+`Install.cmd` forwards arguments to the PowerShell installer. `-ClassicToolbar` installs only the CSS layout. `-AllProfiles` installs into all detected profiles. `-Launch` opens the configured Firefox with the first selected profile after installation; `Install.cmd` supplies this automatically. Direct PowerShell calls do not launch Firefox unless requested. `-Diagnose` reports profile, theme, runtime, loader, and launcher paths. `-Force` bypasses the running-Firefox check and is intended for isolated test profiles.
 
 ## Updating and removal
 

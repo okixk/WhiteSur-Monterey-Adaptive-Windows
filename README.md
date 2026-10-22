@@ -4,7 +4,7 @@ A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
 The selected tab becomes Firefox's native address/search field. Click a tab and type a URL or search, while other tabs stay compact. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
-**v0.2.0-beta.1 is a larger interface update:** editable tabs replace the separate address bar on supported Firefox. After installing, use the new WhiteSur Firefox desktop shortcut. See the [release notes](docs/releases/v0.2.0-beta.1.md) for the changes from the 0.1 betas.
+**v0.2.0-beta.2 installs editable tabs by default and opens the configured Firefox automatically.** See the [release notes](docs/releases/v0.2.0-beta.2.md).
 
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
@@ -44,7 +44,7 @@ Without the extension, the theme still works, but the colours remain based on Fi
 1. Download or clone this repository.
 2. Fully close Firefox. Make sure no `firefox.exe` process remains.
 3. Run `Install.cmd`.
-4. Open the new **WhiteSur Firefox - &lt;profile&gt;** desktop shortcut.
+4. The installer opens WhiteSur Firefox automatically. Use the new **WhiteSur Firefox - &lt;profile&gt;** desktop shortcut next time.
 
 The installer:
 
@@ -55,6 +55,8 @@ The installer:
 - on Firefox 158+, creates a user-local Firefox copy with the editable-tab loader and a profile-specific desktop shortcut.
 
 The copy lives in `%LOCALAPPDATA%\Programs\WhiteSur Firefox`. The original Firefox installation is preserved. Use the WhiteSur shortcut for editable tabs; opening the original binary uses the CSS toolbar. Close Firefox before switching launchers for the same profile.
+
+If editable tabs cannot be installed, installation stops with an error before replacing the profile theme. Update to Firefox 158+ or pass a clean installation with `Install.cmd -FirefoxPath "C:\path\to\firefox.exe"`. Classic mode is an explicit choice: `Install.cmd -ClassicToolbar`.
 
 Type an address or search into the selected tab. Normal searches use your Firefox default engine; `g search terms` uses Google and `q search terms` uses Qwant. `Ctrl+L`, `Alt+D`, and `F6` focus the field; `Esc` cancels the draft and keeps the field visible.
 
@@ -78,7 +80,7 @@ Close Firefox and run `Uninstall.cmd`. It removes its managed preferences and ow
 
 ## Compatibility
 
-Version `2026.10.21-21` (`v0.2.0-beta.1`) was tested with Firefox 158.0.1 on Windows 11. Editable tabs require Firefox 158+ with horizontal tabs. Older versions and detected AutoConfig conflicts receive the classic CSS layout, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+Version `2026.10.22-22` (`v0.2.0-beta.2`) targets Firefox 158+ on Windows 11 with horizontal tabs. Older versions and detected AutoConfig conflicts require explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
 
 Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
 

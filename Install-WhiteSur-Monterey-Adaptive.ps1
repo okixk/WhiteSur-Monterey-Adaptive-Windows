@@ -36,6 +36,9 @@ param(
     [switch]$ClassicToolbar,
 
     [Parameter()]
+    [switch]$Launch,
+
+    [Parameter()]
     [string]$FirefoxPath,
 
     [Parameter()]
@@ -558,10 +561,9 @@ if (($runningFirefox.Count -gt 0) -and -not $Force) {
 
 $selectedProfiles = @(Get-SelectedProfiles)
 if (-not $Uninstall) {
-    try {
-        $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory -Classic:$ClassicToolbar
-    } catch {
-        $EditableTabsRuntime = [pscustomobject]@{ Enabled=$false; Executable=$null; Reason="Editable-tabs runtime setup failed: $($_.Exception.Message) Using the compatible CSS layout." }
+    $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory -Classic:$ClassicToolbar
+    if (-not $ClassicToolbar -and -not $EditableTabsRuntime.Enabled) {
+        throw "Editable tabs could not be installed. $($EditableTabsRuntime.Reason) Update Firefox or specify -FirefoxPath. To explicitly install the classic toolbar, run Install.cmd -ClassicToolbar."
     }
     Write-Status $EditableTabsRuntime.Reason $(if ($EditableTabsRuntime.Enabled) { [ConsoleColor]::Green } else { [ConsoleColor]::Yellow })
 }
@@ -580,6 +582,12 @@ if ($Uninstall) {
 else {
     if ($EditableTabsRuntime.Enabled) {
         Write-Status 'Installation complete. Use the WhiteSur Firefox shortcut for editable tabs. Adaptive Tab Bar Colour is only needed for website-based colours.' Green
+        if ($Launch) {
+            $launchProfile = $selectedProfiles[0]
+            $launchArguments = '-no-remote -profile "' + $launchProfile.Path + '"'
+            Start-Process -FilePath $EditableTabsRuntime.Executable -ArgumentList $launchArguments
+            Write-Status "Opened WhiteSur Firefox with profile '$($launchProfile.Name)'. Use its desktop shortcut next time." Green
+        }
     } else {
         Write-Status 'Installation complete with the compatible CSS layout. Start Firefox again.' Green
     }

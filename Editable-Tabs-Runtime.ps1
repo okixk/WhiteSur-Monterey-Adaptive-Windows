@@ -75,15 +75,15 @@ function Initialize-EditableTabsRuntime {
     if ($Classic) { return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='CSS-only mode requested.' } }
     $executable = Find-FirefoxExecutable -RequestedPath $SourceExecutable
     if (-not $executable) {
-        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Firefox was not found; installed the compatible CSS layout.' }
+        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Firefox was not found.' }
     }
     $sourceVersion = Get-FirefoxRuntimeVersion -Executable $executable
     if ($sourceVersion.Major -lt 158) {
-        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason="Firefox $sourceVersion uses the compatible CSS layout. Editable tabs require Firefox 158+." }
+        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason="Firefox $sourceVersion is unsupported. Editable tabs require Firefox 158+." }
     }
     $sourceDirectory = Split-Path -Parent $executable
     if (Test-ForeignAutoConfig -Directory $sourceDirectory) {
-        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Existing Firefox AutoConfig detected; it was preserved and the CSS layout was installed.' }
+        return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Existing Firefox AutoConfig detected; choose a clean Firefox installation with -FirefoxPath.' }
     }
     if ([string]::IsNullOrWhiteSpace($DestinationDirectory)) {
         $DestinationDirectory = Join-Path $env:LOCALAPPDATA 'Programs\WhiteSur Firefox'
