@@ -4,7 +4,7 @@ Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
 Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklicken und eine Adresse oder Suche eingeben; die übrigen Tabs bleiben kompakt. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
-**v0.2.0-beta.2 installiert editierbare Tabs standardmässig und öffnet den eingerichteten Firefox automatisch.** Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.2.md) (Englisch).
+**v0.2.0-beta.2 installiert editierbare Tabs direkt im vorhandenen Firefox. Die gewohnten Verknüpfungen funktionieren weiterhin.** Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.2.md) (Englisch).
 
 ![WhiteSur Monterey Adaptive in Firefox unter Windows](docs/screenshot.png)
 
@@ -27,7 +27,7 @@ Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklic
 - automatische Erkennung des tatsächlich aktiven Firefox-Profils
 - Backup und Wiederherstellung eines vorhandenen `chrome`-Ordners
 - eine eigene `customChrome.css` bleibt bei Updates erhalten
-- keine Administratorrechte nötig
+- Loader im vorhandenen Firefox; Windows fragt bei geschützten Ordnern nach Administratorrechten
 
 ## Adaptive Farben
 
@@ -44,9 +44,9 @@ Ohne die Erweiterung funktioniert das Layout weiterhin, aber die Farben bleiben 
 1. Repository herunterladen oder klonen.
 2. Firefox vollständig schliessen; im Task-Manager darf kein `firefox.exe` mehr laufen.
 3. `Install.cmd` starten.
-4. WhiteSur Firefox öffnet sich automatisch. Bei späteren Starts die neue Desktop-Verknüpfung **WhiteSur Firefox - &lt;Profil&gt;** verwenden.
+4. Bei Bedarf die Windows-Administratorabfrage bestätigen. Firefox öffnet sich automatisch; die gewohnten Verknüpfungen funktionieren weiterhin.
 
-Ab Firefox 158 erstellt der Installer eine benutzereigene Firefox-Kopie unter `%LOCALAPPDATA%\Programs\WhiteSur Firefox` und richtet dort den Loader ein. Die ursprüngliche Installation bleibt erhalten. Für editierbare Tabs die WhiteSur-Verknüpfung verwenden; das ursprüngliche Programm verwendet die klassische CSS-Toolbar. Vor einem Wechsel des Launchers Firefox vollständig schliessen.
+Ab Firefox 158 ergänzt der Installer die Loader-Dateien direkt in der vorhandenen Firefox-Installation. Profil, Erweiterungen, Lesezeichen und Verknüpfungen werden weiterverwendet. Nur das Schreiben des Loaders wird bei Bedarf mit Administratorrechten ausgeführt; die Profilinstallation bleibt beim ursprünglichen Benutzer.
 
 Normale Eingaben verwenden die Firefox-Standardsuche. `g Suchbegriffe` sucht mit Google, `q Suchbegriffe` mit Qwant. `Strg+L`, `Alt+D` und `F6` fokussieren das Feld. `Esc` verwirft die Eingabe; das Feld bleibt sichtbar.
 
@@ -62,11 +62,11 @@ Mit `Check-Installation.cmd` kannst du das erkannte Profil und die installierte 
 
 ## Update
 
-Firefox schliessen und `Install.cmd` aus der neuen Version starten. Eine vorhandene `customChrome.css` wird übernommen. Loader-Dateien werden aktualisiert und eine neuere Quellinstallation wird in die WhiteSur-Kopie übernommen; eine neuere Kopie wird nicht zurückgestuft.
+Firefox schliessen und `Install.cmd` aus der neuen Version starten. Eine vorhandene `customChrome.css` wird übernommen. Der Loader wird im vorhandenen Firefox aktualisiert. Falls ein Firefox-Update den Loader entfernt, den Installer erneut ausführen.
 
 ## Deinstallation
 
-Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine verwalteten Preferences und die zugehörige Verknüpfung und stellt nach Möglichkeit das vorherige `chrome`-Backup wieder her. Die gemeinsam genutzte Firefox-Kopie bleibt für andere Profile erhalten. Nutzt sie kein Profil mehr, kann `%LOCALAPPDATA%\Programs\WhiteSur Firefox` manuell entfernt werden.
+Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine verwalteten Preferences und stellt nach Möglichkeit das vorherige `chrome`-Backup wieder her. Der gemeinsam genutzte Loader bleibt für andere installierte Profile erhalten und ignoriert Profile ohne Theme-Markierung. Firefox bleibt installiert. Eine alte separate Kopie aus beta.1 kann nach dem Wechsel zum gewohnten Firefox manuell entfernt werden.
 
 ## Kompatibilität
 

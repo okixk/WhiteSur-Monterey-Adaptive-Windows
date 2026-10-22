@@ -2,7 +2,9 @@
 
 ## 2026.10.22-22 (v0.2.0-beta.2)
 
-- `Install.cmd` opens the configured WhiteSur Firefox with the installed profile automatically after successful installation.
+- Install the editable-tab loader directly into the existing Firefox so normal desktop, Start menu, and taskbar shortcuts work.
+- Elevate only the loader helper when the Firefox installation directory needs administrator rights; profile selection and theme installation stay with the original user.
+- `Install.cmd` opens the configured existing Firefox with the installed profile after successful installation. A separate runtime is available only through explicit `-RuntimeDirectory` selection.
 - Require editable-tab runtime setup by default; unsupported Firefox, AutoConfig conflicts, and runtime errors stop installation before replacing the profile theme.
 - Keep classic CSS available explicitly with `Install.cmd -ClassicToolbar` and forward command-line options from the CMD launcher.
 - Add installer regression coverage for automatic launch and failed setup leaving profile themes untouched.

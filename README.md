@@ -4,7 +4,7 @@ A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
 The selected tab becomes Firefox's native address/search field. Click a tab and type a URL or search, while other tabs stay compact. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
-**v0.2.0-beta.2 installs editable tabs by default and opens the configured Firefox automatically.** See the [release notes](docs/releases/v0.2.0-beta.2.md).
+**v0.2.0-beta.2 installs editable tabs into your existing Firefox. Your usual shortcuts work.** See the [release notes](docs/releases/v0.2.0-beta.2.md).
 
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
@@ -27,7 +27,7 @@ The selected tab becomes Firefox's native address/search field. Click a tab and 
 - Automatic Firefox profile detection
 - Existing `chrome` folder backup and restoration
 - Preserves your `customChrome.css` during updates
-- No administrator rights required
+- Adds the loader to your existing Firefox; requests administrator approval when needed
 
 ## Adaptive colours
 
@@ -44,7 +44,7 @@ Without the extension, the theme still works, but the colours remain based on Fi
 1. Download or clone this repository.
 2. Fully close Firefox. Make sure no `firefox.exe` process remains.
 3. Run `Install.cmd`.
-4. The installer opens WhiteSur Firefox automatically. Use the new **WhiteSur Firefox - &lt;profile&gt;** desktop shortcut next time.
+4. Approve the Windows administrator prompt if Firefox is installed in a protected folder. Firefox opens automatically; your usual shortcuts continue to work.
 
 The installer:
 
@@ -52,9 +52,9 @@ The installer:
 - backs up an existing `chrome` directory;
 - installs the theme;
 - enables the necessary preferences through a managed `user.js` block;
-- on Firefox 158+, creates a user-local Firefox copy with the editable-tab loader and a profile-specific desktop shortcut.
+- on Firefox 158+, adds the editable-tab loader to your existing Firefox installation.
 
-The copy lives in `%LOCALAPPDATA%\Programs\WhiteSur Firefox`. The original Firefox installation is preserved. Use the WhiteSur shortcut for editable tabs; opening the original binary uses the CSS toolbar. Close Firefox before switching launchers for the same profile.
+The loader consists of `whitesur.cfg` and `defaults/pref/whitesur-autoconfig.js`, tracked by `.whitesur-loader.json` in the Firefox installation directory. Firefox uses your existing profile, extensions, bookmarks, and shortcuts. Only writing these loader files is elevated when Windows requires it; profile installation runs as your original user.
 
 If editable tabs cannot be installed, installation stops with an error before replacing the profile theme. Update to Firefox 158+ or pass a clean installation with `Install.cmd -FirefoxPath "C:\path\to\firefox.exe"`. Classic mode is an explicit choice: `Install.cmd -ClassicToolbar`.
 
@@ -72,11 +72,11 @@ Use `Check-Installation.cmd` to verify the active profile and installed version.
 
 ## Updating
 
-Close Firefox and run `Install.cmd` from the newer release. A user-created `customChrome.css` is preserved. The installer refreshes its loader and copies a newer source Firefox when available; it does not downgrade a newer WhiteSur copy.
+Close Firefox and run `Install.cmd` from the newer release. A user-created `customChrome.css` is preserved. The installer refreshes the loader in your existing Firefox. Firefox keeps its normal update mechanism; rerun the installer if a Firefox update removes the loader files. When upgrading from beta.1, the old owned WhiteSur shortcut is removed and your usual Firefox shortcut works.
 
 ## Uninstalling
 
-Close Firefox and run `Uninstall.cmd`. It removes its managed preferences and owned profile launcher, and restores the previous `chrome` backup when available. The shared Firefox copy remains for other profiles. Once no profiles use it, you may remove `%LOCALAPPDATA%\Programs\WhiteSur Firefox` manually.
+Close Firefox and run `Uninstall.cmd`. It removes managed preferences and restores the previous `chrome` backup when available. The shared loader remains for other installed profiles and ignores profiles without this theme's marker. Firefox itself stays installed. A separate copy left by beta.1 can be removed manually after closing it and switching to your usual Firefox.
 
 ## Compatibility
 

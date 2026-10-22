@@ -9,12 +9,13 @@ Selected tabs adapt from 300 CSS pixels with plenty of room to 260 pixels as the
 - `chrome/tab-search.uc.js`: privileged window script; observes tab geometry and positions the field without moving it out of its native toolbar DOM.
 - `chrome/tab-search.css`: overrides gated by `tabsearch-ready`; imported before `customChrome.css` so user overrides remain last.
 - `firefox/whitesur.cfg`: AutoConfig loader; starts after window initialization, only loads profiles marked by this installer, and skips Firefox Troubleshoot Mode.
-- `firefox/defaults/pref/whitesur-autoconfig.js`: selects the loader and enables AutoConfig scripting in the managed copy.
-- `Editable-Tabs-Runtime.ps1`: runtime installation, ownership checks, and profile launchers.
+- `firefox/defaults/pref/whitesur-autoconfig.js`: selects the loader and enables AutoConfig scripting in the existing Firefox installation.
+- `Editable-Tabs-Runtime.ps1`: loader installation, ownership checks, and optional separate runtimes.
+- `Install-Editable-Tabs-Loader.ps1`: writes only the installation-level loader files when administrator approval is needed.
 
-The installer copies Firefox into `%LOCALAPPDATA%\Programs\WhiteSur Firefox`, adds its two loader files, and creates a desktop shortcut tied to the selected profile. It preserves the source Firefox installation. The copy uses the same selected profile, including extensions and preferences. Each installed profile has a separate shortcut and `.whitesur-editable-tabs.json` record; the binary copy is shared.
+The installer adds its two loader files to the detected Firefox installation and tracks them with `.whitesur-loader.json`. Your usual desktop, Start menu, and taskbar shortcuts open Firefox with editable tabs in the installed profile. Each profile has a `.whitesur-editable-tabs.json` installation record. The loader only activates in profiles carrying this theme's marker.
 
-CSS alone cannot make a tab an editable native address field. Opening the original Firefox binary gives the existing adaptive CSS toolbar. Open the **WhiteSur Firefox** shortcut for editable tabs. Close the browser before switching binaries for the same profile.
+CSS alone cannot make a tab an editable native address field, so the loader belongs in the Firefox installation directory. Windows requests administrator approval for protected installations such as Program Files. Only the loader helper is elevated; profile detection and theme installation run as your original user. Declining approval stops installation. A writable per-user Firefox installation needs no elevation.
 
 ## Adaptive colours and compatibility
 
@@ -33,18 +34,18 @@ Close Firefox, then use `Install.cmd`, or choose explicit paths:
 ```powershell
 .\Install-WhiteSur-Monterey-Adaptive.ps1 `
   -ProfilePath 'D:\Firefox Profiles\Personal' `
-  -FirefoxPath 'C:\Program Files\Mozilla Firefox\firefox.exe' `
-  -RuntimeDirectory 'D:\Apps\WhiteSur Firefox' `
-  -ShortcutDirectory "$env:USERPROFILE\Desktop"
+  -FirefoxPath 'C:\Program Files\Mozilla Firefox\firefox.exe'
 ```
 
 `Install.cmd` forwards arguments to the PowerShell installer. `-ClassicToolbar` installs only the CSS layout. `-AllProfiles` installs into all detected profiles. `-Launch` opens the configured Firefox with the first selected profile after installation; `Install.cmd` supplies this automatically. Direct PowerShell calls do not launch Firefox unless requested. `-Diagnose` reports profile, theme, runtime, loader, and launcher paths. `-Force` bypasses the running-Firefox check and is intended for isolated test profiles.
 
+Passing `-RuntimeDirectory 'D:\Apps\WhiteSur Firefox'` explicitly requests a separate Firefox copy with a profile-specific shortcut. `-ShortcutDirectory` chooses the shortcut location for that optional mode. The default configures the existing installation.
+
 ## Updating and removal
 
-Rerun the installer with Firefox closed to update the theme and loader. It refreshes the binary copy when the source Firefox version is newer and does not downgrade a newer copy. Firefox's own updates can also update the copy; rerun the installer if an update removes loader files. The original installation keeps its normal update mechanism.
+Rerun the installer with Firefox closed to update the theme and loader. Your existing Firefox keeps its normal update mechanism; rerun the installer if an update removes loader files. Upgrading from beta.1 removes the previous unmodified owned WhiteSur shortcut and configures the original Firefox. Any previous separate Firefox copy remains until removed manually.
 
-Uninstall removes managed preferences and the unmodified owned launcher, then restores the earlier chrome backup when available. A launcher repurposed by the user is preserved. The shared binary copy remains for other profiles. Once no installed profile uses it, it can be removed manually. Existing `customChrome.css` is preserved during theme updates.
+Uninstall removes managed preferences and any unmodified owned launcher, then restores the earlier chrome backup when available. A launcher repurposed by the user is preserved. The shared loader remains for other installed profiles; it ignores profiles without this theme's marker. Existing `customChrome.css` is preserved during theme updates. In the optional separate-runtime mode, the shared copy remains for other profiles.
 
 ## Tab-close behaviour
 

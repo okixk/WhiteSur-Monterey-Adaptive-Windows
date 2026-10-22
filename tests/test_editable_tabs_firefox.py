@@ -10,6 +10,7 @@ import base64
 import ctypes
 import json
 import os
+import shutil
 from pathlib import Path
 import socket
 import subprocess
@@ -118,12 +119,15 @@ class Firefox:
 
 
 def install(profile, source, runtime, shortcuts):
-    completed = subprocess.run([
+    command = [
         "powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
         str(ROOT / "Install-WhiteSur-Monterey-Adaptive.ps1"),
         "-ProfilePath", str(profile), "-FirefoxPath", str(source),
-        "-RuntimeDirectory", str(runtime), "-ShortcutDirectory", str(shortcuts), "-Force",
-    ], capture_output=True, text=True, errors="replace")
+        "-ShortcutDirectory", str(shortcuts), "-Force",
+    ]
+    if runtime is not None:
+        command.extend(["-RuntimeDirectory", str(runtime)])
+    completed = subprocess.run(command, capture_output=True, text=True, errors="replace")
     if completed.returncode:
         raise RuntimeError(completed.stdout + completed.stderr)
     state = profile / ".whitesur-editable-tabs.json"
@@ -319,7 +323,14 @@ def main():
         workspace = Path(directory).resolve()
         profile = workspace / "profile"
         profile.mkdir()
-        binary = install(profile, args.firefox.resolve(), workspace / "runtime", workspace / "shortcuts")
+        # Model an existing installation in a disposable directory. Exercise the
+        # default installer without requesting a separate runtime.
+        existing = workspace / "existing Firefox"
+        shutil.copytree(args.firefox.resolve().parent, existing,
+                        ignore=shutil.ignore_patterns("tobedeleted", "updates"))
+        binary = install(profile, existing / "firefox.exe", None, workspace / "shortcuts")
+        if binary != existing / "firefox.exe" or (workspace / "shortcuts").exists():
+            raise AssertionError("Default installation must use the existing Firefox without a new shortcut")
         browser = Firefox(args.geckodriver.resolve(), binary, profile)
         try:
             results = run(browser, args.artifacts.resolve())

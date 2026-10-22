@@ -7,9 +7,9 @@ Installs WhiteSur Monterey Adaptive into the active Firefox profile on Windows 1
 Finds the profile selected by Firefox's Install section, backs up an existing
 chrome directory, copies the Windows-compatible Monterey Adaptive package, and
 manages the required Firefox user preferences in user.js.
-On supported Firefox versions, creates a user-local runtime with AutoConfig
-and a profile-specific launcher for native editable tabs. Use -ClassicToolbar
-for the CSS-only layout.
+On supported Firefox versions, adds the AutoConfig loader to the existing
+Firefox installation. Windows requests administrator approval when necessary.
+Use -ClassicToolbar for the CSS-only layout, or -RuntimeDirectory for a copy.
 #>
 [CmdletBinding()]
 param(
@@ -433,7 +433,7 @@ function Show-Diagnostics {
         if ($status.EditableTabsState) {
             $state = Get-Content -LiteralPath (Get-EditableTabsStatePath -ProfileDirectory $profile.Path) -Raw | ConvertFrom-Json
             Write-Host "  Firefox executable: $($state.Executable)"
-            Write-Host "  Launcher exists: $(Test-Path -LiteralPath $state.Shortcut -PathType Leaf)"
+            Write-Host "  Launcher: $(if ($state.Shortcut) { $state.Shortcut } else { 'Use your existing Firefox shortcut' })"
             Write-Host "  Loader exists: $(Test-Path -LiteralPath (Join-Path (Split-Path -Parent $state.Executable) 'whitesur.cfg') -PathType Leaf)"
         }
     }
@@ -581,12 +581,12 @@ if ($Uninstall) {
 }
 else {
     if ($EditableTabsRuntime.Enabled) {
-        Write-Status 'Installation complete. Use the WhiteSur Firefox shortcut for editable tabs. Adaptive Tab Bar Colour is only needed for website-based colours.' Green
+        Write-Status $(if ($EditableTabsRuntime.InPlace) { 'Installation complete. Editable tabs work in your existing Firefox using your usual shortcuts.' } else { 'Installation complete. Use the WhiteSur Firefox shortcut for the requested separate runtime.' }) Green
         if ($Launch) {
             $launchProfile = $selectedProfiles[0]
             $launchArguments = '-no-remote -profile "' + $launchProfile.Path + '"'
             Start-Process -FilePath $EditableTabsRuntime.Executable -ArgumentList $launchArguments
-            Write-Status "Opened WhiteSur Firefox with profile '$($launchProfile.Name)'. Use its desktop shortcut next time." Green
+            Write-Status "Opened the configured Firefox with profile '$($launchProfile.Name)'." Green
         }
     } else {
         Write-Status 'Installation complete with the compatible CSS layout. Start Firefox again.' Green

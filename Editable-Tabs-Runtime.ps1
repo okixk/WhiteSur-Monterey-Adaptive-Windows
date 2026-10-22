@@ -54,10 +54,12 @@ function Get-FirefoxRuntimeVersion {
 function Test-ForeignAutoConfig {
     param([string]$Directory)
     $owned = $false
-    $ownershipFile = Join-Path $Directory '.whitesur-runtime.json'
-    if (Test-Path -LiteralPath $ownershipFile -PathType Leaf) {
-        $ownership = Get-Content -LiteralPath $ownershipFile -Raw | ConvertFrom-Json
-        $owned = $ownership.Owner -eq 'WhiteSur-Monterey-Adaptive-Windows'
+    foreach ($markerName in @('.whitesur-runtime.json', '.whitesur-loader.json')) {
+        $ownershipFile = Join-Path $Directory $markerName
+        if (Test-Path -LiteralPath $ownershipFile -PathType Leaf) {
+            $ownership = Get-Content -LiteralPath $ownershipFile -Raw | ConvertFrom-Json
+            if ($ownership.Owner -eq 'WhiteSur-Monterey-Adaptive-Windows') { $owned = $true }
+        }
     }
     $prefDirectory = Join-Path $Directory 'defaults\pref'
     foreach ($file in @(Get-ChildItem -LiteralPath $prefDirectory -Filter '*.js' -File -ErrorAction SilentlyContinue)) {
@@ -68,6 +70,46 @@ function Test-ForeignAutoConfig {
         }
     }
     return $false
+}
+
+function Install-EditableTabsLoader {
+    param([Parameter(Mandatory)][string]$Directory)
+    if (-not (Test-Path -LiteralPath (Join-Path $Directory 'firefox.exe') -PathType Leaf)) {
+        throw 'The selected Firefox installation does not contain firefox.exe.'
+    }
+    foreach ($path in @($Directory, (Join-Path $Directory 'defaults'), (Join-Path $Directory 'defaults\pref'))) {
+        if ((Test-Path -LiteralPath $path) -and ((Get-Item -LiteralPath $path).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw 'The Firefox loader directory must not be a junction or symbolic link.'
+        }
+    }
+    if (Test-ForeignAutoConfig -Directory $Directory) { throw 'Existing Firefox AutoConfig was preserved.' }
+    $markerPath = Join-Path $Directory '.whitesur-loader.json'
+    $owned = $false
+    if (Test-Path -LiteralPath $markerPath -PathType Leaf) {
+        $marker = Get-Content -LiteralPath $markerPath -Raw | ConvertFrom-Json
+        if ($marker.Owner -ne 'WhiteSur-Monterey-Adaptive-Windows') { throw 'The loader ownership marker is invalid.' }
+        $owned = $true
+    }
+    foreach ($relative in @('.whitesur-loader.json', 'whitesur.cfg', 'defaults\pref\whitesur-autoconfig.js')) {
+        $target = Join-Path $Directory $relative
+        if (Test-Path -LiteralPath $target) {
+            if ((Get-Item -LiteralPath $target).Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                throw 'A Firefox loader file is a symbolic link; it was left untouched.'
+            }
+            if (-not $owned) { throw "Refusing to overwrite an unmanaged Firefox loader file: $target" }
+        }
+    }
+    # Reserve only our loader files. Firefox itself and its other files are not copied.
+    @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Ready=$false } |
+        ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
+    foreach ($relative in @('whitesur.cfg', 'defaults\pref\whitesur-autoconfig.js')) {
+        $source = Join-Path (Join-Path $PackageRoot 'firefox') $relative
+        $target = Join-Path $Directory $relative
+        New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
+        [IO.File]::WriteAllText($target, [IO.File]::ReadAllText($source).Replace("`r`n", "`n"), [Text.UTF8Encoding]::new($false))
+    }
+    @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Ready=$true } |
+        ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
 }
 
 function Initialize-EditableTabsRuntime {
@@ -86,7 +128,22 @@ function Initialize-EditableTabsRuntime {
         return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Existing Firefox AutoConfig detected; choose a clean Firefox installation with -FirefoxPath.' }
     }
     if ([string]::IsNullOrWhiteSpace($DestinationDirectory)) {
-        $DestinationDirectory = Join-Path $env:LOCALAPPDATA 'Programs\WhiteSur Firefox'
+        try {
+            Install-EditableTabsLoader -Directory $sourceDirectory
+        } catch [System.UnauthorizedAccessException], [System.Security.SecurityException] {
+            Write-Status 'Windows administrator approval is required to add the editable-tab loader to your existing Firefox.' Yellow
+            $helper = Join-Path $PackageRoot 'Install-Editable-Tabs-Loader.ps1'
+            $arguments = '-NoLogo -NoProfile -ExecutionPolicy Bypass -File "' + $helper + '" -FirefoxDirectory "' + $sourceDirectory + '"'
+            $result = Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList $arguments -Verb RunAs -WindowStyle Hidden -Wait -PassThru
+            if ($result.ExitCode -ne 0) { throw 'Firefox loader setup failed. Run Install.cmd again and approve the Windows administrator prompt.' }
+        }
+        foreach ($relative in @('whitesur.cfg', 'defaults\pref\whitesur-autoconfig.js')) {
+            $expected = [IO.File]::ReadAllText((Join-Path (Join-Path $PackageRoot 'firefox') $relative)).Replace("`r`n", "`n")
+            if ([IO.File]::ReadAllText((Join-Path $sourceDirectory $relative)) -cne $expected) {
+                throw 'Firefox loader verification failed; the profile theme was not changed.'
+            }
+        }
+        return [pscustomobject]@{ Enabled=$true; InPlace=$true; Executable=$executable; Reason='Editable tabs enabled in your existing Firefox. Your usual Firefox shortcuts work.' }
     }
     $destination = [IO.Path]::GetFullPath($DestinationDirectory).TrimEnd('\')
     $sourceDirectory = [IO.Path]::GetFullPath($sourceDirectory).TrimEnd('\')
@@ -137,7 +194,7 @@ function Initialize-EditableTabsRuntime {
     @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Source=$sourceDirectory; Ready=$true;
        Version=(Get-FirefoxRuntimeVersion -Executable $targetExecutable).ToString() } |
         ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
-    return [pscustomobject]@{ Enabled=$true; Executable=$targetExecutable; Reason='Editable tabs enabled in the user-local WhiteSur Firefox installation.' }
+    return [pscustomobject]@{ Enabled=$true; InPlace=$false; Executable=$targetExecutable; Reason='Editable tabs enabled in the explicitly requested separate Firefox installation.' }
 }
 
 function Remove-EditableTabsLauncher {
@@ -161,6 +218,13 @@ function Set-EditableTabsLauncher {
     param([pscustomobject]$Profile, [pscustomobject]$Runtime, [string]$ShortcutDirectory)
     Remove-EditableTabsLauncher -ProfileDirectory $Profile.Path
     if (-not $Runtime.Enabled) { return }
+    if ($Runtime.InPlace) {
+        @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Executable=$Runtime.Executable;
+           Shortcut=$null; Arguments=('-no-remote -profile "' + $Profile.Path + '"') } | ConvertTo-Json |
+            Set-Content -LiteralPath (Get-EditableTabsStatePath -ProfileDirectory $Profile.Path) -Encoding UTF8
+        Write-Status 'Your existing Firefox is configured; open it using your usual shortcut.' Green
+        return
+    }
     if ([string]::IsNullOrWhiteSpace($ShortcutDirectory)) {
         $ShortcutDirectory = [Environment]::GetFolderPath([Environment+SpecialFolder]::DesktopDirectory)
     }

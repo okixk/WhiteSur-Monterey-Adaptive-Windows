@@ -37,7 +37,7 @@ try {
     [IO.File]::WriteAllText((Join-Path $first 'chrome\original.css'), 'original theme')
     Install $first
     $state = Get-Content (Join-Path $first '.whitesur-editable-tabs.json') -Raw | ConvertFrom-Json
-    Check (Test-Path -LiteralPath $state.Shortcut) 'default install creates a profile-specific launcher'
+    Check (Test-Path -LiteralPath $state.Shortcut) 'explicit separate runtime creates a profile-specific launcher'
     Check ($state.Executable -eq (Join-Path $runtime 'firefox.exe')) 'launcher uses the isolated Firefox copy'
     Check ([IO.File]::ReadAllText((Join-Path $first 'user.js')).Contains('user_pref("userChrome.tabSearch.enabled", true);')) 'editable tabs are enabled by default'
     Check (Test-Path -LiteralPath (Join-Path $first 'chrome\tab-search.uc.js')) 'profile contains the runtime script'
@@ -169,6 +169,58 @@ public static class WhiteSurInstallerTestPaths {
     Check (-not (Test-Path -LiteralPath (Join-Path $guardedProfile 'chrome'))) 'runtime setup errors leave the profile theme untouched'
     Check ([IO.File]::ReadAllText((Join-Path $unmanaged 'sentinel.txt')) -eq 'keep me') 'unmanaged runtime directories are preserved'
     Check (-not (Test-Path -LiteralPath (Join-Path $unmanaged 'firefox.exe'))) 'failed runtime setup cannot overwrite an unrelated directory'
+
+    $existing = Fake-Firefox 'existing Firefox' '158.0.1'
+    $existingDirectory = Split-Path -Parent $existing
+    $existingProfile = Profile 'existing profile'
+    $existingHash = (Get-FileHash -LiteralPath $existing).Hash
+    $shortcutCount = @(Get-ChildItem -LiteralPath $shortcuts -Filter '*.lnk').Count
+    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -ShortcutDirectory $shortcuts -Force
+    $existingState = Get-Content (Join-Path $existingProfile '.whitesur-editable-tabs.json') -Raw | ConvertFrom-Json
+    Check ($existingState.Executable -eq $existing) 'default installation configures the existing Firefox executable'
+    Check ((Get-FileHash -LiteralPath $existing).Hash -eq $existingHash) 'default installation preserves the original Firefox binary'
+    Check (-not $existingState.Shortcut -and @(Get-ChildItem -LiteralPath $shortcuts -Filter '*.lnk').Count -eq $shortcutCount) 'default installation creates no additional Firefox shortcut'
+    Check (Test-Path -LiteralPath (Join-Path $existingDirectory 'whitesur.cfg')) 'the existing Firefox installation receives the loader'
+    Check (Test-Path -LiteralPath (Join-Path $existingDirectory 'defaults\pref\whitesur-autoconfig.js')) 'the existing Firefox installation enables AutoConfig'
+    Check (-not (Test-Path -LiteralPath (Join-Path $existingDirectory '.whitesur-runtime.json'))) 'default installation does not create a managed Firefox copy'
+    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -Force
+    Check ($LASTEXITCODE -eq 0) 'updating the existing Firefox loader is supported'
+    & $installer -ProfilePath $existingProfile -Diagnose
+    Check ($LASTEXITCODE -eq 0) 'diagnostics accept an existing Firefox installation without a new launcher'
+    & $installer -ProfilePath $existingProfile -Uninstall -Force
+    Check ((Test-Path -LiteralPath $existing) -and -not (Test-Path -LiteralPath (Join-Path $existingProfile 'chrome'))) 'uninstall removes the profile theme and preserves existing Firefox'
+
+    $helperFirefox = Fake-Firefox 'helper Firefox' '158.0.1'
+    & (Join-Path $repository 'Install-Editable-Tabs-Loader.ps1') -FirefoxDirectory (Split-Path -Parent $helperFirefox)
+    Check ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath (Join-Path (Split-Path -Parent $helperFirefox) 'whitesur.cfg'))) 'the elevation helper installs loader files without running profile installation'
+
+    # Simulate a protected installation without opening a UAC dialog in tests.
+    $PackageRoot = $repository
+    . (Join-Path $repository 'Editable-Tabs-Runtime.ps1')
+    $loaderFunction = ${function:Install-EditableTabsLoader}
+    $elevationFirefox = Fake-Firefox 'protected Firefox' '158.0.1'
+    $elevation = [pscustomobject]@{ Verb=$null; Arguments=$null; ExitCode=0 }
+    function Write-Status { param($Message, $Color) }
+    function Install-EditableTabsLoader { param($Directory); throw [UnauthorizedAccessException]::new('Fixture requires elevation') }
+    function Start-Process {
+        param($FilePath, $ArgumentList, $Verb, $WindowStyle, [switch]$Wait, [switch]$PassThru)
+        $elevation.Verb = $Verb
+        $elevation.Arguments = $ArgumentList
+        if ($elevation.ExitCode -eq 0) { & $loaderFunction -Directory (Split-Path -Parent $elevationFirefox) }
+        return [pscustomobject]@{ ExitCode=$elevation.ExitCode }
+    }
+    try {
+        $elevatedRuntime = Initialize-EditableTabsRuntime -SourceExecutable $elevationFirefox
+        Check ($elevation.Verb -eq 'RunAs' -and $elevation.Arguments.Contains('Install-Editable-Tabs-Loader.ps1')) 'protected Firefox requests elevation for only the loader helper'
+        Check ($elevatedRuntime.InPlace -and $elevatedRuntime.Executable -eq $elevationFirefox) 'elevation keeps the existing Firefox executable'
+        $elevation.ExitCode = 1
+        $elevationFailed = $false
+        try { Initialize-EditableTabsRuntime -SourceExecutable $elevationFirefox } catch { $elevationFailed = $_.Exception.Message -match 'loader setup failed' }
+        Check $elevationFailed 'failed elevated loader setup aborts installation'
+    } finally {
+        Set-Item Function:\Install-EditableTabsLoader -Value $loaderFunction
+        Remove-Item Function:\Start-Process
+    }
     Write-Host "Result: $checks installer checks passed"
 } finally {
     $resolved = [IO.Path]::GetFullPath($testRoot)
