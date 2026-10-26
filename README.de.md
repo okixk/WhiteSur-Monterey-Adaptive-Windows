@@ -4,7 +4,7 @@ Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
 Beim Surfen zeigen Tabs ihre Seitentitel und Favicons. Der erste Klick wählt einen Hintergrund-Tab aus; ein weiterer Klick auf den ausgewählten Tab öffnet die native Firefox-Adress- und Suchleiste. Nach dem Navigieren, mit Escape oder einem Klick auf die Webseite erscheint wieder der normale Tab. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
-**v0.2.0-beta.2 installiert editierbare Tabs direkt im vorhandenen Firefox. Die gewohnten Verknüpfungen funktionieren weiterhin.** Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.2.md) (Englisch).
+**v0.2.0-beta.3 enthält kompakte Safari-inspirierte Tabs und eine separate Lite-Version.** Full aktiviert editierbare Tabs im vorhandenen Firefox; Lite installiert nur das klassische userChrome-CSS-Theme. Beide ZIPs enthalten `Install.cmd`. Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.3.md) (Englisch).
 
 ![WhiteSur Monterey Adaptive in Firefox unter Windows](docs/screenshot.png)
 
@@ -19,7 +19,7 @@ Beim Surfen zeigen Tabs ihre Seitentitel und Favicons. Der erste Klick wählt ei
 - kompakte, Safari-inspirierte Tab-Flächen mit normalen Titeln und Favicons beim Surfen
 - kompakte Hintergrund-Tabs, die bei Platzmangel schmaler werden
 - normale Tab-Breite beim Surfen; beim Bearbeiten wächst nur der ausgewählte Tab zur Suchleiste
-- stabile Tab-Wechsel und Schliessvorgänge ohne animierte Breitenänderungen
+- sanfte Animationen beim Bearbeiten, Öffnen und Schliessen von Tabs; berücksichtigt reduzierte Bewegung
 - klassische CSS-Toolbar als Fallback für ältere Firefox-Versionen, vertikale Tabs und vorhandene AutoConfig-Setups
 - stabiles Spacing bei Vorwärts-, Sicherheits-, Stern- und Page-Action-Symbolen
 - sauberes Schliessen von Tabs ohne unsichtbare Lücken
@@ -72,7 +72,7 @@ Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine ver
 
 ## Kompatibilität
 
-Version `2026.10.22-22` (`v0.2.0-beta.2`) benötigt für editierbare Tabs Firefox 158+ mit horizontalen Tabs. Bei älteren Versionen, fehlendem Firefox, AutoConfig-Konflikten oder Fehlern beim Einrichten der Laufzeit bricht die Standardinstallation vor Änderungen am Profil ab. Das klassische CSS-Layout wird ausdrücklich mit `Install.cmd -ClassicToolbar` gewählt. Vertikale Tabs aktivieren das Skript nicht. `Install.cmd` öffnet den eingerichteten Firefox nach erfolgreicher Installation automatisch und leitet zusätzliche Parameter weiter.
+Version `2026.10.26-23` (`v0.2.0-beta.3`) benötigt für editierbare Tabs Firefox 158+ mit horizontalen Tabs. Bei älteren Versionen, fehlendem Firefox, AutoConfig-Konflikten oder Fehlern beim Einrichten der Laufzeit bricht die Full-Installation vor Änderungen am Profil ab. Das klassische CSS-Layout ist als Lite-ZIP oder mit `Install-Lite.cmd` verfügbar. Vertikale Tabs aktivieren das Skript nicht. Die Full-Installation öffnet den eingerichteten Firefox nach erfolgreicher Installation automatisch und leitet zusätzliche Parameter weiter.
 
 Adaptive Tab Bar Color bleibt kompatibel: beide Layouts verwenden Firefox-Theme-Variablen. Die nativen Tests prüfen helle und dunkle Farbwechsel; das Verhalten einzelner Erweiterungen hängt auch von deren Einstellungen ab.
 

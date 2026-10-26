@@ -48,6 +48,14 @@ Creates another installed Firefox/profile and checks Windows `WM_NCHITTEST` resu
 
 Current result: **19 checks passed** on Windows 11 with Firefox 158.0.1. Run sequentially with the other native suites.
 
+## Release archives: Full and Lite
+
+```powershell
+py tests/test_release_packages.py --tag v0.2.0-beta.3 --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+Builds and extracts both ZIPs. Checks checksums, layout/imports, included installers, exclusion of editable files/loaders in Lite, both Lite CMD launchers, direct PowerShell mode, older/custom-loader Firefox, Full-to-Lite upgrades, custom CSS/preferences, and unchanged Firefox installation files. Optional native checks start each installed edition in a disposable Firefox instance, verify its mode and theme, and focus its address field. Current local result: **35 checks passed**, including both native editions. CI runs archive checks on Linux and Windows; the version-tag workflow always publishes both ZIPs with checksums after the suites pass.
+
 ## Windows installer
 
 ```powershell

@@ -1,7 +1,9 @@
 # Changelog
 
-## Unreleased — Safari-inspired compact tabs
+## 2026.10.26-23 (v0.2.0-beta.3 — Compact Tabs and Lite)
 
+- Added a Lite ZIP containing only the classic userChrome theme and a CSS-only installer, plus `Install-Lite.cmd` in the Full archive and source checkout.
+- Added automated Full/Lite packaging, checksums, ZIP installation tests, and a version-tag release workflow that publishes both editions after validation.
 - Restored native window dragging and double-click maximize/restore on empty editable-tab toolbar space in narrow windows. Kept actual controls clickable and disabled caption dragging during tab reordering.
 - Fixed + clicks while editing: keep the original tab expanded through mouseup so the new-tab button cannot move out from under the pointer. New tabs fade and slide into place using the same timing as the editor.
 - Added short expansion/collapse and fade animations for the native editor, plus a fading tab-close snapshot and smooth movement of surviving tabs. Firefox still completes native tab removal immediately to prevent invisible gaps.

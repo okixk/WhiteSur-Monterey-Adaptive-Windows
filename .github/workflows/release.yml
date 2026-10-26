@@ -1,0 +1,59 @@
+name: Release Full and Lite
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    uses: ./.github/workflows/tests.yml
+
+  package:
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Validate release archives and build both editions
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python tests/test_release_packages.py --tag $env:RELEASE_TAG
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/build_release.py --tag $env:RELEASE_TAG
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Publish release with Full, Lite and checksums
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $tag = $env:RELEASE_TAG
+          $assets = @(Get-ChildItem -LiteralPath dist -File | ForEach-Object { $_.FullName })
+          if ($assets.Count -ne 3) { throw 'Expected Full ZIP, Lite ZIP and SHA256SUMS.txt' }
+          $notes = Join-Path docs/releases ($tag + '.md')
+          $existing = gh release view $tag --json isDraft 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if (-not ($existing | ConvertFrom-Json).isDraft) { throw 'Release is already public; leaving its assets untouched' }
+            gh release upload $tag @assets --clobber
+          } else {
+            $options = @('--draft', '--verify-tag', '--title', "WhiteSur Monterey Adaptive $tag - Full and Lite")
+            if (Test-Path -LiteralPath $notes) { $options += @('--notes-file', $notes) }
+            else { $options += '--generate-notes' }
+            gh release create $tag @assets @options
+          }
+          if ($LASTEXITCODE -ne 0) { throw 'Could not prepare the release assets' }
+          $options = @('--draft=false')
+          if ($tag -match '-') { $options += @('--prerelease', '--latest=false') }
+          else { $options += '--prerelease=false' }
+          gh release edit $tag @options
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish the release' }

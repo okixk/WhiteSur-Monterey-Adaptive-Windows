@@ -2,7 +2,9 @@ name: Tests
 
 on:
   push:
+    branches: ['**']
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
@@ -46,6 +48,9 @@ jobs:
 
       - name: Run package checks
         run: python test_package.py
+
+      - name: Check Full and Lite release archives
+        run: python tests/test_release_packages.py
 
   windows:
     runs-on: windows-latest
@@ -104,6 +109,12 @@ jobs:
         shell: pwsh
         run: |
           python tests/test_window_titlebar_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test Full and Lite ZIP installation in Firefox
+        shell: pwsh
+        run: |
+          python tests/test_release_packages.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload Firefox test report and screenshot

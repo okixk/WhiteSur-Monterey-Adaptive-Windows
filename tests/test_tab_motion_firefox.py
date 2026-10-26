@@ -47,7 +47,8 @@ def run(browser, artifacts):
             settle(browser)
             button = browser.js("return [...document.querySelectorAll('#tabs-newtab-button,#new-tab-button')]"
                                 ".find(b=>b.getBoundingClientRect().width&&getComputedStyle(b).visibility==='visible');")
-            browser.js("window.plusCount=gBrowser.tabs.length;window.plusOld=gBrowser.selectedTab;window.plusDraft=gURLBar.value;"
+            browser.js("window.plusCount=gBrowser.tabs.length;window.plusOld=gBrowser.selectedTab;"
+                       "window.plusDraft=gBrowser.selectedBrowser.userTypedValue;"
                        "window.plusEvents=[];window.plusAbort=new AbortController();"
                        "for(const type of ['mousedown','mouseup','click','focusin','focusout'])"
                        "window.addEventListener(type,event=>plusEvents.push({type,target:event.target.id||event.target.localName,"
@@ -80,7 +81,10 @@ def run(browser, artifacts):
             browser.until(lambda: browser.js("return !gBrowser._switcher?.switchInProgress;"))
             settle(browser)
             draft = browser.js("return {value:gURLBar.value,draft:plusDraft,typed:gBrowser.selectedBrowser.userTypedValue};")
-            check("returning to the original tab preserves the unfinished address", draft["value"] == draft["draft"], draft)
+            # Native inline completion may paint about:mozilla for about:moz.
+            # The draft is browser.userTypedValue, independent of that suffix.
+            check("returning to the original tab preserves the unfinished address",
+                  draft["typed"] == draft["draft"] and draft["value"].startswith(draft["draft"]), draft)
         browser.js("gBrowser.removeTabs([...gBrowser.tabs].slice(3),{animate:false,skipPermitUnload:true});")
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
         browser.js("TabSearch.hide({animate:false});gBrowser.selectedBrowser.focus();")

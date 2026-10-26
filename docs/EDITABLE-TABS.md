@@ -31,6 +31,8 @@ Enabling vertical tabs or setting `userChrome.tabSearch.enabled` to `false` rest
 
 ## Installation options
 
+Releases include a separate Lite ZIP for the classic userChrome theme. It excludes the editable-tab script and loader, and its `Install.cmd` and direct PowerShell entry point always choose CSS-only mode. The Full ZIP and source checkout also include `Install-Lite.cmd`. Switching from Full to Lite removes the profile's editable-tab files/state and disables the feature while preserving custom CSS; existing shared Firefox loader files are left untouched for other profiles.
+
 Close Firefox, then use `Install.cmd`, or choose explicit paths:
 
 ```powershell

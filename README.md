@@ -4,7 +4,7 @@ A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
 Tabs show their page titles and favicons while browsing. Click a background tab to select it, then click the selected tab to open Firefox's native address/search field. Navigation, Escape, or clicking the page restores the normal tab. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
-**v0.2.0-beta.2 installs editable tabs into your existing Firefox. Your usual shortcuts work.** See the [release notes](docs/releases/v0.2.0-beta.2.md).
+**v0.2.0-beta.3 adds Safari-inspired compact tabs and a separate Lite edition.** Full enables editable tabs in your existing Firefox; Lite installs the classic userChrome CSS theme. See the [release notes](docs/releases/v0.2.0-beta.3.md).
 
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
@@ -42,6 +42,8 @@ The extension changes Firefox's theme colours to match the active website. This 
 Without the extension, the theme still works, but the colours remain based on Firefox's current theme instead of adapting per website.
 
 ## Installation
+
+Every release includes a **Full ZIP** and a **Lite ZIP**, each with `Install.cmd`. Full includes editable/searchable tabs. Lite installs only the classic userChrome theme, without adding a Firefox loader or editable-tab script. Use `Install-Lite.cmd` from a source checkout or Full ZIP for classic CSS mode.
 
 1. Download or clone this repository.
 2. Fully close Firefox. Make sure no `firefox.exe` process remains.
@@ -82,7 +84,7 @@ Close Firefox and run `Uninstall.cmd`. It removes managed preferences and restor
 
 ## Compatibility
 
-Version `2026.10.22-22` (`v0.2.0-beta.2`) targets Firefox 158+ on Windows 11 with horizontal tabs. Older versions and detected AutoConfig conflicts require explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+Version `2026.10.26-23` (`v0.2.0-beta.3`) targets Firefox 158+ on Windows 11 with horizontal tabs for Full. Older versions and detected AutoConfig conflicts can use the Lite ZIP or explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
 
 Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
 

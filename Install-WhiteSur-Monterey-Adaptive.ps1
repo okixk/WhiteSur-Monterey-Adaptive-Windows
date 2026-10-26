@@ -52,6 +52,13 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $PackageRoot = Split-Path -Parent $PSCommandPath
+# A Lite archive stays CSS-only even when its PowerShell entry point is used
+# directly, rather than going through the bundled CMD launcher.
+$flavorFile = Join-Path $PackageRoot 'PACKAGE-FLAVOR.txt'
+if ((Test-Path -LiteralPath $flavorFile -PathType Leaf) -and
+    ([IO.File]::ReadAllText($flavorFile).Trim() -eq 'Lite')) {
+    $ClassicToolbar = $true
+}
 $ChromeSource = Join-Path $PackageRoot 'chrome'
 $ThemeMarkerName = '.whitesur-monterey-adaptive-windows'
 $PreferenceBegin = '// BEGIN WhiteSur Monterey Adaptive Windows'
@@ -482,6 +489,20 @@ function Install-ThemeForProfile {
     }
 
     Copy-Item -LiteralPath $ChromeSource -Destination $targetChrome -Recurse -Force
+
+    if (-not $EditableTabsRuntime.Enabled) {
+        # CSS-only installation also applies to Install-Lite.cmd in a Full
+        # package: do not leave inactive privileged scripts in the profile.
+        foreach ($editableFile in @('tab-search.uc.js', 'tab-search.css')) {
+            $editablePath = Join-Path $targetChrome $editableFile
+            if (Test-Path -LiteralPath $editablePath -PathType Leaf) {
+                Remove-Item -LiteralPath $editablePath -Force
+            }
+        }
+        $userChromePath = Join-Path $targetChrome 'userChrome.css'
+        $styles = [IO.File]::ReadAllText($userChromePath).Replace('@import "tab-search.css";', '')
+        [IO.File]::WriteAllText($userChromePath, $styles, [Text.UTF8Encoding]::new($false))
+    }
 
     if (($null -ne $preservedCustomChrome) -and (Test-Path -LiteralPath $preservedCustomChrome)) {
         Copy-Item -LiteralPath $preservedCustomChrome -Destination (Join-Path $targetChrome 'customChrome.css') -Force

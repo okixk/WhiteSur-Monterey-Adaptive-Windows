@@ -18,3 +18,4 @@ Thumbs.db
 
 # Local UI patch backups
 /.local-patch-backups/
+/dist/
