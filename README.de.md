@@ -2,7 +2,7 @@
 
 Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
-Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklicken und eine Adresse oder Suche eingeben; die übrigen Tabs bleiben kompakt. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
+Beim Surfen zeigen Tabs ihre Seitentitel und Favicons. Der erste Klick wählt einen Hintergrund-Tab aus; ein weiterer Klick auf den ausgewählten Tab öffnet die native Firefox-Adress- und Suchleiste. Nach dem Navigieren, mit Escape oder einem Klick auf die Webseite erscheint wieder der normale Tab. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
 **v0.2.0-beta.2 installiert editierbare Tabs direkt im vorhandenen Firefox. Die gewohnten Verknüpfungen funktionieren weiterhin.** Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.2.md) (Englisch).
 
@@ -16,7 +16,9 @@ Der ausgewählte Tab wird zur nativen Firefox-Adress- und Suchleiste. Tab anklic
 - Monterey-inspirierte Firefox-Oberfläche unter Windows
 - echte Windows-Knöpfe für Minimieren, Maximieren und Schliessen rechts
 - ausgewählte Tabs als native Adressleiste inklusive Symbolen und Suchvorschlägen
+- kompakte, Safari-inspirierte Tab-Flächen mit normalen Titeln und Favicons beim Surfen
 - kompakte Hintergrund-Tabs, die bei Platzmangel schmaler werden
+- normale Tab-Breite beim Surfen; beim Bearbeiten wächst nur der ausgewählte Tab zur Suchleiste
 - stabile Tab-Wechsel und Schliessvorgänge ohne animierte Breitenänderungen
 - klassische CSS-Toolbar als Fallback für ältere Firefox-Versionen, vertikale Tabs und vorhandene AutoConfig-Setups
 - stabiles Spacing bei Vorwärts-, Sicherheits-, Stern- und Page-Action-Symbolen
@@ -48,7 +50,7 @@ Ohne die Erweiterung funktioniert das Layout weiterhin, aber die Farben bleiben 
 
 Ab Firefox 158 ergänzt der Installer die Loader-Dateien direkt in der vorhandenen Firefox-Installation. Profil, Erweiterungen, Lesezeichen und Verknüpfungen werden weiterverwendet. Nur das Schreiben des Loaders wird bei Bedarf mit Administratorrechten ausgeführt; die Profilinstallation bleibt beim ursprünglichen Benutzer.
 
-Normale Eingaben verwenden die Firefox-Standardsuche. `g Suchbegriffe` sucht mit Google, `q Suchbegriffe` mit Qwant. `Strg+L`, `Alt+D` und `F6` fokussieren das Feld. `Esc` verwirft die Eingabe; das Feld bleibt sichtbar.
+Normale Eingaben verwenden die Firefox-Standardsuche. `g Suchbegriffe` sucht mit Google, `q Suchbegriffe` mit Qwant. Ein Klick wählt den Tab, der nächste öffnet das Feld; ein schneller Doppelklick ist nicht nötig. `Strg+L`, `Alt+D` und `F6` öffnen das Feld sofort. `Esc` verwirft die Eingabe und zeigt wieder den Seitentitel. Beim Wechsel per Tastatur bleiben Website-Tabs normal; `Strg+T` öffnet einen neuen Tab direkt zum Tippen.
 
 Nur die klassische adaptive Toolbar installieren:
 

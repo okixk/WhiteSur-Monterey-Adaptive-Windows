@@ -25,6 +25,7 @@ const boxes={field:rect(field),host:rect(host),button:rect(button),icon:rect(ico
 const centre=r=>r.y+r.h/2;
 const visible=Object.entries(boxes).filter(([key,r])=>key!=='field'&&r.w>0&&r.h>0);
 return {boxes,engineLabel:label.textContent,
+  visible:getComputedStyle(field).visibility==='visible',
   classicGap:gBrowser.selectedTab.getBoundingClientRect().left-
     field.getBoundingClientRect().right,
   maxOffset:Math.max(...visible.map(([,r])=>Math.abs(centre(r)-centre(boxes.field)))),
@@ -58,6 +59,7 @@ def run(driver, source, artifacts):
             browser = Firefox(driver, binary, profile)
             try:
                 assert browser.js("return !!window.TabSearch;") == (mode == "editable"), mode
+                browser.until(lambda: browser.js("return !gBrowser._switcher?.switchInProgress;"))
                 for state in ("normal", "maximized", "narrow"):
                     if state == "maximized":
                         browser.call("POST", "window/maximize", {})
@@ -67,7 +69,7 @@ def run(driver, source, artifacts):
                     browser.js("gURLBar.focus();gURLBar.view.close();")
                     frame(browser)
                     idle = browser.js(MEASURE)
-                    passed = (idle["maxOffset"] < 0.6 and idle["overflow"] < 0.6
+                    passed = (idle["visible"] and idle["maxOffset"] < 0.6 and idle["overflow"] < 0.6
                               and (mode != "classic" or state == "narrow" or idle["classicGap"] >= 0))
                     results.append({"mode": mode, "state": state, "engine": "default", "pass": passed, **idle})
                     print(f"{'PASS' if passed else 'FAIL'}: {mode}/{state} default engine centred", flush=True)
@@ -81,7 +83,7 @@ def run(driver, source, artifacts):
                             "return gURLBar.querySelector('.searchmode-switcher-title').textContent===arguments[0];", engine))
                         frame(browser)
                         measurement = browser.js(MEASURE)
-                        passed = (measurement["maxOffset"] < 0.6 and measurement["overflow"] < 0.6
+                        passed = (measurement["visible"] and measurement["maxOffset"] < 0.6 and measurement["overflow"] < 0.6
                                   and measurement["horizontalImbalance"] < 1
                                   and measurement["boxes"]["label"]["h"] > 0)
                         if state == "normal" and engine == "Google":

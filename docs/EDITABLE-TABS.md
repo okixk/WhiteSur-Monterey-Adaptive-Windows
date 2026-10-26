@@ -1,8 +1,10 @@
 # Editable tabs
 
-The default installer enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. The selected tab contains Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. It stays visible after navigation and Escape. Background tabs display their titles.
+The default installer enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. Tabs show their native page titles and favicons while browsing. Clicking a background tab selects it without editing; clicking the already selected tab opens Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. This does not require a rapid double-click. Ctrl+L, Alt+D, and F6 open editing directly. Navigation, Escape, or clicking the webpage restores the title. Native search/identity popups remain usable while editing.
 
-Selected tabs adapt from 300 CSS pixels with plenty of room to 260 pixels as the strip fills up, and shrink further when the window cannot fit that width. Background tabs use 88–180 pixels depending on available space, then overflow through Firefox's native tab strip. Selecting another tab preserves the total allocated width. Pinned tabs keep their icon size and show their field immediately below the icon.
+While browsing, all ordinary tabs use the same compact width of 88–180 CSS pixels depending on available space. Clicking the selected tab expands its editor to 300 pixels with plenty of room or 260 pixels when crowded, and further reduces that width when necessary in a narrow window. Background tabs keep their widths during expansion. Pinned tabs keep their icon size and show their field immediately below the icon.
+
+Selection and editing are separate states. Opening the field expands just the selected tab; navigation, Escape, or clicking the page collapses it to its original width. The layout reserves room for the editor without repeatedly shrinking the surrounding tabs, and Firefox scrolls an expanded tab into view when needed. Keyboard switching to a website leaves its normal title visible. Ctrl+T still opens a new tab ready for input. Rounded tab backgrounds follow the active Firefox theme; close-button space remains reserved so hovering does not shift content.
 
 ## Files and startup
 

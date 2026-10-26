@@ -136,6 +136,20 @@ def install(profile, source, runtime, shortcuts):
     return Path(json.loads(state.read_text(encoding="utf-8-sig"))["Executable"])
 
 
+def settle(browser):
+    """Wait for finite tab/editor motion, including work queued by native focus."""
+    browser.js("""
+        const done=arguments[arguments.length-1];
+        (async()=>{
+          const frame=()=>new Promise(requestAnimationFrame);
+          await frame();await frame();
+          const targets=[...gBrowser.tabs,document.getElementById('urlbar-container')];
+          await Promise.all(targets.flatMap(t=>t.getAnimations()).map(a=>a.finished.catch(()=>{})));
+          await frame();await frame();done(true);
+        })();
+        """, asynchronous=True)
+
+
 def run(browser, artifacts):
     results = []
 
@@ -150,16 +164,54 @@ def run(browser, artifacts):
         check("the selected field remains compact", browser.js(
             "return gBrowser.selectedTab.getBoundingClientRect().width<=301;"))
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
-        browser.js("gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
-                   "gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
-                   "gBrowser.selectedTab=gBrowser.tabs[1];TabSearch.edit();")
+        root_handle = browser.call("GET", "window")
+        editable_handle = browser.call("POST", "window/new", {"type": "tab"})["handle"]
+        browser.call("POST", "window/new", {"type": "tab"})
+        browser.call("POST", "window", {"handle": editable_handle})
+        browser.js("TabSearch.edit();")
         check("selected native input is focused", browser.js(
             "return document.activeElement===gURLBar.inputField;"))
         browser.text("about:robots")
         browser.text("\ue007")
         browser.until(lambda: browser.js("return gBrowser.currentURI.spec==='about:robots';"))
-        check("native URL navigation keeps the editor visible", browser.js(
-            "return document.documentElement.hasAttribute('tabsearch-editing');"))
+        browser.until(lambda: browser.js("return !document.documentElement.hasAttribute('tabsearch-editing');"))
+        settle(browser)
+        check("navigation restores the page title and favicon", browser.js(
+            "const t=gBrowser.selectedTab;return t.hasAttribute('tabsearch-active')"
+            "&&getComputedStyle(t.querySelector('.tab-label-container')).opacity==='1'"
+            "&&getComputedStyle(t.querySelector('.tab-icon-stack')).opacity==='1';"))
+        idle_width = browser.js("return gBrowser.selectedTab.getBoundingClientRect().width;")
+        neighbour_widths = browser.js("return [...gBrowser.tabs].filter(t=>t!==gBrowser.selectedTab)"
+                                     ".map(t=>t.getBoundingClientRect().width);")
+        title = browser.js("return gBrowser.selectedTab.querySelector('.tab-label');")
+        element_id = title["element-6066-11e4-a52e-4f735466cecf"]
+        browser.call("POST", f"element/{element_id}/click", {})
+        browser.until(lambda: browser.js("return document.documentElement.hasAttribute('tabsearch-editing');"))
+        settle(browser)
+        check("clicking a normal tab expands its native editor and preserves neighbour widths", browser.js(
+            "return document.documentElement.hasAttribute('tabsearch-editing')"
+            "&&document.activeElement===gURLBar.inputField"
+            "&&gBrowser.selectedTab.getBoundingClientRect().width>arguments[0]+40"
+            "&&[...gBrowser.tabs].filter(t=>t!==gBrowser.selectedTab)"
+            ".every((t,i)=>Math.abs(t.getBoundingClientRect().width-arguments[1][i])<1);", idle_width, neighbour_widths))
+        artifacts.mkdir(parents=True, exist_ok=True)
+        (artifacts / "compact-editing.png").write_bytes(base64.b64decode(browser.call("GET", "screenshot")))
+        browser.call("POST", "moz/context", {"context": "content"})
+        try:
+            heading = browser.js("return document.querySelector('h1');")
+            heading_id = heading["element-6066-11e4-a52e-4f735466cecf"]
+            browser.call("POST", f"element/{heading_id}/click", {})
+        finally:
+            browser.call("POST", "moz/context", {"context": "chrome"})
+        browser.until(lambda: browser.js("return !document.documentElement.hasAttribute('tabsearch-editing');"))
+        settle(browser)
+        check("clicking the website collapses the editor to its original normal-tab width", browser.js(
+            "return !gBrowser.selectedTab.hasAttribute('tabsearch-editing')"
+            "&&Math.abs(gBrowser.selectedTab.getBoundingClientRect().width-arguments[0])<1;", idle_width))
+        (artifacts / "compact-browsing.png").write_bytes(base64.b64decode(browser.call("GET", "screenshot")))
+        browser.chord('l')
+        check("Ctrl+L reopens the selected tab for editing", browser.js(
+            "return document.documentElement.hasAttribute('tabsearch-editing')&&document.activeElement===gURLBar.inputField;"))
 
         browser.js("window.whiteSurOriginalOpen=openTrustedLinkIn;"
                    "window.whiteSurRequests=[];window.openTrustedLinkIn=(url)=>whiteSurRequests.push(url);")
@@ -177,9 +229,37 @@ def run(browser, artifacts):
         browser.js("TabSearch.edit();")
         browser.text("cancel this draft")
         browser.text("\ue00c")
-        check("Escape restores the address and preserves the field", browser.js(
-            "return gURLBar.value!=='cancel this draft'&&document.documentElement.hasAttribute('tabsearch-editing')"
+        check("Escape restores the address and normal tab appearance", browser.js(
+            "return gURLBar.value!=='cancel this draft'&&!document.documentElement.hasAttribute('tabsearch-editing')"
             "&&document.activeElement!==gURLBar.inputField;"))
+
+        background = browser.js("return gBrowser.tabs[0].querySelector('.tab-label');")
+        background_id = background["element-6066-11e4-a52e-4f735466cecf"]
+        browser.call("POST", f"element/{background_id}/click", {})
+        browser.until(lambda: browser.js("return !gBrowser._switcher?.switchInProgress;"))
+        check("the first click selects a background tab without expanding or editing", browser.js(
+            "return gBrowser.selectedTab===gBrowser.tabs[0]&&!document.documentElement.hasAttribute('tabsearch-editing')"
+            "&&gBrowser.selectedTab.getBoundingClientRect().width<=181&&document.activeElement!==gURLBar.inputField;"))
+        browser.call("POST", f"element/{background_id}/click", {})
+        browser.until(lambda: browser.js("return document.documentElement.hasAttribute('tabsearch-editing');"))
+        background_state = browser.js(
+            "return {selected:[...gBrowser.tabs].indexOf(gBrowser.selectedTab),"
+            "editing:document.documentElement.hasAttribute('tabsearch-editing'),"
+            "focused:document.activeElement===gURLBar.inputField,focusId:document.activeElement?.id,"
+            "windowFocused:document.hasFocus()};")
+        check("the second click expands the selected tab and focuses its editor",
+              background_state["selected"] == 0 and background_state["editing"] and background_state["focused"], background_state)
+        browser.chord('\ue00f')
+        check("keyboard switching to a website shows its normal title", browser.js(
+            "return gBrowser.currentURI.spec==='about:robots'&&!document.documentElement.hasAttribute('tabsearch-editing');"))
+        browser.chord('t')
+        browser.until(lambda: browser.js("return document.documentElement.hasAttribute('tabsearch-editing')"
+                                        "&&document.activeElement===gURLBar.inputField;"))
+        check("Ctrl+T opens a ready-to-type new tab", browser.js(
+            "return ['about:newtab','about:blank'].includes(gBrowser.currentURI.spec);"))
+        browser.chord('w')
+        check("closing a new tab restores the website's normal tab", browser.js(
+            "return gBrowser.currentURI.spec==='about:robots'&&!document.documentElement.hasAttribute('tabsearch-editing');"))
 
         saved_colors = browser.js("return ['--lwt-accent-color','--toolbar-color','--toolbar-text-color']"
                                  ".map(k=>[k,document.documentElement.style.getPropertyValue(k)]);")
@@ -208,25 +288,58 @@ def run(browser, artifacts):
             check(f"new window loads and cleans up (private={private})", correct_privacy)
             browser.js("delete window.whiteSurExtra;")
 
+        browser.call("POST", "window", {"handle": root_handle})
         sizes = {}
         for width, count in ((1384, 4), (1368, 14), (800, 8), (600, 6)):
             browser.call("POST", "window/rect", {"width": width, "height": 800})
             browser.js("gBrowser.selectedTab=gBrowser.tabs[0];"
                 "gBrowser.removeTabs([...gBrowser.tabs].slice(1),{animate:false,skipPermitUnload:true});"
-                "for(let i=1;i<arguments[0];i++)gBrowser.addTrustedTab('about:blank',{skipAnimation:true});"
+                "for(let i=1;i<arguments[0];i++)gBrowser.addTrustedTab('about:robots',{skipAnimation:true});"
                 "gBrowser.selectedTab=gBrowser.tabs[0];gBrowser.selectedBrowser.focus();", count)
-            geometry = browser.js("const done=arguments[arguments.length-1];(async()=>{"
-                "const frame=()=>new Promise(requestAnimationFrame);let maxError=0,total=null,drift=0;"
-                "for(let i=0;i<arguments[0];i++){gBrowser.selectedTab=gBrowser.tabs[i%gBrowser.tabs.length];"
-                "await frame();await frame();let t=gBrowser.selectedTab,r=t.getBoundingClientRect(),"
-                "c=t.querySelector('.tab-content').getBoundingClientRect(),"
-                "e=gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect();"
-                "maxError=Math.max(maxError,Math.abs(e.left-Math.max(r.left+4,c.left)));"
-                "const sum=[...gBrowser.tabs].reduce((s,t)=>s+t.getBoundingClientRect().width,0);"
-                "if(total===null)total=sum;drift=Math.max(drift,Math.abs(sum-total));}"
-                "done({maxError,drift});})().catch(e=>done({error:String(e)}));", count * 2, asynchronous=True)
-            check(f"selection stays aligned at {width}px with {count} tabs",
-                  not geometry.get("error") and geometry["maxError"] < 2 and geometry["drift"] < 1, geometry)
+            geometry = browser.js("""
+                const done=arguments[arguments.length-1], iterations=arguments[0];
+                (async()=>{
+                  const frame=()=>new Promise(requestAnimationFrame);
+                  const settled=async()=>{
+                    await frame();await frame();
+                    await Promise.all([...gBrowser.tabs,document.getElementById('urlbar-container')]
+                      .flatMap(t=>t.getAnimations()).map(a=>a.finished.catch(()=>{})));
+                    await frame();await frame();
+                  };
+                  const totals={}, result={maxError:0,drift:0,equalIdle:true,expands:true};
+                  function measure(mode) {
+                    const t=gBrowser.selectedTab,r=t.getBoundingClientRect();
+                    const c=t.querySelector('.tab-content').getBoundingClientRect();
+                    const e=gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect();
+                    result.maxError=Math.max(result.maxError,Math.abs(e.left-Math.max(r.left+4,c.left)));
+                    const widths=[...gBrowser.tabs].map(t=>t.getBoundingClientRect().width);
+                    const sum=widths.reduce((s,w)=>s+w,0);
+                    if(totals[mode]===undefined)totals[mode]=sum;
+                    result.drift=Math.max(result.drift,Math.abs(sum-totals[mode]));
+                    if(mode==='idle')result.equalIdle &&= Math.max(...widths)-Math.min(...widths)<1;
+                    return r.width;
+                  }
+                  for(let i=0;i<iterations;i++) {
+                    gBrowser.selectedTab=gBrowser.tabs[i%gBrowser.tabs.length];
+                    await frame();await frame();
+                    while(gBrowser._switcher?.switchInProgress)await frame();
+                    gBrowser.selectedBrowser.focus();
+                    await frame();await frame();
+                    // Set the browsing pose explicitly: this loop measures
+                    // geometry; real clicks, focus and Escape are checked above.
+                    TabSearch.hide();TabSearch.layout();
+                    await settled();
+                    const idle=measure('idle');
+                    TabSearch.edit();
+                    await settled();
+                    result.expands &&= measure('editing')>idle+1;
+                  }
+                  done(result);
+                })().catch(e=>done({error:String(e)}));
+                """, count * 2, asynchronous=True)
+            check(f"compact and expanded tabs stay aligned at {width}px with {count} tabs",
+                  not geometry.get("error") and geometry["maxError"] < 2 and geometry["drift"] < 1
+                  and geometry["equalIdle"] and geometry["expands"], geometry)
             sizes[count] = browser.js("return {tab:gBrowser.selectedTab.getBoundingClientRect().width,"
                 "field:gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect().width};")
 
@@ -295,7 +408,8 @@ def run(browser, artifacts):
         check("disabling editable tabs removes all active layout changes", browser.js(
             "return !window.TabSearch&&!document.documentElement.hasAttribute('tabsearch-ready')"
             "&&!document.getElementById('tabsearch-spacer')&&gBrowser.addTab.name!=='addTabInstant'"
-            "&&gBrowser.tabContainer.arrowScrollbox.ensureElementIsVisible.name!=='ensureVisibleWithEditor';"))
+            "&&gBrowser.tabContainer.arrowScrollbox.ensureElementIsVisible.name!=='ensureVisibleWithEditor'"
+            "&&gURLBar.focus.name!=='focusEditor';"))
         browser.js("Services.prefs.setBoolPref('userChrome.tabSearch.enabled',true);"
                    "Services.scriptloader.loadSubScript('resource://whitesur/tab-search.uc.js?test='+Date.now(),window,'UTF-8');")
         check("native browser methods and runtime can be reinitialized", browser.js("return !!window.TabSearch;"))

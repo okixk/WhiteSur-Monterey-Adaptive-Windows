@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased — Safari-inspired compact tabs
+
+- Restored native window dragging and double-click maximize/restore on empty editable-tab toolbar space in narrow windows. Kept actual controls clickable and disabled caption dragging during tab reordering.
+- Fixed + clicks while editing: keep the original tab expanded through mouseup so the new-tab button cannot move out from under the pointer. New tabs fade and slide into place using the same timing as the editor.
+- Added short expansion/collapse and fade animations for the native editor, plus a fading tab-close snapshot and smooth movement of surviving tabs. Firefox still completes native tab removal immediately to prevent invisible gaps.
+- Enabled middle-clicking the search field to close its selected tab; releasing outside the field cancels the close gesture.
+- Respected reduced-motion settings and cleaned up interrupted animations during switching, dragging, customization, or disabling.
+- Made the first click on a background tab select it normally; clicking the selected tab opens editing. New tabs and keyboard address shortcuts remain ready to type.
+- Separated the selected-tab state from editing: website tabs show normal titles and favicons until clicked or focused with Ctrl+L, Alt+D, or F6.
+- Restored the normal tab after navigation, Escape, or clicking the page; kept new tabs ready to type and native search/identity popups usable.
+- Made all browsing tabs normal-sized and expanded only the edited tab, preserving neighbour widths and the native scroll/close race fixes.
+- Added rounded adaptive tab surfaces and reserved close-button space to prevent hover movement.
+- Added native checks for actual tab/page clicks, keyboard switching, and new-tab focus.
+
 ## 2026.10.22-22 (v0.2.0-beta.2)
 
 - Install the editable-tab loader directly into the existing Firefox so normal desktop, Start menu, and taskbar shortcuts work.

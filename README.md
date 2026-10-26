@@ -2,7 +2,7 @@
 
 A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
-The selected tab becomes Firefox's native address/search field. Click a tab and type a URL or search, while other tabs stay compact. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
+Tabs show their page titles and favicons while browsing. Click a background tab to select it, then click the selected tab to open Firefox's native address/search field. Navigation, Escape, or clicking the page restores the normal tab. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
 **v0.2.0-beta.2 installs editable tabs into your existing Firefox. Your usual shortcuts work.** See the [release notes](docs/releases/v0.2.0-beta.2.md).
 
@@ -16,8 +16,10 @@ The selected tab becomes Firefox's native address/search field. Click a tab and 
 - Monterey-inspired Firefox appearance on Windows
 - Native Windows minimise, maximise, and close buttons on the right
 - Editable selected tabs with native address-bar icons and suggestions
-- Compact background tabs that shrink as space fills; selected tabs stay open
-- Stable switching and closing without animated width changes
+- Safari-inspired compact capsules with normal titles and favicons while browsing
+- Normal-size tabs while browsing; first click selects, clicking the selected tab expands its search field without resizing neighboring tabs
+- Smooth editor expansion/collapse, new-tab entrance, and tab-close effects, respecting reduced motion
+- Middle-click the search field to close its tab
 - Compatible CSS toolbar for older Firefox, vertical tabs, and existing AutoConfig setups
 - Stable spacing when navigation and page-action icons appear
 - Clean tab closing without invisible gaps
@@ -58,7 +60,7 @@ The loader consists of `whitesur.cfg` and `defaults/pref/whitesur-autoconfig.js`
 
 If editable tabs cannot be installed, installation stops with an error before replacing the profile theme. Update to Firefox 158+ or pass a clean installation with `Install.cmd -FirefoxPath "C:\path\to\firefox.exe"`. Classic mode is an explicit choice: `Install.cmd -ClassicToolbar`.
 
-Type an address or search into the selected tab. Normal searches use your Firefox default engine; `g search terms` uses Google and `q search terms` uses Qwant. `Ctrl+L`, `Alt+D`, and `F6` focus the field; `Esc` cancels the draft and keeps the field visible.
+Click a tab to select it, then click it again to type an address or search. The clicks do not need to be a rapid double-click. Normal searches use your Firefox default engine; `g search terms` uses Google and `q search terms` uses Qwant. `Ctrl+L`, `Alt+D`, and `F6` open editing immediately; `Esc` cancels the draft and restores the title. Clicking the page or navigating also returns to a normal tab. Keyboard tab switching leaves website titles visible, while `Ctrl+T` creates a ready-to-type new tab.
 
 To install just the classic adaptive toolbar:
 
@@ -96,6 +98,8 @@ Native Windows checks use a disposable profile and runtime. Run with Firefox 158
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
 py tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 py tests/test_search_mode_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+py tests/test_window_titlebar_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 ```
 
 See [testing notes](docs/TESTING.md) for coverage and artifacts. The classic layout and package checks run with:

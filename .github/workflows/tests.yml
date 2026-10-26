@@ -94,6 +94,18 @@ jobs:
           python tests/test_search_mode_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Test editor motion and middle-click closing in Firefox
+        shell: pwsh
+        run: |
+          python tests/test_tab_motion_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test native window titlebar hit-testing and double-click
+        shell: pwsh
+        run: |
+          python tests/test_window_titlebar_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Upload Firefox test report and screenshot
         if: always()
         uses: actions/upload-artifact@v7
