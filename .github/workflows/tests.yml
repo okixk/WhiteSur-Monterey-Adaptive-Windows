@@ -100,6 +100,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Test editor motion and middle-click closing in Firefox
+        # Keep native browser suites sequential: focus is shared on Windows.
         shell: pwsh
         run: |
           python tests/test_tab_motion_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
@@ -115,6 +116,12 @@ jobs:
         shell: pwsh
         run: |
           python tests/test_release_packages.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test centred tab titles, address text and favicons
+        shell: pwsh
+        run: |
+          python tests/test_centered_text_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Upload Firefox test report and screenshot

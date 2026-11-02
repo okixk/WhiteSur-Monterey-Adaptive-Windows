@@ -161,9 +161,53 @@ def run(browser, artifacts):
 
     try:
         check("AutoConfig starts the packaged script", browser.js("return !!window.TabSearch;"))
-        check("the selected field remains compact", browser.js(
-            "return gBrowser.selectedTab.getBoundingClientRect().width<=301;"))
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
+        settle(browser)
+        single = browser.js("window.singleStart=gBrowser.selectedTab;"
+            "const t=singleStart.getBoundingClientRect(),s=document.getElementById('TabsToolbar').getBoundingClientRect();"
+            "const plus=[...document.querySelectorAll('#tabs-newtab-button,#new-tab-button')]"
+            ".find(b=>b.getBoundingClientRect().width&&getComputedStyle(b).visibility==='visible');"
+            "return {width:t.width,strip:s.width,plus:plus.getBoundingClientRect().right,right:s.right,"
+            "centre:(t.left+t.right)/2,windowCentre:innerWidth/2};")
+        check("a lone startup capsule is narrower, centred and leaves + visible",
+              300 < single["width"] <= 580 and single["width"] < single["strip"]*.8
+              and abs(single["centre"]-single["windowCentre"]) < 2
+              and single["plus"] <= single["right"]+1, single)
+        browser.js("TabSearch.hide();gBrowser.selectedBrowser.focus();")
+        settle(browser)
+        check("the lone tab stays wide while browsing", browser.js(
+            "return !document.documentElement.hasAttribute('tabsearch-editing')"
+            "&&Math.abs(singleStart.getBoundingClientRect().width-arguments[0])<1;", single["width"]))
+        browser.call("POST", "window/rect", {"width": 800, "height": 850})
+        settle(browser)
+        check("the lone tab adapts to a narrower window", browser.js(
+            "const t=singleStart.getBoundingClientRect(),s=document.getElementById('TabsToolbar').getBoundingClientRect();"
+            "return t.width<arguments[0]-100&&t.width>s.width*.4&&t.right<s.right-30"
+            "&&Math.abs((t.left+t.right)/2-innerWidth/2)<2;", single["width"]))
+        browser.call("POST", "window/rect", {"width": 1384, "height": 850})
+        browser.js("gBrowser.pinTab(singleStart);TabSearch.edit();")
+        settle(browser)
+        check("a lone pinned tab keeps its icon size", browser.js(
+            "return singleStart.getBoundingClientRect().width<80"
+            "&&gURLBar.getBoundingClientRect().top>=singleStart.getBoundingClientRect().bottom;"))
+        browser.js("gBrowser.unpinTab(singleStart);TabSearch.edit();")
+        settle(browser)
+        button = browser.js("return [...document.querySelectorAll('#tabs-newtab-button,#new-tab-button')]"
+            ".find(b=>b.getBoundingClientRect().width&&getComputedStyle(b).visibility==='visible');")
+        button_id = button["element-6066-11e4-a52e-4f735466cecf"]
+        browser.call("POST", f"element/{button_id}/click", {})
+        browser.until(lambda: browser.js("return gBrowser.tabs.length===2"
+            "&&gBrowser.selectedTab!==singleStart&&document.activeElement===gURLBar.inputField;"))
+        settle(browser)
+        check("+ on the wide tab opens a second tab and restores compact sizing", browser.js(
+            "return singleStart.getBoundingClientRect().width<=181"
+            "&&gBrowser.selectedTab.getBoundingClientRect().width<=301;"))
+        browser.js("gBrowser.removeTab(gBrowser.selectedTab,{animate:true});")
+        browser.until(lambda: browser.js("return gBrowser.tabs.length===1;"))
+        settle(browser)
+        check("closing back to one tab restores the wide first tab", browser.js(
+            "return gBrowser.selectedTab===singleStart&&Math.abs(singleStart.getBoundingClientRect().width-arguments[0])<1;",
+            single["width"]))
         root_handle = browser.call("GET", "window")
         editable_handle = browser.call("POST", "window/new", {"type": "tab"})["handle"]
         browser.call("POST", "window/new", {"type": "tab"})
@@ -306,7 +350,7 @@ def run(browser, artifacts):
                       .flatMap(t=>t.getAnimations()).map(a=>a.finished.catch(()=>{})));
                     await frame();await frame();
                   };
-                  const totals={}, result={maxError:0,drift:0,equalIdle:true,expands:true};
+                  const totals={}, result={maxError:0,drift:0,equalIdle:true,expands:true,outliers:[]};
                   function measure(mode) {
                     const t=gBrowser.selectedTab,r=t.getBoundingClientRect();
                     const c=t.querySelector('.tab-content').getBoundingClientRect();
@@ -317,6 +361,10 @@ def run(browser, artifacts):
                     if(totals[mode]===undefined)totals[mode]=sum;
                     result.drift=Math.max(result.drift,Math.abs(sum-totals[mode]));
                     if(mode==='idle')result.equalIdle &&= Math.max(...widths)-Math.min(...widths)<1;
+                    if(mode==='idle'&&Math.max(...widths)-Math.min(...widths)>=1)result.outliers.push({
+                      selected:[...gBrowser.tabs].indexOf(t),uri:gBrowser.currentURI.spec,widths,
+                      editing:document.documentElement.hasAttribute('tabsearch-editing'),
+                      focused:document.activeElement?.id,switching:!!gBrowser._switcher?.switchInProgress});
                     return r.width;
                   }
                   for(let i=0;i<iterations;i++) {

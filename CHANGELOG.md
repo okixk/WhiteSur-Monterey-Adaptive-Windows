@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026.11.02-24 (v0.2.0-beta.4 — Centred Tabs and Favicons)
+
+- Centred tab titles and native address/search text, placing the favicon directly beside the text. Preserved native editing, autocomplete, selection, engine/security controls, and long-address scrolling.
+- Made a single ordinary tab a smaller centred capsule, capped at 580 px and responsive to the available toolbar space. Adding a second tab animates it into the compact layout; closing back to one animates it into the centre. Pinned tabs keep their icon size, and reduced-motion settings still apply.
+
 ## 2026.10.26-23 (v0.2.0-beta.3 — Compact Tabs and Lite)
 
 - Added a Lite ZIP containing only the classic userChrome theme and a CSS-only installer, plus `Install-Lite.cmd` in the Full archive and source checkout.

@@ -12,6 +12,7 @@
   if (!container || !strip || root.hasAttribute('taskbartab') || tabs.verticalMode ||
       Services.prefs.getBoolPref('sidebar.verticalTabs', false) ||
       !tabs.arrowScrollbox?.scrollbox || !gURLBar.inputField || !gURLBar.view ||
+      !gURLBar.inputField.closest('.urlbar-input-box') ||
       typeof gBrowser.addTab !== 'function' || typeof gBrowser.removeTab !== 'function' ||
       typeof gURLBar.focus !== 'function' ||
       typeof gURLBar.getBrowserState !== 'function' ||
@@ -35,9 +36,46 @@
   const on = (target, name, callback, capture = false) =>
     target.addEventListener(name, callback, { ...listeners, capture });
 
+  const input = gURLBar.inputField;
+  const inputBox = input.closest('.urlbar-input-box');
+  const inputIcon = document.createElementNS('http://www.w3.org/1999/xhtml', 'img');
+  inputIcon.className = 'tabsearch-input-favicon';
+  inputIcon.setAttribute('aria-hidden', 'true');
+  inputBox.append(inputIcon);
+  const measure = document.createElementNS('http://www.w3.org/1999/xhtml', 'canvas').getContext('2d');
+  let measuredKey = '', measuredWidth = 0;
+  function layoutInputIcon() {
+    if (!editingTab && !fadingTab) return;
+    const tab = editingTab || fadingTab;
+    const icon = tab?.getAttribute('image') || 'chrome://global/skin/icons/defaultFavicon.svg';
+    if (inputIcon.getAttribute('src') !== icon) inputIcon.setAttribute('src', icon);
+    const box = inputBox.getBoundingClientRect();
+    const tight = box.width < 64;
+    inputBox.toggleAttribute('tabsearch-tight', tight);
+    inputIcon.hidden = tight;
+    const style = getComputedStyle(input), field = input.getBoundingClientRect();
+    const start = Number.parseFloat(style.paddingLeft) || 0, end = Number.parseFloat(style.paddingRight) || 0;
+    const available = Math.max(0, field.width - start - end);
+    const text = input.value || input.placeholder;
+    const font = style.font || `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const key = font + '\n' + text;
+    if (key !== measuredKey) {
+      measure.font = font;
+      measuredWidth = text.length > 2048 ? Infinity : measure.measureText(text).width;
+      measuredKey = key;
+    }
+    const width = Math.min(available, measuredWidth);
+    // Leave native input scrolling/selection intact when a long address fills
+    // the field; its reserved left padding keeps the favicon off the caret.
+    const left = Math.max(2, field.left - box.left + start + (available - width) / 2 - 22);
+    inputIcon.style.left = Math.round(left * 60) / 60 + 'px';
+  }
+  for (const type of ['input', 'select', 'scroll', 'compositionend']) on(input, type, schedule);
+  on(gURLBar, 'ValueChange', schedule);
+
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const visuals = new Map(), ghosts = new Set(), closeSnapshots = new WeakMap();
-  let visualFrame = 0, closeFrame = 0, closeBefore = null, fadingTab = null, removing = 0, middleTab = null;
+  let visualFrame = 0, closeFrame = 0, openFrame = 0, closeBefore = null, openBefore = null, fadingTab = null, removing = 0, middleTab = null;
   const motionAllowed = () => !reducedMotion.matches && !abort.signal.aborted && !window.closed;
   function visualTick() {
     visualFrame = 0;
@@ -113,8 +151,8 @@
     ], 150, () => { ghost.remove(); ghosts.delete(ghost); });
   }
   function clearMotion() {
-    cancelAnimationFrame(visualFrame); cancelAnimationFrame(closeFrame);
-    visualFrame = closeFrame = 0; closeBefore = null;
+    cancelAnimationFrame(visualFrame); cancelAnimationFrame(closeFrame); cancelAnimationFrame(openFrame);
+    visualFrame = closeFrame = openFrame = 0; closeBefore = openBefore = null;
     for (const animation of visuals.values()) animation.cancel();
     visuals.clear();
     for (const ghost of ghosts) ghost.remove();
@@ -163,7 +201,7 @@
     set('strip-left', space.left + 4);
     set('strip-right', Math.max(0, window.innerWidth - space.right + 4));
     // Reserve room for one expanded editor without changing the other tabs'
-    // widths. Idle tabs all use the compact width; editing consumes that room.
+    // widths. A lone tab is a centred Safari-like capsule; others stay compact.
     const visible = gBrowser.visibleTabs.filter(tab => !tab.closing);
     const ordinary = visible.filter(tab => !tab.pinned);
     const pinnedWidth = visible.filter(tab => tab.pinned)
@@ -176,11 +214,22 @@
     // trim it as tabs fill the available space. Use the fixed budget/count,
     // not measured tab widths, so selection and overflow cannot feed back.
     const crowding = Math.max(0, Math.min(1, (180 - budget / count) / 92));
-    const activeWidth = Math.min(budget, Math.round(300 - 40 * crowding));
-    const backgroundWidth = Math.max(88, Math.min(180,
+    const single = visible.length === 1 && ordinary.length === 1;
+    const singleWidth = Math.min(budget, 580, Math.max(240, Math.round(budget * .8)));
+    const activeWidth = single ? singleWidth : Math.min(budget, Math.round(300 - 40 * crowding));
+    const backgroundWidth = single ? singleWidth : Math.max(88, Math.min(180,
       Math.floor((budget - activeWidth) / Math.max(1, count - 1))));
+    root.toggleAttribute('tabsearch-single', single);
     set('tab-width', backgroundWidth);
     set('active-width', activeWidth);
+    // Centre the capsule on the window where it fits, keeping + and both
+    // toolbar control groups clear. Measure the viewport, not the moving tab.
+    if (single) {
+      const viewport = scrollbox.scrollbox.getBoundingClientRect();
+      const centre = Math.max(viewport.left + singleWidth / 2,
+        Math.min(window.innerWidth / 2, space.right - singleWidth / 2 - 56));
+      set('single-offset', Math.max(0, centre - singleWidth / 2 - viewport.left));
+    } else set('single-offset', 0);
     // Track the selected tab even while the editor is hidden, so the field is
     // already aligned when a compact tab expands into the editor.
     const positionTab = editingTab || activeTab;
@@ -208,6 +257,7 @@
       set('clip-left', viewport ? Math.max(0, viewport.left - Math.max(rect.left + 4, content.left)) : 0);
       set('clip-right', viewport ? Math.max(0, end - viewport.right) : 0);
     }
+    layoutInputIcon();
   }
   function schedule() {
     if (!frame) frame = requestAnimationFrame(() => { frame = 0; layout(); });
@@ -438,6 +488,7 @@
   const resize = new ResizeObserver(layout);
   resize.observe(spacer);
   resize.observe(tabs);
+  resize.observe(inputBox);
   if (tabs.arrowScrollbox?.scrollbox) resize.observe(tabs.arrowScrollbox.scrollbox);
   const observer = new MutationObserver(schedule);
   observer.observe(root, { attributes: true, attributeFilter: ['customizing', 'sizemode', 'inFullscreen'] });
@@ -489,6 +540,7 @@
     return result;
   }
   function addTabInstant(url, options = {}) {
+    const before = root.hasAttribute('tabsearch-single') && options.skipAnimation !== true && motionAllowed() ? tabRects() : null;
     try {
       const tab = nativeAddTab.call(this, url, { ...options, skipAnimation: true });
       if (tab?.isConnected && options.skipAnimation !== true && motionAllowed()) {
@@ -499,6 +551,13 @@
           { opacity:0, transform:'translateY(4px) scale(.97)' },
           { opacity:1, transform:'translateY(0) scale(1)' }
         ]);
+        // Native selection happens after addTab returns. Animate the old
+        // capsule's position/width once that final layout is known.
+        openBefore ||= before;
+        if (openBefore && !openFrame) openFrame = requestAnimationFrame(() => {
+          openFrame = 0; const previous = openBefore; openBefore = null;
+          if (!abort.signal.aborted && !window.closed) { layout(); animateTabs(previous); }
+        });
       }
       return tab;
     }
@@ -524,6 +583,8 @@
       cancelClickEdit();
       cancelAnimationFrame(newTabReleaseFrame); newTabPress = false;
       abort.abort(); hide({ animate:false }); clearMotion();
+      inputIcon.remove();
+      inputBox.removeAttribute('tabsearch-tight');
       resize.disconnect(); observer.disconnect(); tabChanges.disconnect();
       Services.prefs.removeObserver('userChrome.tabSearch.enabled', modeChanged);
       Services.prefs.removeObserver('sidebar.verticalTabs', modeChanged);
@@ -535,6 +596,7 @@
       activeTab?.removeAttribute('tabsearch-active');
       activeTab = null;
       cancelAnimationFrame(frame); spacer.remove(); root.removeAttribute('tabsearch-ready');
+      root.removeAttribute('tabsearch-single');
       if (originalSmoothScroll === null) scrollbox.removeAttribute('smoothscroll');
       else scrollbox.setAttribute('smoothscroll', originalSmoothScroll);
       for (const key of [...root.style]) if (key.startsWith('--tabsearch-')) root.style.removeProperty(key);

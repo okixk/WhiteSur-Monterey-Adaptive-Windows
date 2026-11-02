@@ -4,7 +4,7 @@ A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
 
 Tabs show their page titles and favicons while browsing. Click a background tab to select it, then click the selected tab to open Firefox's native address/search field. Navigation, Escape, or clicking the page restores the normal tab. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
 
-**v0.2.0-beta.3 adds Safari-inspired compact tabs and a separate Lite edition.** Full enables editable tabs in your existing Firefox; Lite installs the classic userChrome CSS theme. See the [release notes](docs/releases/v0.2.0-beta.3.md).
+**v0.2.0-beta.4 refines the Safari-style layout with a centred single-tab capsule, centred text and adjacent favicons.** Full enables editable tabs in your existing Firefox; Lite installs the classic userChrome CSS theme. See the [release notes](docs/releases/v0.2.0-beta.4.md).
 
 ![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
 
@@ -16,8 +16,9 @@ Tabs show their page titles and favicons while browsing. Click a background tab 
 - Monterey-inspired Firefox appearance on Windows
 - Native Windows minimise, maximise, and close buttons on the right
 - Editable selected tabs with native address-bar icons and suggestions
+- Centred tab titles, addresses and search text, with the favicon beside the text
 - Safari-inspired compact capsules with normal titles and favicons while browsing
-- Normal-size tabs while browsing; first click selects, clicking the selected tab expands its search field without resizing neighboring tabs
+- A lone tab forms a centred, Safari-style capsule; multiple tabs stay compact, with only the edited tab expanding
 - Smooth editor expansion/collapse, new-tab entrance, and tab-close effects, respecting reduced motion
 - Middle-click the search field to close its tab
 - Compatible CSS toolbar for older Firefox, vertical tabs, and existing AutoConfig setups
@@ -84,7 +85,7 @@ Close Firefox and run `Uninstall.cmd`. It removes managed preferences and restor
 
 ## Compatibility
 
-Version `2026.10.26-23` (`v0.2.0-beta.3`) targets Firefox 158+ on Windows 11 with horizontal tabs for Full. Older versions and detected AutoConfig conflicts can use the Lite ZIP or explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+Version `2026.11.02-24` (`v0.2.0-beta.4`) targets Firefox 158+ on Windows 11 with horizontal tabs for Full. Older versions and detected AutoConfig conflicts can use the Lite ZIP or explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
 
 Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
 

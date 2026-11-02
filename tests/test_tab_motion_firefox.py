@@ -8,6 +8,7 @@ import tempfile
 import time
 
 from test_editable_tabs_firefox import Firefox, ROOT, install, settle
+from test_window_titlebar_firefox import NativeWindow
 
 
 def run(browser, artifacts):
@@ -30,11 +31,47 @@ def run(browser, artifacts):
 
     try:
         browser.call("POST", "window/rect", {"width": 1384, "height": 850})
+        # Occluded Firefox windows throttle paint frames and can skip an entire
+        # short animation. Keep the disposable test window visible while sampling.
+        NativeWindow(browser)
         browser.js("Services.prefs.setIntPref('ui.prefersReducedMotion',0);"
                    "gBrowser.addTrustedTab('about:robots',{skipAnimation:true});"
                    "gBrowser.addTrustedTab('about:mozilla',{skipAnimation:true});"
                    "TabSearch.hide({animate:false});gBrowser.selectedBrowser.focus();")
         browser.until(lambda: browser.js("return !matchMedia('(prefers-reduced-motion: reduce)').matches;"))
+        settle(browser)
+
+        browser.js("gBrowser.removeTabs([...gBrowser.tabs].slice(1),{animate:false,skipPermitUnload:true});"
+                   "TabSearch.hide();gBrowser.selectedBrowser.focus();")
+        settle(browser)
+        for opening in (True, False):
+            motion = browser.js("""
+                const done=arguments[arguments.length-1], opening=arguments[0], survivor=gBrowser.tabs[0];
+                const samples=[];let start=null;
+                function sample(){
+                  const r=survivor.getBoundingClientRect(), t=gBrowser.selectedTab,
+                    selected=t.getBoundingClientRect(),c=t.querySelector('.tab-content').getBoundingClientRect(),
+                    e=gURLBar.querySelector('.urlbar-input-container').getBoundingClientRect();
+                  samples.push({width:r.width,left:r.left,centre:(r.left+r.right)/2,
+                    error:Math.abs(e.left-Math.max(selected.left+4,c.left))});
+                }
+                sample();
+                if(opening){window.singleOther=gBrowser.addTrustedTab('about:robots');
+                  gBrowser.selectedTab=singleOther;TabSearch.edit();}
+                else gBrowser.removeTab(singleOther,{animate:true});
+                function tick(time){start ??= time;sample();if(time-start<350)requestAnimationFrame(tick);
+                  else done({samples,windowCentre:innerWidth/2});}
+                requestAnimationFrame(tick);
+                """, opening, asynchronous=True)
+            widths = [s["width"] for s in motion["samples"]]
+            low, high = min(widths), max(widths)
+            check(f"{'opening the second tab' if opening else 'returning to the centred capsule'} animates smoothly and keeps the field aligned",
+                  high-low > 100 and any(low+10 < w < high-10 for w in widths)
+                  and max(s["error"] for s in motion["samples"]) < 2
+                  and (widths[-1] < 200 if opening else
+                       abs(motion["samples"][-1]["centre"]-motion["windowCentre"]) < 2), motion)
+        browser.js("gBrowser.addTrustedTab('about:robots',{skipAnimation:true});"
+                   "gBrowser.addTrustedTab('about:mozilla',{skipAnimation:true});TabSearch.hide();")
         settle(browser)
 
         # Hold the actual pointer over + between down/up. Collapsing the old

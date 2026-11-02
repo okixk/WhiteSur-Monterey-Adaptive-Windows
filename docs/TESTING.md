@@ -16,7 +16,15 @@ Results are written to ignored `tests/artifacts/editable-tabs/firefox-report.jso
 
 Keyboard alignment is measured in the next animation frame, after the scheduled selection/scroll layout. Immediate offsets sampled before that frame are also retained in the report; those intermediate tasks can run before the updated layout is painted.
 
-On Windows 11 with Firefox 158.0.1: **33 checks passed**, including page-title/favicon restoration, first-click selection versus second-click editing, actual webpage clicks, keyboard switching, new-tab focus, expansion/collapse without resizing neighbours, adaptive editor sizes, and a native visibility-scroll request queued after selection. The click-selection case includes an existing blank tab with previously saved address-bar focus, which must stay compact on the first click. Geometry cases exercise both equal-width browsing tabs and an expanded editor, measuring alignment and total-width drift separately for each mode. Browsing/editing screenshots are saved as `compact-browsing.png` and `compact-editing.png`. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
+On Windows 11 with Firefox 158.0.1: **38 checks passed**, including the narrower centred single-tab capsule, its browsing/editing and narrow-window states, + opening the second tab, restoring the centred tab after closing back to one, pinned-tab sizing, page-title/favicon restoration, first-click selection versus second-click editing, actual webpage clicks, keyboard switching, new-tab focus, expansion/collapse without resizing neighbours, adaptive editor sizes, and a native visibility-scroll request queued after selection. The click-selection case includes an existing blank tab with previously saved address-bar focus, which must stay compact on the first click when multiple tabs are open. Geometry cases exercise both equal-width browsing tabs and an expanded editor, measuring alignment and total-width drift separately for each mode. Browsing/editing screenshots are saved as `compact-browsing.png` and `compact-editing.png`. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
+
+## Centred tab and address text
+
+```powershell
+py tests/test_centered_text_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+Checks actual title glyph bounds and favicon spacing, native input centring against independently measured DOM text, loaded page/fallback icons, typed and programmatic value changes, placeholders, long-address selection, engine mode, and cleanup. Covers 1/3/10 tabs at wide and narrow widths. Current result: **18 checks passed** on Windows 11 with Firefox 158.0.1. Reports go to `tests/artifacts/centered-text/centered-text-report.json`.
 
 ## Search-engine pill (issue #4)
 
@@ -36,7 +44,7 @@ py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\
 
 Uses another installer-created profile and runtime. Checks intermediate tab widths and editor opacity, frame-by-frame input alignment, rapid animation reversal, immediate native tab removal with a temporary decorative snapshot, native WebDriver middle-clicks inside the input and releases outside it, reduced-motion behaviour, and cleanup when disabling during motion. Reports go to `tests/artifacts/tab-motion/tab-motion-report.json`. The geometry checks in the main tab suite wait for motion to settle before comparing final widths; the rapid keyboard checks still sample the next frame.
 
-Current result: **25 checks passed** on Windows 11 with Firefox 158.0.1, including expansion at the crowded strip's right edge and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance also respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
+Current result: **27 checks passed** on Windows 11 with Firefox 158.0.1, including frame-by-frame capsule movement/alignment when opening a second tab and returning to one, expansion at the crowded strip's right edge, and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance also respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
 
 ## Native window titlebar
 
