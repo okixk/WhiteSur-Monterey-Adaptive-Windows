@@ -124,7 +124,6 @@ def install(profile, source, runtime, shortcuts):
         str(ROOT / "Install-WhiteSur-Monterey-Adaptive.ps1"),
         "-ProfilePath", str(profile), "-FirefoxPath", str(source),
         "-ShortcutDirectory", str(shortcuts), "-Force",
-        "-InstallationMethod", "AutoConfig",
     ]
     if runtime is not None:
         command.extend(["-RuntimeDirectory", str(runtime)])

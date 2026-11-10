@@ -1,102 +1,87 @@
 # WhiteSur Monterey Adaptive für Windows
 
-Ein Monterey-inspiriertes, adaptives Firefox-Theme für Windows 11.
+Ein **Monterey-inspiriertes, adaptives Firefox-UI-Theme für Windows 11**.
 
-**Full funktioniert jetzt standardmässig ohne Firefox AutoConfig.** Die Methode
-Compatible installiert nur Profil-CSS und kann neben `zscaler.cfg` und anderen
-vorhandenen Konfigurationen verwendet werden. Firefox-Installationsdateien,
-Unternehmensrichtlinien und Sicherheitseinstellungen bleiben unverändert.
-Administratorrechte und ein zusätzlicher Loader sind nicht erforderlich.
+Beim Surfen zeigen Tabs ihre Seitentitel und Favicons. Der erste Klick wählt einen Hintergrund-Tab aus; ein weiterer Klick auf den ausgewählten Tab öffnet die native Firefox-Adress- und Suchleiste. Nach dem Navigieren, mit Escape oder einem Klick auf die Webseite erscheint wieder der normale Tab. Adaptive Farben, echte Windows-Fensterknöpfe, Profilerkennung, Backups und Deinstallation bleiben erhalten.
 
-![Full Compatible im echten Firefox-Laborprofil](docs/compatible-browsing.png)
+**v0.2.0-beta.4 ergänzt die Safari-inspirierte Oberfläche um eine zentrierte Einzel-Tab-Kapsel, zentrierte Texte und direkt daneben platzierte Favicons.** Full aktiviert editierbare Tabs im vorhandenen Firefox; Lite installiert nur das klassische userChrome-CSS-Theme. Beide ZIPs enthalten `Install.cmd`. Details stehen in den [Release Notes](docs/releases/v0.2.0-beta.4.md) (Englisch).
+
+![WhiteSur Monterey Adaptive in Firefox unter Windows](docs/screenshot.png)
+
+> [!IMPORTANT]
+> Dies ist ein inoffizielles Community-Projekt und steht in keiner offiziellen Verbindung zu Mozilla, Apple, Vince Liuice, Rafael Mardojai, AdamXweb oder den Entwicklern von Adaptive Tab Bar Color.
+
+## Funktionen
+
+- Monterey-inspirierte Firefox-Oberfläche unter Windows
+- echte Windows-Knöpfe für Minimieren, Maximieren und Schliessen rechts
+- ausgewählte Tabs als native Adressleiste inklusive Symbolen und Suchvorschlägen
+- zentrierte Tab-Titel, Adressen und Suchtexte mit Favicon direkt neben dem Text
+- kompakte, Safari-inspirierte Tab-Flächen mit normalen Titeln und Favicons beim Surfen
+- kompakte Hintergrund-Tabs, die bei Platzmangel schmaler werden
+- ein einzelner Tab bildet eine schmalere, zentrierte Safari-inspirierte Kapsel; mehrere Tabs bleiben kompakt und nur der bearbeitete Tab wächst
+- sanfte Animationen beim Bearbeiten, Öffnen und Schliessen von Tabs; berücksichtigt reduzierte Bewegung
+- klassische CSS-Toolbar als Fallback für ältere Firefox-Versionen, vertikale Tabs und vorhandene AutoConfig-Setups
+- stabiles Spacing bei Vorwärts-, Sicherheits-, Stern- und Page-Action-Symbolen
+- sauberes Schliessen von Tabs ohne unsichtbare Lücken
+- freie Toolbar- und Tab-Leisten-Bereiche können das Fenster ziehen, ohne Tab-Reihenfolge oder Tab-Abtrennen zu stören
+- macOS-inspirierte helle/dunkle Mittelklick-Autoscroll-Anzeige
+- adaptive Farben über Firefox-Theme-Variablen
+- automatische Erkennung des tatsächlich aktiven Firefox-Profils
+- Backup und Wiederherstellung eines vorhandenen `chrome`-Ordners
+- eine eigene `customChrome.css` bleibt bei Updates erhalten
+- Loader im vorhandenen Firefox; Windows fragt bei geschützten Ordnern nach Administratorrechten
+
+## Adaptive Farben
+
+Für die adaptive Einfärbung ist das Theme auf **Adaptive Tab Bar Color** ausgelegt:
+
+https://addons.mozilla.org/firefox/addon/adaptive-tab-bar-colour/
+
+Die Erweiterung passt Firefox' Theme-Farben an die aktive Webseite an. Dieses Theme verwendet Firefox' normale Lightweight-Theme-Variablen und übernimmt dadurch die dynamischen Farben.
+
+Ohne die Erweiterung funktioniert das Layout weiterhin, aber die Farben bleiben beim aktuell ausgewählten Firefox-Theme.
 
 ## Installation
 
-1. Full-ZIP herunterladen und entpacken oder Repository klonen.
-2. Firefox vollständig schliessen.
-3. `Install.cmd` starten. Firefox öffnet sich mit dem ausgewählten Profil.
+1. Repository herunterladen oder klonen.
+2. Firefox vollständig schliessen; im Task-Manager darf kein `firefox.exe` mehr laufen.
+3. `Install.cmd` starten.
+4. Bei Bedarf die Windows-Administratorabfrage bestätigen. Firefox öffnet sich automatisch; die gewohnten Verknüpfungen funktionieren weiterhin.
 
-Der Installer erkennt das Installations-Standardprofil, sichert einen bestehenden
-`chrome`-Ordner und erhält eigene `customChrome.css`-Anpassungen bei Updates.
-Ein verwalteter `user.js`-Block aktiviert Stylesheets. Vorhandenes AutoConfig wird
-erkannt; Compatible Full bleibt die automatische Wahl. Gesperrte Einstellungen
-werden respektiert. Wenn Unternehmensrichtlinien Profil-CSS verbieten, kann das
-Theme nicht angewendet werden; die Sperre wird nicht umgangen.
+Ab Firefox 158 ergänzt der Installer die Loader-Dateien direkt in der vorhandenen Firefox-Installation. Profil, Erweiterungen, Lesezeichen und Verknüpfungen werden weiterverwendet. Nur das Schreiben des Loaders wird bei Bedarf mit Administratorrechten ausgeführt; die Profilinstallation bleibt beim ursprünglichen Benutzer.
+
+Normale Eingaben verwenden die Firefox-Standardsuche. `g Suchbegriffe` sucht mit Google, `q Suchbegriffe` mit Qwant. Ein Klick wählt den Tab, der nächste öffnet das Feld; ein schneller Doppelklick ist nicht nötig. `Strg+L`, `Alt+D` und `F6` öffnen das Feld sofort. `Esc` verwirft die Eingabe und zeigt wieder den Seitentitel. Beim Wechsel per Tastatur bleiben Website-Tabs normal; `Strg+T` öffnet einen neuen Tab direkt zum Tippen.
+
+Nur die klassische adaptive Toolbar installieren:
 
 ```powershell
-.\Install.cmd
-.\Install.cmd -InstallationMethod Compatible
-.\Install-Lite.cmd
-# Nur explizit, für saubere Firefox-Installationen ab Version 158:
-.\Install.cmd -InstallationMethod AutoConfig
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-WhiteSur-Monterey-Adaptive.ps1 -ClassicToolbar
 ```
 
-Lite installiert immer das klassische Layout, auch beim direkten Aufruf des
-PowerShell-Installers. Der optionale alte Loader verweigert fremdes AutoConfig.
-Bestehende cfg- und Loader-Pref-Dateien werden niemals neu geschrieben, auch
-nicht WhiteSur-eigene Dateien. Details: [Methoden und Funktionsvergleich](docs/COMPATIBILITY.md).
+Details und eigene Installationspfade: [Editable tabs](docs/EDITABLE-TABS.md) (Englisch).
 
-## Aussehen und Bedienung
+Mit `Check-Installation.cmd` kannst du das erkannte Profil und die installierte Version prüfen.
 
-Full erhält die kompakte Monterey-Toolbar, zentrierte Tab-Titel und Favicons,
-abgerundete Kapseln, echte Windows-Fensterknöpfe und native Firefox-Suchvorschläge.
-Ein einzelner Tab bildet eine zentrierte Kapsel. Standard-Theme-Erweiterungen wie
-[Adaptive Tab Bar Color](https://addons.mozilla.org/firefox/addon/adaptive-tab-bar-colour/)
-können weiterhin die Farben liefern.
+## Update
 
-Mit CSS-Ankerunterstützung folgt das echte Firefox-Adressfeld dem ausgewählten
-Tab. Darüberfahren zeigt das Feld, ein Klick aktiviert die Eingabe. `Strg+L`,
-`Alt+D` und F6 funktionieren nativ. Ein Klick auf die Webseite zeigt wieder den
-Titel. Escape verwendet das normale Firefox-Verhalten und kann den Fokus im Feld
-belassen. Tab-Aussenränder bleiben für natives Ziehen und Tab-Kontextmenüs
-verfügbar; die Mitte verwendet die Aktionen des Adressfelds.
+Firefox schliessen und `Install.cmd` aus der neuen Version starten. Eine vorhandene `customChrome.css` wird übernommen. Der Loader wird im vorhandenen Firefox aktualisiert. Falls ein Firefox-Update den Loader entfernt, den Installer erneut ausführen.
 
-Normale Tabs reservieren 280 Pixel breite Eingabeplätze. Auswahl und Fokus
-ändern dadurch keine Breiten nach der nativen Scroll-Berechnung; bei vielen
-Tabs wird früher gescrollt als beim dichteren alten JavaScript-Layout.
+## Deinstallation
 
-Bis 980 CSS-Pixel Fensterbreite, ohne CSS-Anker oder bei einem ausgewählten
-angehefteten Tab nutzt Full eine separate Adress- und Tab-Zeile. Vertikale Tabs
-behalten ihre Sidebar. Lite behält das bisherige klassische Layout.
+Firefox schliessen und `Uninstall.cmd` starten. Der Installer entfernt seine verwalteten Preferences und stellt nach Möglichkeit das vorherige `chrome`-Backup wieder her. Der gemeinsam genutzte Loader bleibt für andere installierte Profile erhalten und ignoriert Profile ohne Theme-Markierung. Firefox bleibt installiert. Eine alte separate Kopie aus beta.1 kann nach dem Wechsel zum gewohnten Firefox manuell entfernt werden.
 
-Exaktes Zweitklick-Verhalten, eigene Schliessanimationen, Mittelklick-Schliessen
-im Eingabefeld und fest eingebaute `g`/`q`-Suche benötigen weiterhin das alte
-privilegierte Skript. Native Suchkürzel/Lesezeichen-Schlüsselwörter können die
-Suchpräfixe ersetzen. Full Compatible ergänzt CSS-Überblendungen für Titel und
-Adressfeld sowie dezentes Ein-/Ausblenden, Verschieben und Skalieren beim Öffnen
-und nativen Schliessen. Die Tab-Breiten bleiben stabil; reduzierte Bewegung
-deaktiviert die Effekte. Details: [CSS-Animationen und Tests](docs/COMPATIBLE-MOTION.md).
+## Kompatibilität
 
-## Update, Prüfung und Deinstallation
+Version `2026.11.02-24` (`v0.2.0-beta.4`) benötigt für editierbare Tabs Firefox 158+ mit horizontalen Tabs. Bei älteren Versionen, fehlendem Firefox, AutoConfig-Konflikten oder Fehlern beim Einrichten der Laufzeit bricht die Full-Installation vor Änderungen am Profil ab. Das klassische CSS-Layout ist als Lite-ZIP oder mit `Install-Lite.cmd` verfügbar. Vertikale Tabs aktivieren das Skript nicht. Die Full-Installation öffnet den eingerichteten Firefox nach erfolgreicher Installation automatisch und leitet zusätzliche Parameter weiter.
 
-Firefox schliessen und `Install.cmd` erneut starten. Ein älteres Full-Profil
-wechselt standardmässig auf Compatible; sein privilegiertes Skript wird entfernt.
-Gemeinsam verwendete AutoConfig-Dateien bleiben unangetastet. Normale Updates und
-Verknüpfungen funktionieren weiter. Ein explizites `-RuntimeDirectory` behält aus
-Kompatibilitätsgründen die alte Bedeutung; `-InstallationMethod Compatible`
-erzwingt auch dann reine Profilinstallation.
+Adaptive Tab Bar Color bleibt kompatibel: beide Layouts verwenden Firefox-Theme-Variablen. Die nativen Tests prüfen helle und dunkle Farbwechsel; das Verhalten einzelner Erweiterungen hängt auch von deren Einstellungen ab.
 
-`Check-Installation.cmd` zeigt Profil, Version, Methode, erkanntes fremdes
-AutoConfig und vorhandene dateibasierte Richtlinien. `about:policies` bleibt die
-zuständige Ansicht für aktive Unternehmensrichtlinien.
+## Entwicklung
 
-Firefox schliessen und `Uninstall.cmd` starten. Verwaltete Einstellungen werden
-entfernt und ein vorheriger `chrome`-Ordner wiederhergestellt, sofern vorhanden.
-Firefox und gemeinsam verwendete Loader bleiben installiert.
+Das Projekt wurde **stark mit ChatGPT vibe-codiert** und danach iterativ in echtem Firefox unter Windows getestet und korrigiert. Besonders intensiv getestet wurden URLbar-Geometrie, Tab-Schliessen, schmale Fenster, dynamisch erscheinende Toolbar-Symbole, Spacing und Fenster-Dragging.
 
-## Entwicklung und Grenzen
-
-Die Änderungen wurden mit Firefox 159.0 unter Windows 11 in isolierten Kopien
-und Profilen getestet, einschliesslich aktivem synthetischem `zscaler.cfg`, einer
-gesperrten Laboreinstellung und einer aktiven Unternehmensrichtlinie. Screenshots
-decken schmale und breite Fenster, viele Tabs, Suchvorschläge, helle/dunkle Themes,
-Vollbild, vertikale Tabs und private Fenster ab. Quellen, Alternativen und die
-vollständige Funktionsmatrix stehen in [COMPATIBILITY.md](docs/COMPATIBILITY.md);
-Testbefehle und Ergebnisse in [TESTING.md](docs/TESTING.md).
-
-Browser-Chrome-CSS ist keine stabile öffentliche Mozilla-Schnittstelle. Künftige
-Firefox-Änderungen können Anpassungen erfordern. Dies ist ein inoffizielles
-Community-Projekt ohne Verbindung zu Mozilla, Apple oder den Upstream-Autoren.
+Die aktuellen Tests und Befehle stehen unter [`docs/TESTING.md`](docs/TESTING.md). Dazu gehören echte Firefox-Tests für die Tab-Geometrie und Windows-PowerShell-Tests für Installation, Update, Fallback und Deinstallation.
 
 ## Basis und Inspiration
 

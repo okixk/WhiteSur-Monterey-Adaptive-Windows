@@ -123,7 +123,7 @@ public static class WhiteSurInstallerTestPaths {
     $cmdProfile = Profile 'cmd profile with spaces'
     $cmdStart = New-Object System.Diagnostics.ProcessStartInfo
     $cmdStart.FileName = $env:ComSpec
-    $cmdStart.Arguments = '/d /c ""' + (Join-Path $repository 'Install.cmd') + '" -ProfilePath "' + $cmdProfile + '" -FirefoxPath "' + $old + '" -InstallationMethod AutoConfig -Force"'
+    $cmdStart.Arguments = '/d /c ""' + (Join-Path $repository 'Install.cmd') + '" -ProfilePath "' + $cmdProfile + '" -FirefoxPath "' + $old + '" -Force"'
     $cmdStart.UseShellExecute = $false
     $cmdStart.CreateNoWindow = $true
     $cmdStart.RedirectStandardInput = $true
@@ -175,7 +175,7 @@ public static class WhiteSurInstallerTestPaths {
     $existingProfile = Profile 'existing profile'
     $existingHash = (Get-FileHash -LiteralPath $existing).Hash
     $shortcutCount = @(Get-ChildItem -LiteralPath $shortcuts -Filter '*.lnk').Count
-    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -InstallationMethod AutoConfig -ShortcutDirectory $shortcuts -Force
+    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -ShortcutDirectory $shortcuts -Force
     $existingState = Get-Content (Join-Path $existingProfile '.whitesur-editable-tabs.json') -Raw | ConvertFrom-Json
     Check ($existingState.Executable -eq $existing) 'default installation configures the existing Firefox executable'
     Check ((Get-FileHash -LiteralPath $existing).Hash -eq $existingHash) 'default installation preserves the original Firefox binary'
@@ -183,7 +183,7 @@ public static class WhiteSurInstallerTestPaths {
     Check (Test-Path -LiteralPath (Join-Path $existingDirectory 'whitesur.cfg')) 'the existing Firefox installation receives the loader'
     Check (Test-Path -LiteralPath (Join-Path $existingDirectory 'defaults\pref\whitesur-autoconfig.js')) 'the existing Firefox installation enables AutoConfig'
     Check (-not (Test-Path -LiteralPath (Join-Path $existingDirectory '.whitesur-runtime.json'))) 'default installation does not create a managed Firefox copy'
-    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -InstallationMethod AutoConfig -Force
+    & $installer -ProfilePath $existingProfile -FirefoxPath $existing -Force
     Check ($LASTEXITCODE -eq 0) 'updating the existing Firefox loader is supported'
     & $installer -ProfilePath $existingProfile -Diagnose
     Check ($LASTEXITCODE -eq 0) 'diagnostics accept an existing Firefox installation without a new launcher'

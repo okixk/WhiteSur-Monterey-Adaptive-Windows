@@ -57,36 +57,17 @@ function Test-ForeignAutoConfig {
     foreach ($markerName in @('.whitesur-runtime.json', '.whitesur-loader.json')) {
         $ownershipFile = Join-Path $Directory $markerName
         if (Test-Path -LiteralPath $ownershipFile -PathType Leaf) {
-            try {
-                $ownership = Get-Content -LiteralPath $ownershipFile -Raw | ConvertFrom-Json
-                if ($ownership.PSObject.Properties['Owner'] -and $ownership.Owner -eq 'WhiteSur-Monterey-Adaptive-Windows') { $owned = $true }
-            } catch { return $true }
+            $ownership = Get-Content -LiteralPath $ownershipFile -Raw | ConvertFrom-Json
+            if ($ownership.Owner -eq 'WhiteSur-Monterey-Adaptive-Windows') { $owned = $true }
         }
     }
     $prefDirectory = Join-Path $Directory 'defaults\pref'
     foreach ($file in @(Get-ChildItem -LiteralPath $prefDirectory -Filter '*.js' -File -ErrorAction SilentlyContinue)) {
         $text = [IO.File]::ReadAllText($file.FullName)
-        # Conservative, including inline/multiline assignments and dynamic
-        # filenames. Do not execute third-party JavaScript to inspect it.
-        if ($text -match 'general\s*\.\s*config\s*\.' -and
-            $file.Name -ne 'whitesur-autoconfig.js') { return $true }
-        $pattern = '(?s)(?:pref|defaultPref|lockPref)\s*\(\s*["'']general\.config\.filename["'']\s*,\s*["'']([^"'']+)["'']'
+        $pattern = '(?m)^\s*(?:pref|defaultPref|lockPref)\s*\(\s*["'']general\.config\.filename["'']\s*,\s*["'']([^"'']+)["'']'
         foreach ($match in [regex]::Matches($text, $pattern)) {
             if ($match.Groups[1].Value -ne 'whitesur.cfg' -or -not $owned) { return $true }
         }
-    }
-    foreach ($file in @(Get-ChildItem -LiteralPath $Directory -Filter '*.cfg' -File -ErrorAction SilentlyContinue)) {
-        if ($file.Name -ne 'whitesur.cfg' -or -not $owned) { return $true }
-    }
-    return $false
-}
-
-function Test-FirefoxEnterprisePolicy {
-    param([string]$Directory)
-    if (Test-Path -LiteralPath (Join-Path $Directory 'distribution\policies.json')) { return $true }
-    foreach ($key in @('HKLM:\SOFTWARE\Policies\Mozilla\Firefox', 'HKCU:\SOFTWARE\Policies\Mozilla\Firefox',
-                       'HKLM:\SOFTWARE\WOW6432Node\Policies\Mozilla\Firefox')) {
-        if (Test-Path -LiteralPath $key) { return $true }
     }
     return $false
 }
@@ -102,7 +83,6 @@ function Install-EditableTabsLoader {
         }
     }
     if (Test-ForeignAutoConfig -Directory $Directory) { throw 'Existing Firefox AutoConfig was preserved.' }
-    if (Test-FirefoxEnterprisePolicy -Directory $Directory) { throw 'Enterprise policy was detected and preserved. Use -InstallationMethod Compatible.' }
     $markerPath = Join-Path $Directory '.whitesur-loader.json'
     $owned = $false
     if (Test-Path -LiteralPath $markerPath -PathType Leaf) {
@@ -117,12 +97,6 @@ function Install-EditableTabsLoader {
                 throw 'A Firefox loader file is a symbolic link; it was left untouched.'
             }
             if (-not $owned) { throw "Refusing to overwrite an unmanaged Firefox loader file: $target" }
-            if ($relative -ne '.whitesur-loader.json') {
-                $source = Join-Path (Join-Path $PackageRoot 'firefox') $relative
-                if ([IO.File]::ReadAllText($target) -cne [IO.File]::ReadAllText($source).Replace("`r`n", "`n")) {
-                    throw "Existing AutoConfig file was preserved: $target. Use -InstallationMethod Compatible."
-                }
-            }
         }
     }
     # Reserve only our loader files. Firefox itself and its other files are not copied.
@@ -132,12 +106,7 @@ function Install-EditableTabsLoader {
         $source = Join-Path (Join-Path $PackageRoot 'firefox') $relative
         $target = Join-Path $Directory $relative
         New-Item -ItemType Directory -Path (Split-Path -Parent $target) -Force | Out-Null
-        if (-not (Test-Path -LiteralPath $target)) {
-            # CreateNew also protects against a cfg appearing after preflight.
-            $bytes = [Text.UTF8Encoding]::new($false).GetBytes([IO.File]::ReadAllText($source).Replace("`r`n", "`n"))
-            $stream = [IO.File]::Open($target, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
-            try { $stream.Write($bytes, 0, $bytes.Length) } finally { $stream.Dispose() }
-        }
+        [IO.File]::WriteAllText($target, [IO.File]::ReadAllText($source).Replace("`r`n", "`n"), [Text.UTF8Encoding]::new($false))
     }
     @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Ready=$true } |
         ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
@@ -158,18 +127,6 @@ function Initialize-EditableTabsRuntime {
     if (Test-ForeignAutoConfig -Directory $sourceDirectory) {
         return [pscustomobject]@{ Enabled=$false; Executable=$null; Reason='Existing Firefox AutoConfig detected; choose a clean Firefox installation with -FirefoxPath.' }
     }
-    if (Test-FirefoxEnterprisePolicy -Directory $sourceDirectory) {
-        throw 'Enterprise policy was detected and preserved. Use -InstallationMethod Compatible.'
-    }
-    if ($DestinationDirectory) {
-        foreach ($directory in @($sourceDirectory, [IO.Path]::GetFullPath($DestinationDirectory))) {
-            $customDefaults = @(Get-ChildItem -LiteralPath (Join-Path $directory 'defaults\pref') -File -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -notin @('channel-prefs.js', 'whitesur-autoconfig.js') })
-            if ($customDefaults.Count) {
-                throw 'Custom installation preferences were preserved. Use -InstallationMethod Compatible instead of copying this Firefox.'
-            }
-        }
-    }
     if ([string]::IsNullOrWhiteSpace($DestinationDirectory)) {
         try {
             Install-EditableTabsLoader -Directory $sourceDirectory
@@ -189,9 +146,6 @@ function Initialize-EditableTabsRuntime {
         return [pscustomobject]@{ Enabled=$true; InPlace=$true; Executable=$executable; Reason='Editable tabs enabled in your existing Firefox. Your usual Firefox shortcuts work.' }
     }
     $destination = [IO.Path]::GetFullPath($DestinationDirectory).TrimEnd('\')
-    if (Test-Path -LiteralPath (Join-Path $destination 'distribution\policies.json')) {
-        throw 'The requested runtime contains enterprise policies; it was left untouched. Use -InstallationMethod Compatible.'
-    }
     $sourceDirectory = [IO.Path]::GetFullPath($sourceDirectory).TrimEnd('\')
     $sameDirectory = Test-PathEquals -Left $sourceDirectory -Right $destination
     if (-not $sameDirectory -and
@@ -228,10 +182,15 @@ function Initialize-EditableTabsRuntime {
         # to be completed on retry without touching an unrelated installation.
         @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Source=$sourceDirectory; Ready=$false } |
             ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
-        & robocopy $sourceDirectory $destination /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP /XD tobedeleted updates distribution /XF *.cfg whitesur-autoconfig.js .whitesur-loader.json | Out-Host
+        & robocopy $sourceDirectory $destination /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP /XD tobedeleted updates | Out-Host
         if ($LASTEXITCODE -ge 8) { throw "Firefox could not be copied (robocopy exit $LASTEXITCODE)." }
     }
-    Install-EditableTabsLoader -Directory $destination
+    foreach ($relative in @('whitesur.cfg', 'defaults\pref\whitesur-autoconfig.js')) {
+        $sourceFile = Join-Path (Join-Path $PackageRoot 'firefox') $relative
+        $targetFile = Join-Path $destination $relative
+        New-Item -ItemType Directory -Path (Split-Path -Parent $targetFile) -Force | Out-Null
+        [IO.File]::WriteAllText($targetFile, [IO.File]::ReadAllText($sourceFile).Replace("`r`n", "`n"), [Text.UTF8Encoding]::new($false))
+    }
     @{ Owner='WhiteSur-Monterey-Adaptive-Windows'; Source=$sourceDirectory; Ready=$true;
        Version=(Get-FirefoxRuntimeVersion -Executable $targetExecutable).ToString() } |
         ConvertTo-Json | Set-Content -LiteralPath $markerPath -Encoding UTF8
