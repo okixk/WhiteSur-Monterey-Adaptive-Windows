@@ -1,6 +1,8 @@
-# Editable tabs
+# Legacy editable tabs (optional AutoConfig)
 
-The default installer enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. Tabs show their native page titles and favicons while browsing. Clicking a background tab selects it without editing; clicking the already selected tab opens Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. This does not require a rapid double-click. Ctrl+L, Alt+D, and F6 open editing directly. Navigation, Escape, or clicking the webpage restores the title. Native search/identity popups remain usable while editing.
+Default Full now uses profile-only Compatible CSS. See [COMPATIBILITY.md](COMPATIBILITY.md) for CSS anchor editing, migration, the feature matrix and limitations. The following describes the original privileged implementation, selected explicitly with `Install.cmd -InstallationMethod AutoConfig`.
+
+The legacy method enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. Tabs show their native page titles and favicons while browsing. Clicking a background tab selects it without editing; clicking the already selected tab opens Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. This does not require a rapid double-click. Ctrl+L, Alt+D, and F6 open editing directly. Navigation, Escape, or clicking the webpage restores the title. Native search/identity popups remain usable while editing.
 
 A single ordinary tab is a centred capsule up to 580 CSS pixels wide, both while browsing and editing. It shrinks in narrow windows and leaves room for +, toolbar controls, and window dragging. Opening a second tab animates the capsule into the compact layout; closing back to one animates it into the centre. With multiple tabs, ordinary tabs use the same compact width of 88–180 CSS pixels depending on available space. Clicking the selected tab expands its editor to 300 pixels with plenty of room or 260 pixels when crowded, and further reduces that width when necessary in a narrow window. Background tabs keep their widths during expansion. Pinned tabs keep their icon size and show their field immediately below the icon.
 
@@ -19,15 +21,15 @@ Tab titles are centred, with their native favicon immediately to the left. Addre
 
 The installer adds its two loader files to the detected Firefox installation and tracks them with `.whitesur-loader.json`. Your usual desktop, Start menu, and taskbar shortcuts open Firefox with editable tabs in the installed profile. Each profile has a `.whitesur-editable-tabs.json` installation record. The loader only activates in profiles carrying this theme's marker.
 
-CSS alone cannot make a tab an editable native address field, so the loader belongs in the Firefox installation directory. Windows requests administrator approval for protected installations such as Program Files. Only the loader helper is elevated; profile detection and theme installation run as your original user. Declining approval stops installation. A writable per-user Firefox installation needs no elevation.
+The legacy interaction script requires privileged browser access. Compatible mode instead anchors the native input using CSS, with different hover, Escape and motion behavior. The optional legacy loader belongs in the Firefox installation directory. Windows requests administrator approval for protected installations such as Program Files. Only the loader helper is elevated; profile detection and theme installation run as your original user. Declining approval stops installation. A writable per-user Firefox installation needs no elevation.
 
 ## Adaptive colours and compatibility
 
 The existing Monterey light/dark styles and Firefox theme variables supply colours, including `--lwt-accent-color`, `--toolbar-color`, and `--toolbar-text-color`. Adaptive Tab Bar Color can continue to supply those values; no separate palette is imposed. Native integration tests verify light and dark variable changes.
 
-The default installer stops before changing the profile theme for Firefox below 158, missing installations, a detected existing AutoConfig loader, or runtime setup errors. It reports the failure instead of silently installing classic CSS. Choose `-ClassicToolbar` explicitly for the classic layout. Unsupported browser windows and vertical tabs do not activate the script. Required DOM capabilities are checked before activation. `chrome/windows.css` remains the fallback with the previous Firefox 154/156 fixes.
+The explicit AutoConfig method stops before changing the profile theme for Firefox below 158, missing installations, a detected existing AutoConfig loader, or runtime setup errors. It reports the failure instead of silently installing classic CSS. Choose `-ClassicToolbar` explicitly for the classic layout. Unsupported browser windows and vertical tabs do not activate the script. Required DOM capabilities are checked before activation. `chrome/windows.css` remains the fallback with the previous Firefox 154/156 fixes.
 
-Existing AutoConfig files are preserved. Using this script with a custom loader requires configuring that loader yourself; this installer does not replace it. Custom toolbar extensions and future Firefox UI changes may need adjustments.
+Existing AutoConfig files are preserved. Use Compatible with a custom loader. This project does not chain into, edit or replace it. Custom toolbar extensions and future Firefox UI changes may need adjustments.
 
 Enabling vertical tabs or setting `userChrome.tabSearch.enabled` to `false` restores the standard toolbar immediately. After returning to horizontal tabs or re-enabling the preference, open a new window or restart Firefox. The managed preference block is reapplied on restart; use `-ClassicToolbar` for a persistent classic installation.
 
@@ -45,11 +47,11 @@ Close Firefox, then use `Install.cmd`, or choose explicit paths:
 
 `Install.cmd` forwards arguments to the PowerShell installer. `-ClassicToolbar` installs only the CSS layout. `-AllProfiles` installs into all detected profiles. `-Launch` opens the configured Firefox with the first selected profile after installation; `Install.cmd` supplies this automatically. Direct PowerShell calls do not launch Firefox unless requested. `-Diagnose` reports profile, theme, runtime, loader, and launcher paths. `-Force` bypasses the running-Firefox check and is intended for isolated test profiles.
 
-Passing `-RuntimeDirectory 'D:\Apps\WhiteSur Firefox'` explicitly requests a separate Firefox copy with a profile-specific shortcut. `-ShortcutDirectory` chooses the shortcut location for that optional mode. The default configures the existing installation.
+Passing `-RuntimeDirectory 'D:\Apps\WhiteSur Firefox'` explicitly requests a separate Firefox copy with a profile-specific shortcut. `-ShortcutDirectory` chooses the shortcut location for that optional mode. The default AutoConfig method configures the existing installation; normal default Full installation is Compatible CSS.
 
 ## Updating and removal
 
-Rerun the installer with Firefox closed to update the theme and loader. Your existing Firefox keeps its normal update mechanism; rerun the installer if an update removes loader files. Upgrading from beta.1 removes the previous unmodified owned WhiteSur shortcut and configures the original Firefox. Any previous separate Firefox copy remains until removed manually.
+Rerun the installer with Firefox closed to update the theme. Existing cfg and loader-pref files are never rewritten: identical WhiteSur payloads may be reused, but changed files cause a refusal recommending Compatible. Your existing Firefox keeps its normal update mechanism; rerun the installer if an update removes loader files. Upgrading from beta.1 removes the previous unmodified owned WhiteSur shortcut and configures the original Firefox. Any previous separate Firefox copy remains until removed manually.
 
 Uninstall removes managed preferences and any unmodified owned launcher, then restores the earlier chrome backup when available. A launcher repurposed by the user is preserved. The shared loader remains for other installed profiles; it ignores profiles without this theme's marker. Existing `customChrome.css` is preserved during theme updates. In the optional separate-runtime mode, the shared copy remains for other profiles.
 

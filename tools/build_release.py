@@ -21,7 +21,7 @@ def build(tag: str, output: Path) -> list[Path]:
         raise ValueError("Expected a version tag such as v0.2.0-beta.3")
     output.mkdir(parents=True, exist_ok=True)
     files = {name: ROOT / name for name in ROOT_FILES}
-    for folder in ("chrome", "firefox", "docs"):
+    for folder in ("chrome", "firefox", "docs", "licenses"):
         files.update({p.relative_to(ROOT).as_posix(): p for p in (ROOT / folder).rglob("*") if p.is_file()})
     archives = []
     for lite in (False, True):
@@ -30,7 +30,7 @@ def build(tag: str, output: Path) -> list[Path]:
         with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as bundle:
             for name, source in sorted(files.items()):
                 if lite and (name.startswith("firefox/") or name in (
-                    "chrome/tab-search.uc.js", "chrome/tab-search.css", "Install-Editable-Tabs-Loader.ps1")):
+                    "chrome/tab-search.uc.js", "chrome/tab-search.css", "chrome/full-compatible.css", "Install-Editable-Tabs-Loader.ps1")):
                     continue
                 data = source.read_bytes()
                 if lite and name == "chrome/userChrome.css":
@@ -46,7 +46,7 @@ def build(tag: str, output: Path) -> list[Path]:
                     "No editable-tab script, AutoConfig loader, Firefox copy, or extra shortcut is installed.\n"
                     "Firefox installation files are left untouched. User.js enables custom stylesheets and disables editable tabs.\n"
                     "Existing customChrome.css and unrelated preferences are preserved. Uninstall.cmd restores the previous theme.\n"
-                    "Use the full ZIP if you want searchable tabs.\n")
+                    "Full adds a CSS-anchor inline editor where supported; its default also leaves Firefox installation files untouched.\n")
         archives.append(archive)
     checksums = output / "SHA256SUMS.txt"
     checksums.write_text("".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n" for p in archives), encoding="ascii")

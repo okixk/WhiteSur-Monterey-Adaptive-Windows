@@ -1,4 +1,52 @@
-# Testing — 2026.10.21-21
+# Testing — 2026.11.10-25
+
+## Default Full without AutoConfig
+
+Run on Windows with a **clean source** Firefox and geckodriver:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_compatible_installer.ps1
+python tests/test_compatible_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+The installer suite uses fake browser executables, never launched. It hashes
+every browser fixture file across install, diagnostics, rejected explicit
+AutoConfig setup and uninstall. Cases include clean/older browsers, inline and
+multiline config preferences, dynamic filenames, orphan cfg files, policy files,
+invalid ownership markers and modified WhiteSur-owned AutoConfig. **57 checks**
+passed on Windows PowerShell 5.1.
+
+The native suite copies the supplied source into a temporary directory. It
+creates its own harmless `zscaler.cfg`, a locked lab preference and an enterprise
+policy there; none of these are real company configuration. It verifies their
+effective values in Firefox and hashes file bytes before/after installation,
+update and uninstall. WebDriver chrome access is test-only, and no production
+WhiteSur JavaScript is injected or enabled.
+
+Coverage includes real Ctrl+L and mouse entry, the native site-information/trust
+popup, selected-tab hover, actual + and
+Ctrl+W, native suggestion panels/Escape/page clicks, centred single-tab geometry,
+3/14 tabs at 600/800/980/1384/1600 outer window widths, overflowing selections,
+pinned and vertical tabs, native Windows caption hit-testing and double-click
+maximize, private/fullscreen/customization states, reduced motion, built-in
+light/dark themes and a temporary ordinary theme WebExtension. CSS viewport
+widths can be smaller than requested outer window widths due to window borders.
+The suite also checks that a locked stylesheet prohibition is respected.
+Native smooth scrolling is allowed to settle before final geometry assertions.
+During native scrolling the toolbar/caption controls remain above the editor.
+
+Reports and screenshots go to ignored `tests/artifacts/compatible/`; selected
+screenshots are committed in `docs/` for review. Test-created windows/processes
+close before temporary browser files are removed. Run native suites sequentially.
+The recorded test run and remaining limitations are in
+[the beta.5 validation record](VALIDATION-beta.5.md). These tests do not certify
+Zscaler integration or all possible enterprise policies/add-on combinations.
+
+## Legacy suites below
+
+The existing editable-tab, text, motion and titlebar suites explicitly select
+`-InstallationMethod AutoConfig`. Their results below describe the original
+privileged implementation, not default Compatible interaction parity.
 
 ## Native Firefox on Windows
 

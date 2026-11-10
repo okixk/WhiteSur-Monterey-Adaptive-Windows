@@ -1,0 +1,1106 @@
+{
+  "environment": {
+    "date": "2026-11-10",
+    "os": "Windows 11",
+    "firefox": "159.0",
+    "geckodriver": "0.37.1",
+    "python": "3.13.9",
+    "isolated": true
+  },
+  "results": [
+    {
+      "name": "default Full detects AutoConfig and recommends compatible mode",
+      "pass": true,
+      "details": "Installer reported existing AutoConfig and selected Compatible."
+    },
+    {
+      "name": "installation changes no Firefox, AutoConfig or policy files",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "Full installs CSS with no privileged script or launcher",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "update preserves custom CSS and unrelated preferences",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "existing AutoConfig really loads and its locked preference stays locked",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "enterprise policy remains active",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "no privileged WhiteSur script is loaded",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "supporting Firefox uses a centred single-tab capsule",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 1,
+        "focused": false,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 871.7833557128906,
+          "w": 369.5666809082031,
+          "x": 502.2166748046875,
+          "y": 9
+        },
+        "opacity": "0",
+        "overflow": false,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 964,
+          "w": 560,
+          "x": 404,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 961,
+          "w": 554,
+          "x": 407,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "browsing shows the actual page title",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "empty toolbar space remains a native window drag region",
+      "pass": true,
+      "details": {
+        "ancestors": [
+          {
+            "drag": "",
+            "id": "tabbrowser-arrowscrollbox"
+          },
+          {
+            "drag": "",
+            "id": "tabbrowser-tabs"
+          },
+          {
+            "drag": "",
+            "id": "TabsToolbar-customization-target"
+          },
+          {
+            "drag": "",
+            "id": "hbox"
+          },
+          {
+            "drag": "",
+            "id": "TabsToolbar"
+          },
+          {
+            "drag": "",
+            "id": "navigator-toolbox"
+          },
+          {
+            "drag": "",
+            "id": "body"
+          },
+          {
+            "drag": "",
+            "id": "main-window"
+          }
+        ],
+        "screenX": 1052,
+        "screenY": 28,
+        "x": 1040,
+        "y": 24
+      }
+    },
+    {
+      "name": "tab and new-tab targets remain ordinary controls",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "real double-click maximizes the lab window",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "Ctrl+L focuses the visible native input aligned with its tab",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 1,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 871.7833557128906,
+          "w": 369.5666809082031,
+          "x": 502.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 964,
+          "w": 560,
+          "x": 404,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 961,
+          "w": 554,
+          "x": 407,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "native site-identity popup opens from the anchored field",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "security popup keeps its address field visible",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "native suggestions stay inside the viewport",
+      "pass": true,
+      "details": {
+        "right": 967,
+        "w": 560,
+        "x": 407,
+        "y": 44
+      }
+    },
+    {
+      "name": "Escape closes native suggestions",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "clicking the page restores the title capsule",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 1,
+        "focused": false,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 930.7833557128906,
+          "w": 411.5666809082031,
+          "x": 519.2166748046875,
+          "y": 9
+        },
+        "opacity": "0",
+        "overflow": false,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 964,
+          "w": 560,
+          "x": 404,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 961,
+          "w": 554,
+          "x": 407,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "hover reveals a visible address field before mouse editing",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "mouse click focuses the native address input",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "native + opens exactly one ready-to-type tab",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "native Ctrl+W restores the single capsule without gaps",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "3 tabs at 600px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 3,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 357.9499969482422,
+          "w": 154.06666564941406,
+          "x": 203.88333129882812,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 584,
+          "w": 584,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 520,
+          "w": 320,
+          "x": 200,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 365.1666717529297,
+          "w": 247.5,
+          "x": 117.66667175292967,
+          "y": 8
+        },
+        "width": 584
+      }
+    },
+    {
+      "name": "3 tabs at 800px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 3,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 550.7833404541016,
+          "w": 334.5666809082031,
+          "x": 216.21665954589844,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 784,
+          "w": 784,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 532,
+          "w": 320,
+          "x": 212,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 558,
+          "w": 428,
+          "x": 130,
+          "y": 8
+        },
+        "width": 784
+      }
+    },
+    {
+      "name": "3 tabs at 980px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 3,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 707.7833404541016,
+          "w": 466.5666809082031,
+          "x": 241.21665954589844,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 964,
+          "w": 964,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 692,
+          "w": 460,
+          "x": 232,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 715,
+          "w": 560,
+          "x": 155,
+          "y": 8
+        },
+        "width": 964
+      }
+    },
+    {
+      "name": "3 tabs at 1384px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 3,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 781.7833557128906,
+          "w": 258.5666809082031,
+          "x": 523.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 818,
+          "w": 410,
+          "x": 408,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 815,
+          "w": 404,
+          "x": 411,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "3 tabs at 1600px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 3,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 931.7833557128906,
+          "w": 408.5666809082031,
+          "x": 523.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1294,
+          "w": 1106,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 968,
+          "w": 560,
+          "x": 408,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 965,
+          "w": 554,
+          "x": 411,
+          "y": 8
+        },
+        "width": 1584
+      }
+    },
+    {
+      "name": "14 tabs at 600px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 357.9499969482422,
+          "w": 154.06666564941406,
+          "x": 203.88333129882812,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 584,
+          "w": 584,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 644.7000122070312,
+          "w": 320,
+          "x": 324.70001220703125,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 365.1666717529297,
+          "w": 247.5,
+          "x": 117.66667175292967,
+          "y": 8
+        },
+        "width": 584
+      }
+    },
+    {
+      "name": "14 tabs at 800px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 550.7833404541016,
+          "w": 334.5666809082031,
+          "x": 216.21665954589844,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 784,
+          "w": 784,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 644.7000122070312,
+          "w": 320,
+          "x": 324.70001220703125,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 558,
+          "w": 428,
+          "x": 130,
+          "y": 8
+        },
+        "width": 784
+      }
+    },
+    {
+      "name": "14 tabs at 980px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 707.7833404541016,
+          "w": 466.5666809082031,
+          "x": 241.21665954589844,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 964,
+          "w": 964,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 644.7000122070312,
+          "w": 320,
+          "x": 324.70001220703125,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 715,
+          "w": 560,
+          "x": 155,
+          "y": 8
+        },
+        "width": 964
+      }
+    },
+    {
+      "name": "14 tabs at 1384px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 784.4833526611328,
+          "w": 168.56666564941406,
+          "x": 615.9166870117188,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 820.7000122070312,
+          "w": 320,
+          "x": 500.7000122070313,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 817.7000122070312,
+          "w": 314,
+          "x": 503.7000122070313,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "14 tabs at 1600px keep tabs and address input usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 784.4833526611328,
+          "w": 168.56666564941406,
+          "x": 615.9166870117188,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1294,
+          "w": 1106,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 820.7000122070312,
+          "w": 320,
+          "x": 500.7000122070313,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 817.7000122070312,
+          "w": 314,
+          "x": 503.7000122070313,
+          "y": 8
+        },
+        "width": 1584
+      }
+    },
+    {
+      "name": "overflow selection 0 at 1384px stays inside its strip",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 465.84999084472656,
+          "w": 138.56666564941406,
+          "x": 327.2833251953125,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 532.0666656494141,
+          "w": 320,
+          "x": 212.0666656494141,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 529.0666656494141,
+          "w": 314,
+          "x": 215.0666656494141,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "overflow selection 7 at 1384px stays inside its strip",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 1013.0333557128906,
+          "w": 168.56668090820312,
+          "x": 844.4666748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 1049.25,
+          "w": 320,
+          "x": 729.25,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 1046.25,
+          "w": 314,
+          "x": 732.25,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "overflow selection 13 at 1384px stays inside its strip",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 1029.9833526611328,
+          "w": 168.56666564941406,
+          "x": 861.4166870117188,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1078,
+          "w": 890,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 1066.2000122070312,
+          "w": 320,
+          "x": 746.2000122070312,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 1063.2000122070312,
+          "w": 314,
+          "x": 749.2000122070312,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "overflow selection 13 at 1000px stays inside its strip",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 589.7833557128906,
+          "w": 168.56668090820312,
+          "x": 421.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 694,
+          "w": 506,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 626,
+          "w": 320,
+          "x": 306,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 623,
+          "w": 314,
+          "x": 309,
+          "y": 8
+        },
+        "width": 984
+      }
+    },
+    {
+      "name": "pinned selection uses a separate usable native address field",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 905.7833557128906,
+          "w": 454.5666809082031,
+          "x": 451.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": false,
+        "strip": {
+          "bottom": 96,
+          "h": 48,
+          "right": 1368,
+          "w": 1368,
+          "x": 0,
+          "y": 48
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 88,
+          "h": 32,
+          "right": 56,
+          "w": 38,
+          "x": 18,
+          "y": 56
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 919,
+          "w": 560,
+          "x": 359,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "vertical tabs keep the native address field usable",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 905.7833557128906,
+          "w": 454.5666809082031,
+          "x": 451.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 0,
+          "h": 0,
+          "right": 0,
+          "w": 0,
+          "x": 0,
+          "y": 0
+        },
+        "stripVisible": false,
+        "tab": {
+          "bottom": 85,
+          "h": 36,
+          "right": 239,
+          "w": 239,
+          "x": 0,
+          "y": 49
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 919,
+          "w": 560,
+          "x": 359,
+          "y": 8
+        },
+        "width": 1368
+      }
+    },
+    {
+      "name": "private windows get a native usable editor without a loader",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "fullscreen keeps the native editor on screen",
+      "pass": true,
+      "details": {
+        "anchors": true,
+        "count": 14,
+        "focused": true,
+        "input": {
+          "bottom": 39,
+          "h": 30,
+          "right": 499.7833557128906,
+          "w": 168.56668090820312,
+          "x": 331.2166748046875,
+          "y": 9
+        },
+        "opacity": "1",
+        "overflow": true,
+        "strip": {
+          "bottom": 48,
+          "h": 48,
+          "right": 1628,
+          "w": 1440,
+          "x": 188,
+          "y": 0
+        },
+        "stripVisible": true,
+        "tab": {
+          "bottom": 40,
+          "h": 32,
+          "right": 536,
+          "w": 320,
+          "x": 216,
+          "y": 8
+        },
+        "url": {
+          "bottom": 40,
+          "h": 32,
+          "right": 533,
+          "w": 314,
+          "x": 219,
+          "y": 8
+        },
+        "width": 1918
+      }
+    },
+    {
+      "name": "customization suspends CSS anchor positioning",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "maximized editor remains visible",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "reduced motion suppresses decorative transitions",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "actual built-in light theme is enabled",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "actual built-in dark theme is enabled",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "standard theme extension colours reach the toolbar",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "no WhiteSur runtime errors or resize loops",
+      "pass": true,
+      "details": []
+    },
+    {
+      "name": "a locked stylesheet prohibition is respected",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "uninstall restores the original theme",
+      "pass": true,
+      "details": null
+    },
+    {
+      "name": "install, update, browser use and uninstall preserve security file bytes",
+      "pass": true,
+      "details": null
+    }
+  ]
+}

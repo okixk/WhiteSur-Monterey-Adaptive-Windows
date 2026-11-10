@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026.11.10-25 (v0.2.0-beta.5 — Full without AutoConfig)
+
+- Default Full to Compatible profile CSS, preserving existing AutoConfig and enterprise/security configuration. Keep legacy AutoConfig as explicit opt-in and Lite as Classic.
+- Anchor the real native address field to the selected tab where supported; retain the centred single capsule, native suggestions, controls, titles/favicons and adaptive theme colours.
+- Keep a usable separate address/tab layout at narrow widths, without anchors and for pinned selections. Preserve vertical tabs. Keep toolbar controls above the editor during native smooth scrolling.
+- Detect conservative AutoConfig conflicts and refuse rewriting even owned cfg/pref-loader files. Do not copy policy-managed installations into new runtimes. Extend read-only diagnostics.
+- Test real Firefox with active synthetic AutoConfig and enterprise policy, keyboard/mouse entry, crowded tabs, native window dragging, themes, fullscreen, private windows, customization and locked stylesheet behavior.
+- Document feature differences, unsupported privileged behaviors, and the evaluated extension/policy alternatives. Include upstream license notices in both release archives.
+
 ## 2026.11.02-24 (v0.2.0-beta.4 — Centred Tabs and Favicons)
 
 - Centred tab titles and native address/search text, placing the favicon directly beside the text. Preserved native editing, autocomplete, selection, engine/security controls, and long-address scrolling.

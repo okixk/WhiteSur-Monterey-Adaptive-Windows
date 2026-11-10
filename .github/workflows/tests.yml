@@ -67,7 +67,9 @@ jobs:
 
       - name: Test installer with Windows PowerShell 5.1
         shell: powershell
-        run: .\tests\test_installer.ps1
+        run: |
+          .\tests\test_installer.ps1
+          .\tests\test_compatible_installer.ps1
 
       - name: Install official Firefox and geckodriver
         shell: pwsh
@@ -87,7 +89,13 @@ jobs:
           Invoke-WebRequest 'https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-win64.zip' -OutFile $archive
           Expand-Archive -LiteralPath $archive -DestinationPath (Join-Path $env:RUNNER_TEMP 'geckodriver')
 
-      - name: Test editable tabs in native Firefox
+      - name: Test compatible Full with existing AutoConfig and enterprise policy
+        shell: pwsh
+        run: |
+          python tests/test_compatible_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Test legacy editable tabs in native Firefox
         shell: pwsh
         run: |
           python tests/test_editable_tabs_firefox.py --firefox "$env:WHITESUR_TEST_FIREFOX" --geckodriver "$env:RUNNER_TEMP\geckodriver\geckodriver.exe"

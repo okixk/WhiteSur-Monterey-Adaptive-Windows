@@ -7,9 +7,10 @@ Installs WhiteSur Monterey Adaptive into the active Firefox profile on Windows 1
 Finds the profile selected by Firefox's Install section, backs up an existing
 chrome directory, copies the Windows-compatible Monterey Adaptive package, and
 manages the required Firefox user preferences in user.js.
-On supported Firefox versions, adds the AutoConfig loader to the existing
-Firefox installation. Windows requests administrator approval when necessary.
-Use -ClassicToolbar for the CSS-only layout, or -RuntimeDirectory for a copy.
+Full defaults to a profile-only CSS layout with native inline editing using CSS
+anchors when available. Existing AutoConfig and enterprise policies are never
+changed. -InstallationMethod AutoConfig explicitly selects the legacy loader.
+Use -ClassicToolbar for the original Lite layout.
 #>
 [CmdletBinding()]
 param(
@@ -34,6 +35,10 @@ param(
 
     [Parameter()]
     [switch]$ClassicToolbar,
+
+    [Parameter()]
+    [ValidateSet('Auto', 'Compatible', 'AutoConfig', 'Classic')]
+    [string]$InstallationMethod = 'Auto',
 
     [Parameter()]
     [switch]$Launch,
@@ -341,6 +346,9 @@ function Set-ManagedPreferences {
     )
 
     $userJs = Join-Path $FirefoxProfilePath 'user.js'
+    if ((Test-Path -LiteralPath $userJs) -and ((Get-Item -LiteralPath $userJs).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'The profile user.js is a symbolic link; it was left untouched.'
+    }
     $rawExisting = if (Test-Path -LiteralPath $userJs -PathType Leaf) {
         Get-Content -LiteralPath $userJs -Raw -ErrorAction Stop
     }
@@ -414,6 +422,15 @@ function Get-ProfileStatus {
 }
 
 function Show-Diagnostics {
+    $executable = Find-FirefoxExecutable -RequestedPath $FirefoxPath
+    if ($executable) {
+        $directory = Split-Path -Parent $executable
+        Write-Status "Firefox: $executable ($(Get-FirefoxRuntimeVersion -Executable $executable))" White
+        Write-Host "  Foreign AutoConfig: $(Test-ForeignAutoConfig -Directory $directory)"
+        Write-Host "  policies.json present: $(Test-Path -LiteralPath (Join-Path $directory 'distribution\policies.json'))"
+        Write-Host "  Enterprise policy source detected: $(Test-FirefoxEnterprisePolicy -Directory $directory)"
+        Write-Host '  Recommended: Compatible (profile CSS only). Effective locked preferences remain authoritative.'
+    }
     $profiles = if (-not [string]::IsNullOrWhiteSpace($ProfilePath)) {
         @(Get-SelectedProfiles)
     }
@@ -434,6 +451,9 @@ function Show-Diagnostics {
         Write-Host "  chrome folder:      $($status.ChromeFolder)"
         Write-Host "  userChrome.css:     $($status.UserChromeCss)"
         Write-Host "  WhiteSur marker:    $($status.WhiteSurMarker)"
+        if ($status.WhiteSurMarker) {
+            Get-Content -LiteralPath (Join-Path $profile.Path "chrome\$ThemeMarkerName") | Where-Object { $_ -match '^(Version|Method):' } | ForEach-Object { Write-Host "  $_" }
+        }
         Write-Host "  user.js preference: $($status.PreferenceInUserJs)"
         Write-Host "  Editable-tabs script: $($status.EditableTabsScript)"
         Write-Host "  Editable-tabs launcher metadata: $($status.EditableTabsState)"
@@ -504,6 +524,17 @@ function Install-ThemeForProfile {
         [IO.File]::WriteAllText($userChromePath, $styles, [Text.UTF8Encoding]::new($false))
     }
 
+    # The compatible Full layout is profile CSS only. Never load privileged JS,
+    # even if a previous installation still has a shared AutoConfig loader.
+    $userChromePath = Join-Path $targetChrome 'userChrome.css'
+    $styles = [IO.File]::ReadAllText($userChromePath)
+    if ($EditableTabsRuntime.Method -eq 'Compatible') {
+        $styles = $styles.Replace('@import "customChrome.css";', "@import `"full-compatible.css`";`n@import `"customChrome.css`";")
+    } else {
+        Remove-Item -LiteralPath (Join-Path $targetChrome 'full-compatible.css') -Force -ErrorAction SilentlyContinue
+    }
+    [IO.File]::WriteAllText($userChromePath, $styles, [Text.UTF8Encoding]::new($false))
+
     if (($null -ne $preservedCustomChrome) -and (Test-Path -LiteralPath $preservedCustomChrome)) {
         Copy-Item -LiteralPath $preservedCustomChrome -Destination (Join-Path $targetChrome 'customChrome.css') -Force
         Remove-Item -LiteralPath $preservedCustomChrome -Force
@@ -515,6 +546,7 @@ function Install-ThemeForProfile {
         "Package: $PackageRoot"
         "Version: $([IO.File]::ReadAllText((Join-Path $PackageRoot 'VERSION.txt')).Trim())"
         "Profile: $($Profile.Path)"
+        "Method: $($EditableTabsRuntime.Method)"
     ) | Set-Content -LiteralPath $marker -Encoding UTF8
 
     Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $true -EditableTabs $EditableTabsRuntime.Enabled
@@ -582,9 +614,28 @@ if (($runningFirefox.Count -gt 0) -and -not $Force) {
 
 $selectedProfiles = @(Get-SelectedProfiles)
 if (-not $Uninstall) {
-    $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory -Classic:$ClassicToolbar
-    if (-not $ClassicToolbar -and -not $EditableTabsRuntime.Enabled) {
-        throw "Editable tabs could not be installed. $($EditableTabsRuntime.Reason) Update Firefox or specify -FirefoxPath. To explicitly install the classic toolbar, run Install.cmd -ClassicToolbar."
+    if ($ClassicToolbar) { $InstallationMethod = 'Classic' }
+    # Keep the existing explicit separate-runtime command working.
+    if ($InstallationMethod -eq 'Auto') {
+        $InstallationMethod = if ($RuntimeDirectory) { 'AutoConfig' } else { 'Compatible' }
+    }
+    if ($InstallationMethod -eq 'AutoConfig') {
+        $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory
+        if (-not $EditableTabsRuntime.Enabled) {
+            throw "Editable tabs could not be installed. $($EditableTabsRuntime.Reason) Use -InstallationMethod Compatible for Full without AutoConfig."
+        }
+        $EditableTabsRuntime | Add-Member -NotePropertyName Method -NotePropertyValue 'AutoConfig'
+    } else {
+        $executable = Find-FirefoxExecutable -RequestedPath $FirefoxPath
+        $conflict = $executable -and (Test-ForeignAutoConfig -Directory (Split-Path -Parent $executable))
+        $reason = if ($InstallationMethod -eq 'Classic') { 'Classic CSS toolbar selected.' } else {
+            'Full compatible CSS selected. CSS anchors provide inline editing on supporting Firefox versions; other versions use a separate native address field.'
+        }
+        if ($conflict) { Write-Status 'AutoConfig detected: all installation/security files will be left untouched. Compatible Full and Classic are available.' Yellow }
+        if ($executable -and (Test-FirefoxEnterprisePolicy -Directory (Split-Path -Parent $executable))) {
+            Write-Status 'Enterprise policy source detected; Compatible Full and Classic preserve it. Policy locks remain authoritative.' Yellow
+        }
+        $EditableTabsRuntime = [pscustomobject]@{ Enabled=$false; Method=$InstallationMethod; Executable=$executable; Reason=$reason }
     }
     Write-Status $EditableTabsRuntime.Reason $(if ($EditableTabsRuntime.Enabled) { [ConsoleColor]::Green } else { [ConsoleColor]::Yellow })
 }
@@ -610,7 +661,10 @@ else {
             Write-Status "Opened the configured Firefox with profile '$($launchProfile.Name)'." Green
         }
     } else {
-        Write-Status 'Installation complete with the compatible CSS layout. Start Firefox again.' Green
+        Write-Status "Installation complete: $($EditableTabsRuntime.Method). No Firefox installation files were changed." Green
+        if ($Launch -and $EditableTabsRuntime.Executable -and $EditableTabsRuntime.Method -eq 'Compatible') {
+            Start-Process -FilePath $EditableTabsRuntime.Executable -ArgumentList ('-no-remote -profile "' + $selectedProfiles[0].Path + '"')
+        }
     }
 }
 exit 0
