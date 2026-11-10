@@ -62,8 +62,10 @@ behalten ihre Sidebar. Lite behält das bisherige klassische Layout.
 Exaktes Zweitklick-Verhalten, eigene Schliessanimationen, Mittelklick-Schliessen
 im Eingabefeld und fest eingebaute `g`/`q`-Suche benötigen weiterhin das alte
 privilegierte Skript. Native Suchkürzel/Lesezeichen-Schlüsselwörter können die
-Suchpräfixe ersetzen. Full Compatible nutzt native Tab-Animationen und
-berücksichtigt reduzierte Bewegung für Theme-Übergänge.
+Suchpräfixe ersetzen. Full Compatible ergänzt CSS-Überblendungen für Titel und
+Adressfeld sowie dezentes Ein-/Ausblenden, Verschieben und Skalieren beim Öffnen
+und nativen Schliessen. Die Tab-Breiten bleiben stabil; reduzierte Bewegung
+deaktiviert die Effekte. Details: [CSS-Animationen und Tests](docs/COMPATIBLE-MOTION.md).
 
 ## Update, Prüfung und Deinstallation
 

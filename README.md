@@ -70,8 +70,11 @@ install [Adaptive Tab Bar Color](https://addons.mozilla.org/firefox/addon/adapti
 Without it, Firefox's selected theme supplies the colours. A normal theme
 WebExtension can supply colours without any privileged browser modifications.
 
-The Compatible method uses native tab motion and respects reduced motion for
-theme transitions. Exact second-click activation, custom close snapshots,
+The Compatible method adds short CSS fades and a subtle slide/scale on capsule
+opening and native closing, plus a title/editor crossfade and hover transitions.
+Reduced motion disables these effects. The tab slots and editor geometry remain
+stable. See [motion behavior and native test evidence](docs/COMPATIBLE-MOTION.md).
+Exact second-click activation, detached custom close snapshots,
 middle-click closing inside the address input and hard-coded `g`/`q` routing
 remain legacy-script features. Configure Firefox's native search shortcuts or
 bookmark keywords for equivalent search prefixes. The complete limitations and

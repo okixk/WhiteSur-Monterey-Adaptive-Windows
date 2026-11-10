@@ -35,6 +35,13 @@ The suite also checks that a locked stylesheet prohibition is respected.
 Native smooth scrolling is allowed to settle before final geometry assertions.
 During native scrolling the toolbar/caption controls remain above the editor.
 
+The suite now also calls `compatible_motion.py`: **14 additional native motion
+checks**, for **64 Compatible checks total**, cover intermediate animation-frame
+opacity/translation, editor/title crossfades, constant editing widths, rapid
+reversal, opening/closing at 800/1384px, no leftover tab slots, and reduced motion.
+The sampler invokes native methods and reads actual frames; it injects no CSS
+or production script. See [the motion report](COMPATIBLE-MOTION.md).
+
 Reports and screenshots go to ignored `tests/artifacts/compatible/`; selected
 screenshots are committed in `docs/` for review. Test-created windows/processes
 close before temporary browser files are removed. Run native suites sequentially.

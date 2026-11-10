@@ -63,8 +63,9 @@ for this change used Firefox **159.0**, Windows 11, and geckodriver **0.37.1**.
 | Escape | Native cancel/close; focus may remain in field | Returns to tab title | Native behavior |
 | Click page | Returns to title unless pointer remains over tab | Returns to title | Native behavior |
 | Editor space | All ordinary tabs reserve 280px editing slots; native scrolling | Compact tabs with animated focus-only expansion | Separate field |
-| Open/close animations | Firefox's native motion | Custom entrances/close snapshots | Native motion |
-| Reduced motion | Respected for theme transitions | Also cancels custom motion | Native motion |
+| Open/close animations | CSS fade/slide/scale during native lifecycle | Custom entrances/detached close snapshots | Native motion |
+| Editor/title motion | 140ms crossfade without resizing | Coordinated expansion/collapse and fade | Native behavior |
+| Reduced motion | Disables the decorative CSS transitions | Also cancels custom motion | Native motion |
 | Middle-click inside address input closes tab | No; normal Firefox input behavior | Yes | No |
 | `g`/`q` search prefixes | Configure native bookmark keywords / search shortcuts | Built in | Configure natively |
 | Tab drag/context menu | Native tab edges/background tabs; input has native input actions | Script coordinates dragging | Native tabs |
@@ -80,6 +81,12 @@ tab. Exact custom interaction parity requires privileged browser code.
 Crowded/customized toolbars and future Firefox chrome changes may require using
 the separate-field layout or Classic. The built-in title bar and taskbar-app
 windows are not a promise of compact inline-editor support.
+
+Compatible's capsule effects run on the painted `.tab-stack`, not the outer tab
+that Firefox measures for scrolling or uses as the address field's anchor. The
+native width transition and completion event remain untouched. This supports
+short opening/closing effects without retaining a removed tab. See
+[CSS motion and validation](COMPATIBLE-MOTION.md) for measured behavior and limits.
 
 ## Alternatives evaluated
 

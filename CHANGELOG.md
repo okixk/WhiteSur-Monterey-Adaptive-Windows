@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.11.10-26 (Compatible CSS motion)
+
+- Add a 140ms title/editor crossfade and hover colour/shadow transitions without changing tab or editor widths.
+- Add subtle 160ms capsule fade/slide/scale effects during native tab opening and closing. Keep native tab removal and width-transition completion intact; do not retain detached snapshots.
+- Respect reduced motion for every new effect. Add 14 native frame-sampling checks, bringing Compatible coverage to 64 checks with existing AutoConfig and policy still active.
+
 ## 2026.11.10-25 (v0.2.0-beta.5 — Full without AutoConfig)
 
 - Default Full to Compatible profile CSS, preserving existing AutoConfig and enterprise/security configuration. Keep legacy AutoConfig as explicit opt-in and Lite as Classic.

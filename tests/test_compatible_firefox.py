@@ -20,10 +20,19 @@ import time
 import zipfile
 from pathlib import Path
 
-from test_editable_tabs_firefox import Firefox, settle
+from test_editable_tabs_firefox import Firefox, settle as settle_native
 from test_window_titlebar_firefox import NativeWindow, POINTS
+from compatible_motion import run_motion
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def settle(browser):
+    settle_native(browser)
+    browser.js('''const done=arguments[arguments.length-1];
+        const targets=document.querySelectorAll('#urlbar-container,#TabsToolbar .tab-stack,#TabsToolbar .tab-background,#TabsToolbar .tab-label-container,#TabsToolbar .tab-icon-stack');
+        Promise.all([...targets].flatMap(e=>e.getAnimations()).map(a=>a.finished.catch(()=>{})))
+          .then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>done(true))));''',asynchronous=True)
 
 
 def hashes(directory):
@@ -196,6 +205,7 @@ def run(source, driver, artifacts):
             browser.chord('w')
             settle(browser)
             check('native Ctrl+W restores the single capsule without gaps',browser.js('return gBrowser.tabs.length===1;'))
+            results.extend(run_motion(browser,artifacts/'motion',settle,move))
             for count in (3,14):
                 browser.js('while(gBrowser.tabs.length<arguments[0])gBrowser.addTab("about:blank",{triggeringPrincipal:Services.scriptSecurityManager.getSystemPrincipal()});',count)
                 browser.chord('\ue004')
