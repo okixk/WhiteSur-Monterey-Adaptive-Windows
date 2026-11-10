@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -62,15 +63,23 @@ def run(tag, firefox=None, driver=None):
             packages[lite] = package
             check(hashlib.sha256(archive.read_bytes()).hexdigest() in checksums, "archive checksum matches SHA256SUMS.txt")
             check((package / "Install.cmd").is_file() and (package / "Uninstall.cmd").is_file(), "archive includes install and uninstall launchers")
+            check(all((package / 'licenses' / name).is_file() for name in (
+                'WhiteSur-firefox-theme-LICENSE.txt', 'WhiteSurFirefoxThemeMacOS-LICENSE.txt',
+                'firefox-gnome-theme-UNLICENSE.txt')), 'archive preserves all upstream licence texts')
             check((package / "PACKAGE-FLAVOR.txt").read_text().strip() == ("Lite" if lite else "Full"), "archive declares its installation mode")
             check((package / "chrome/tab-search.uc.js").exists() != lite, "editable-tab script is included only in Full")
             check((package / "firefox").exists() != lite, "AutoConfig payload is included only in Full")
+            check((package/'chrome/whitesur-updater.sys.mjs').exists() != lite, 'only Full contains the release updater')
+            check((package/'chrome/lite.css').exists() == lite, 'Lite contains its CSS layout')
+            manifest=json.loads((package/'release-manifest.json').read_text())
+            check(manifest['edition']==('Lite' if lite else 'Full') and all(
+                hashlib.sha256((package/name).read_bytes()).hexdigest()==value for name,value in manifest['files'].items()),'release manifest hashes the actual packaged theme')
             for css in (package / "chrome").rglob("*.css"):
                 for relative in re.findall(r'@import\s+["\']([^"\']+)["\']', css.read_text(encoding="utf-8")):
                     assert (css.parent / relative).is_file(), f"Broken packaged CSS import: {css}: {relative}"
             check(True, "all packaged CSS imports resolve")
             if lite:
-                check("-ClassicToolbar %*" in (package / "Install.cmd").read_text(), "Lite Install.cmd selects CSS-only mode")
+                check("-Edition Lite %*" in (package / "Install.cmd").read_text(), "Lite Install.cmd selects CSS-only mode")
                 check(not (package / "chrome/tab-search.css").exists(), "Lite excludes editable-tab styling")
 
         if os.name == "nt":
@@ -83,8 +92,8 @@ def run(tag, firefox=None, driver=None):
             profile.mkdir()
             (profile / "user.js").write_text('user_pref("my.preference", true);\n')
             install(packages[False], profile, executable)
-            check((existing / "whitesur.cfg").is_file() and (profile / ".whitesur-editable-tabs.json").is_file(), "Full archive installs its loader into the chosen Firefox")
-            check('tabSearch.enabled", true' in (profile / "user.js").read_text(encoding="utf-8-sig"), "Full archive enables editable tabs")
+            check((existing / "whitesur.cfg").is_file() and (profile / ".whitesur-editable-tabs.json").exists(), "Full installs its guarded loader")
+            check((profile / "chrome/whitesur-updater.sys.mjs").is_file() and 'tabSearch.enabled", true' in (profile / "user.js").read_text(encoding="utf-8-sig"), "Full enables click editing and its updater")
             browser_files = tree_hash(existing)
             (profile / "chrome/customChrome.css").write_text("/* keep my custom CSS */")
             install(packages[True], profile, executable, cmd=True)
@@ -119,13 +128,14 @@ def run(tag, firefox=None, driver=None):
                 shutil.copytree(firefox.parent, target, ignore=shutil.ignore_patterns("tobedeleted", "updates"))
                 profile = workspace / ("native Lite profile" if lite else "native Full profile")
                 profile.mkdir()
-                before = tree_hash(target) if lite else None
+                before = tree_hash(target)
                 install(package, profile, target / "firefox.exe")
                 if lite:
                     check(tree_hash(target) == before, "native Lite installation leaves every Firefox file unchanged")
                 browser = Firefox(driver, target / "firefox.exe", profile)
                 try:
-                    check(browser.js("return !!window.TabSearch;") != lite, f"installed {'Lite' if lite else 'Full'} archive starts in its correct Firefox mode")
+                    check(browser.js("return !!window.TabSearch;") != lite, "Full uses JavaScript; Lite stays CSS-only")
+                    check((profile/'chrome/lite.css').exists() == lite, "Full and Lite install distinct CSS layouts")
                     check(browser.js("return getComputedStyle(document.getElementById('nav-bar')).height==='48px';"), "packaged userChrome theme is active in Firefox")
                     browser.chord("l")
                     check(browser.js("return document.activeElement===gURLBar.inputField;"), "packaged Firefox address entry remains usable")

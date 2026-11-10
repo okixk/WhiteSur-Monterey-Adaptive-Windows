@@ -1,4 +1,70 @@
-# Testing — 2026.10.21-21
+# Testing — 2026.11.10-27
+
+Local results below use Windows 11, Firefox 159.0 and geckodriver 0.37.1.
+Every native suite installs into disposable Firefox copies/profiles; no company
+configuration or normal user profile is changed. Run suites sequentially because
+native input focus is shared. Remote CI has not been run for these local changes.
+
+## Full / Lite installation and packaging
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_compatible_installer.ps1
+python tests/test_release_packages.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+**49 core installer checks**, **60 compatibility/edition/updater-settings checks**
+and **45 archive checks including real Full/Lite Firefox launches** passed.
+The installer suites use fake browser executables that are never launched and
+real filesystem/preferences/shortcut operations. Cases include read-only owned
+loader reuse, foreign/dynamic/orphan cfg detection, policies, invalid markers,
+custom CSS, opt-out/channel preservation, edition switching, uninstall and
+elevation of the loader helper only. Browser fixture files are hashed unchanged
+where no new loader installation was requested.
+
+## Lite without AutoConfig
+
+```powershell
+python tests/test_compatible_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+```
+
+**65 checks passed**, including 14 frame-sampled motion checks. The suite creates
+its own harmless `zscaler.cfg`, locked lab preference and enterprise policy,
+checks their effective values, and verifies their bytes survive install/update/
+uninstall. WhiteSur's privileged scripts/updater remain absent. WebDriver chrome
+access is test-only.
+
+Coverage includes keyboard editing, no hover reveal, native middle-click closing,
+site-information/security panels, real + / Ctrl+W, suggestions/Escape/page clicks,
+single-tab geometry, 3/14 tabs at 600/800/980/1384/1600 outer widths, overflow,
+pinned/vertical tabs, native Windows dragging/maximize, private/fullscreen/
+customization states, reduced motion, built-in themes and a temporary ordinary
+theme extension. Locked stylesheet prohibition is respected. Native scrolling
+settles before final geometry checks; toolbar controls stay above the editor.
+Screenshots/report: `tests/artifacts/compatible/`.
+
+## Full automatic updates
+
+```powershell
+python tests/test_full_updater_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe" --network
+```
+
+**43 checks passed** (42 without the optional network probe). A real Full install
+loads the production updater through its AutoConfig loader. Transport fixtures
+provide GitHub metadata and actual release ZIPs; production code performs hashes,
+raw ZIP checks, extraction, staging, shutdown replacement and rollback. A real
+quit/relaunch proves updated JavaScript and CSS execute, with post-download
+custom CSS edits preserved. The separate `--network` probe reads the public
+GitHub API without publishing or installing a remote release.
+
+Negative cases include corrupt downloads, wrong hosts, Lite payloads, traversal,
+absolute/backslash/device paths, case collisions, symlinks, missing manifests,
+large files, bad hashes and staged tampering. Other checks cover unowned state,
+daily throttling, opt-out, manual loader-protocol updates, rollback/retry,
+interrupted-rename recovery, and cancelling queued updates during Full-to-Lite
+migration. AutoConfig bytes remain unchanged. Reports/screenshots:
+`tests/artifacts/full-updater/`. Recovery limits are documented in
+[AUTO-UPDATES.md](AUTO-UPDATES.md).
 
 ## Native Firefox on Windows
 
@@ -16,7 +82,7 @@ Results are written to ignored `tests/artifacts/editable-tabs/firefox-report.jso
 
 Keyboard alignment is measured in the next animation frame, after the scheduled selection/scroll layout. Immediate offsets sampled before that frame are also retained in the report; those intermediate tasks can run before the updated layout is painted.
 
-On Windows 11 with Firefox 158.0.1: **38 checks passed**, including the narrower centred single-tab capsule, its browsing/editing and narrow-window states, + opening the second tab, restoring the centred tab after closing back to one, pinned-tab sizing, page-title/favicon restoration, first-click selection versus second-click editing, actual webpage clicks, keyboard switching, new-tab focus, expansion/collapse without resizing neighbours, adaptive editor sizes, and a native visibility-scroll request queued after selection. The click-selection case includes an existing blank tab with previously saved address-bar focus, which must stay compact on the first click when multiple tabs are open. Geometry cases exercise both equal-width browsing tabs and an expanded editor, measuring alignment and total-width drift separately for each mode. Browsing/editing screenshots are saved as `compact-browsing.png` and `compact-editing.png`. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
+On Windows 11 with Firefox 159.0: **38 checks passed**, including the narrower centred single-tab capsule, its browsing/editing and narrow-window states, + opening the second tab, restoring the centred tab after closing back to one, pinned-tab sizing, page-title/favicon restoration, first-click selection versus second-click editing, actual webpage clicks, keyboard switching, new-tab focus, expansion/collapse without resizing neighbours, adaptive editor sizes, and a native visibility-scroll request queued after selection. The click-selection case includes an existing blank tab with previously saved address-bar focus, which must stay compact on the first click when multiple tabs are open. Geometry cases exercise both equal-width browsing tabs and an expanded editor, measuring alignment and total-width drift separately for each mode. Browsing/editing screenshots are saved as `compact-browsing.png` and `compact-editing.png`. These checks do not cover every extension combination, native window-caption hit testing, or every drag/detach interaction.
 
 ## Centred tab and address text
 
@@ -24,7 +90,7 @@ On Windows 11 with Firefox 158.0.1: **38 checks passed**, including the narrower
 py tests/test_centered_text_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 ```
 
-Checks actual title glyph bounds and favicon spacing, native input centring against independently measured DOM text, loaded page/fallback icons, typed and programmatic value changes, placeholders, long-address selection, engine mode, and cleanup. Covers 1/3/10 tabs at wide and narrow widths. Current result: **18 checks passed** on Windows 11 with Firefox 158.0.1. Reports go to `tests/artifacts/centered-text/centered-text-report.json`.
+Checks actual title glyph bounds and favicon spacing, native input centring against independently measured DOM text, loaded page/fallback icons, typed and programmatic value changes, placeholders, long-address selection, engine mode, and cleanup. Covers 1/3/10 tabs at wide and narrow widths. Current result: **18 checks passed** on Windows 11 with Firefox 159.0. Reports go to `tests/artifacts/centered-text/centered-text-report.json`.
 
 ## Search-engine pill (issue #4)
 
@@ -44,7 +110,7 @@ py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\
 
 Uses another installer-created profile and runtime. Checks intermediate tab widths and editor opacity, frame-by-frame input alignment, rapid animation reversal, immediate native tab removal with a temporary decorative snapshot, native WebDriver middle-clicks inside the input and releases outside it, reduced-motion behaviour, and cleanup when disabling during motion. Reports go to `tests/artifacts/tab-motion/tab-motion-report.json`. The geometry checks in the main tab suite wait for motion to settle before comparing final widths; the rapid keyboard checks still sample the next frame.
 
-Current result: **27 checks passed** on Windows 11 with Firefox 158.0.1, including frame-by-frame capsule movement/alignment when opening a second tab and returning to one, expansion at the crowded strip's right edge, and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance also respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
+Current result: **27 checks passed** on Windows 11 with Firefox 159.0, including frame-by-frame capsule movement/alignment when opening a second tab and returning to one, expansion at the crowded strip's right edge, and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance also respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
 
 ## Native window titlebar
 
@@ -54,15 +120,15 @@ py tests/test_window_titlebar_firefox.py --firefox "C:\Program Files\Mozilla Fir
 
 Creates another installed Firefox/profile and checks Windows `WM_NCHITTEST` results, plus real mouse double-clicks to maximize and restore. Covers a 921 px restored window and maximized state, 1/14 tabs, browsing/editing, client hit-testing for tabs/+ and the input, and the no-drag state during tab reordering. The top resize border remains native in restored windows. The disposable test window is temporarily topmost so native clicks cannot land in another application. Results go to `tests/artifacts/window-titlebar/window-titlebar-report.json`.
 
-Current result: **19 checks passed** on Windows 11 with Firefox 158.0.1. Run sequentially with the other native suites.
+Current result: **19 checks passed** on Windows 11 with Firefox 159.0. Run sequentially with the other native suites.
 
 ## Release archives: Full and Lite
 
 ```powershell
-py tests/test_release_packages.py --tag v0.2.0-beta.3 --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+py tests/test_release_packages.py --tag v0.2.0-beta.5 --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 ```
 
-Builds and extracts both ZIPs. Checks checksums, layout/imports, included installers, exclusion of editable files/loaders in Lite, both Lite CMD launchers, direct PowerShell mode, older/custom-loader Firefox, Full-to-Lite upgrades, custom CSS/preferences, and unchanged Firefox installation files. Optional native checks start each installed edition in a disposable Firefox instance, verify its mode and theme, and focus its address field. Current local result: **35 checks passed**, including both native editions. CI runs archive checks on Linux and Windows; the version-tag workflow always publishes both ZIPs with checksums after the suites pass.
+Builds and extracts both ZIPs. Checks checksums, layout/imports, included installers, exclusion of editable files/loaders in Lite, both Lite CMD launchers, direct PowerShell mode, older/custom-loader Firefox, Full-to-Lite upgrades, custom CSS/preferences, and unchanged Firefox installation files. Optional native checks start each installed edition in a disposable Firefox instance, verify its mode and theme, and focus its address field. Current local result: **45 checks passed**, including both native editions. CI runs archive checks on Linux and Windows; the version-tag workflow always publishes both ZIPs with checksums after the suites pass.
 
 ## Windows installer
 

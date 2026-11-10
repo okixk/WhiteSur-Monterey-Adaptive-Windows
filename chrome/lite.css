@@ -1,0 +1,218 @@
+/* WhiteSur Lite. Only native Firefox controls are used; no hover-to-edit.
+ * CSS anchors follow the selected tab; no URL is fabricated from a title.
+ * Unsupported anchor engines and vertical/pinned tabs keep a native toolbar.
+ * Imported by the installer, before the user's customChrome.css.
+ */
+:root#main-window:not([customizing]):not([taskbartab]) {
+  #navigator-toolbox {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+  #toolbar-menubar { order: 0 !important; }
+  #nav-bar { order: 1 !important; z-index: auto !important; width: 100% !important; }
+  #TabsToolbar {
+    display: flex !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    order: 2 !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    padding-inline: 12px !important;
+  }
+  #PersonalToolbar { order: 3 !important; }
+  #nav-bar-customization-target { overflow: visible !important; }
+  #urlbar-container {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 120px !important;
+    max-width: 560px !important;
+    margin-inline: auto !important;
+  }
+  #urlbar .urlbar-input { text-align: center !important; font-size: 13px !important; }
+  #urlbar .urlbarView {
+    min-width: min(560px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+    background: var(--arrowpanel-background) !important;
+    color: var(--arrowpanel-color) !important;
+  }
+  #urlbar .urlbarView :is(.urlbarView-title, .urlbarView-action) { color: var(--arrowpanel-color) !important; }
+  #TabsToolbar .tab-background {
+    border-radius: 9px !important;
+    background: color-mix(in srgb, var(--gnome-tabbar-tab-color) 5%, var(--gnome-tabstoolbar-background)) !important;
+    transition: background-color 140ms ease, box-shadow 140ms ease !important;
+  }
+  #TabsToolbar .tabbrowser-tab:hover .tab-background {
+    background: var(--gnome-tabbar-tab-hover-background) !important;
+  }
+  #TabsToolbar .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
+    background: var(--gnome-tabbar-tab-active-background) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 9%, transparent) !important;
+  }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-content {
+    display: grid !important;
+    grid-template-columns: minmax(24px, 1fr) minmax(0, max-content) minmax(24px, 1fr) !important;
+    column-gap: 6px !important;
+    align-items: center !important;
+  }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-icon-stack {
+    grid-area: 1 / 1 !important;
+    justify-self: end !important;
+    margin-inline: 0 !important;
+  }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-label-container {
+    grid-area: 1 / 2 !important;
+    min-width: 0 !important;
+    justify-content: center !important;
+  }
+  #TabsToolbar .tab-label { text-align: center !important; font-size: 12px !important; }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-close-button { grid-area: 1 / 3 !important; justify-self: end !important; }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-audio-button { grid-area: 1 / 1 !important; justify-self: end !important; }
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-note-icon { grid-area: 1 / 3 !important; justify-self: start !important; }
+  /* Animate the painted capsule, never the tab used by Firefox's visibility
+   * calculations or the anchor positioning the native address field. Keep the
+   * native outer-tab width transition and its completion event untouched. */
+  #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-stack {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    transform-origin: center;
+    transition: opacity 160ms ease, translate 160ms cubic-bezier(.2,.7,.2,1), scale 160ms cubic-bezier(.2,.7,.2,1);
+  }
+  #TabsToolbar .tabbrowser-tab:not([pinned]):not([fadein]) .tab-stack {
+    opacity: 0;
+    translate: 0 4px;
+    scale: .97;
+  }
+  #TabsToolbar .tabbrowser-tab[closing]:not([pinned]) .tab-stack {
+    opacity: 0;
+    translate: 0 -2px;
+    scale: .97;
+  }
+  @starting-style {
+    #TabsToolbar .tabbrowser-tab:not([pinned]) .tab-stack {
+      opacity: 0;
+      translate: 0 4px;
+      scale: .97;
+    }
+  }
+  #TabsToolbar :is(.tab-label-container, .tab-icon-stack) { transition: opacity 140ms ease; }
+  /* Keep extensions and overflow reachable at narrow widths. */
+  #unified-extensions-button:not([hidden]), #nav-bar[overflowing] #nav-bar-overflow-button {
+    display: revert !important;
+  }
+  #nav-bar:not([overflowing]) #nav-bar-overflow-button { display: none !important; }
+  #nav-bar-customization-target > .content-analysis-indicator:not([hidden]) { display: revert !important; }
+  &:has(#tabbrowser-tabs[orient="vertical"]) #TabsToolbar { display: none !important; }
+
+  @supports (left: anchor(--whitesur-selected-tab left)) and (width: anchor-size(width)) {
+    &:not(:has(#tabbrowser-tabs[orient="vertical"])):not(:has(.tabbrowser-tab[selected][pinned])) {
+      --whitesur-compatible-left: 188px;
+      --whitesur-compatible-right: calc(var(--whitesur-right-zone) + 44px);
+      &:has(#nav-bar-customization-target > #sidebar-button:not([hidden]):not([collapsed]) ~ #urlbar-container) {
+        --whitesur-compatible-left: 188px;
+      }
+      /* Real flex space replaces the out-of-flow address field. Custom toolbar
+       * items retain their native order on each side of it. */
+      #nav-bar-customization-target::after { content: ""; flex: 1 1 auto; order: 1; }
+      #nav-bar-customization-target > #urlbar-container ~ * { order: 2 !important; }
+      #TabsToolbar {
+        position: absolute !important;
+        inset: 0 var(--whitesur-compatible-right) auto var(--whitesur-compatible-left) !important;
+        width: auto !important;
+        padding-inline: 0 !important;
+      }
+      #tabbrowser-tabs .tabbrowser-tab[selected]:not([pinned]) { anchor-name: --whitesur-selected-tab; }
+      #tabbrowser-tabs .tabbrowser-tab[fadein]:not([pinned]):not([closing]) {
+        /* Selection attributes and saved input focus may be restored after
+         * native visibility calculations. Keep ALL slots independent of both
+         * states; no privileged hook is needed to repair native scrolling. */
+        min-width: 240px !important;
+        max-width: 240px !important;
+      }
+      /* A lone tab uses the available space, with a cap like Monterey's
+       * centred address capsule. Native scroll/close logic still owns tabs. */
+      #tabbrowser-tabs:not([haspinnedtabs]):not(:has(tab-group)):not(:has(.tabbrowser-tab ~ .tabbrowser-tab)) .tabbrowser-tab:not([pinned]) {
+        flex: 1 1 auto !important;
+        width: 560px !important;
+        max-width: 560px !important;
+        margin-inline-start: max(0px, calc((100vw - min(560px, 100vw - var(--whitesur-compatible-left) - var(--whitesur-compatible-right) - 40px)) / 2 - var(--whitesur-compatible-left))) !important;
+      }
+      #urlbar-container {
+        position: fixed !important;
+        position-anchor: --whitesur-selected-tab;
+        left: calc(anchor(left) + 3px) !important;
+        top: anchor(top) !important;
+        width: calc(anchor-size(width) - 6px) !important;
+        height: 32px !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 50 !important;
+        opacity: 0 !important;
+        transition: opacity 140ms cubic-bezier(.2,.7,.2,1);
+        pointer-events: none !important;
+      }
+      #urlbar-container * { pointer-events: none !important; }
+      /* Native smooth scrolling can briefly carry the anchored field across
+       * a strip edge. Real navigation/tools/caption controls stay above it. */
+      #nav-bar-customization-target > :not(#urlbar-container),
+      #PanelUI-button, #nav-bar-overflow-button, #nav-bar > .titlebar-buttonbox-container {
+        position: relative !important;
+        z-index: 60 !important;
+      }
+      #nav-bar > .titlebar-buttonbox-container { position: absolute !important; }
+      /* Keep the browsing tab itself available for native middle-click close.
+       * Ctrl+L, Alt+D, F6 and new-tab focus reveal the real address field. */
+      &:has(#urlbar[focused], #urlbar-container:focus-within) #urlbar-container {
+        opacity: 1 !important;
+        .urlbar-input-container > *, .urlbar-input-container *:not(.urlbar-background),
+        .urlbarView, .urlbarView * { pointer-events: auto !important; }
+      }
+      #urlbar { margin: 0 !important; height: 32px !important; }
+      /* Reserve the tab's native close target while giving compact editors
+       * room for their input and native identity/page-action controls. */
+      #urlbar .urlbar-input-container { padding-inline: 0 20px !important; }
+      #urlbar-background { pointer-events: none !important; }
+      &:has(#urlbar[focused], #urlbar-container:focus-within)
+        .tabbrowser-tab[selected] :is(.tab-label-container, .tab-icon-stack) { opacity: 0 !important; }
+      /* Suggestions may be wider than a compact tab; keep the panel inside
+       * the viewport even for the last tab in an overflowing strip. */
+      #urlbar .urlbarView {
+        position: fixed !important;
+        left: clamp(12px, anchor(left), calc(100vw - min(560px, 100vw - 24px) - 12px)) !important;
+        top: calc(anchor(top) + 36px) !important;
+        width: min(560px, calc(100vw - 24px)) !important;
+        margin: 0 !important;
+        background: var(--arrowpanel-background) !important;
+        border-radius: 9px !important;
+        box-shadow: 0 6px 24px #0004 !important;
+      }
+      /* Native toolbar overflow handles an arbitrary number of pinned addons.
+       * At small widths use two rows instead of hiding navigation/security UI. */
+      @media (max-width: 980px) {
+        #TabsToolbar { position: relative !important; inset: auto !important; width: 100% !important; padding-inline: 12px !important; }
+        #nav-bar-customization-target::after { display: none; }
+        #nav-bar-customization-target > #urlbar-container ~ * { order: 0 !important; }
+        #urlbar-container {
+          position: relative !important;
+          left: auto !important; top: auto !important;
+          width: auto !important; min-width: 200px !important;
+          max-width: 560px !important; margin-inline: auto !important;
+          opacity: 1 !important; pointer-events: auto !important;
+          * { pointer-events: auto !important; }
+        }
+        #urlbar .urlbar-input-container { padding-inline: 0 !important; }
+        &:has(#urlbar[focused], #urlbar-container:focus-within)
+          .tabbrowser-tab[selected] :is(.tab-label-container, .tab-icon-stack) { opacity: 1 !important; }
+      }
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root#main-window #urlbar-container,
+  :root#main-window:not([customizing]):not([taskbartab]) #TabsToolbar
+    :is(.tab-background, .tab-stack, .tab-label-container, .tab-icon-stack) { transition: none !important; }
+}

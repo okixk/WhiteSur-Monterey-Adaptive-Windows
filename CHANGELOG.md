@@ -1,5 +1,44 @@
 # Changelog
 
+## 2026.11.10-28 (v0.2.0-beta.5 — Full / Lite editions)
+
+- Restore Full as the guarded AutoConfig edition: selected-tab left click edits,
+  middle click inside the editor closes, and hovering only highlights.
+- Make Lite the profile-only CSS edition, including anchor editing, reduced-motion
+  aware animations and no loader/privileged runtime. Remove hover-to-edit.
+- Keep smaller multi-tab capsules (Full up to 160px, Lite fixed 240px), preserving
+  the wide single-tab appearance and Full’s expanded editor.
+- Add Full’s GitHub release updater: verified staging, normal-shutdown application
+  for next startup, custom CSS preservation, rollback and Tools-menu controls.
+  Never update existing AutoConfig, policies or browser installation files.
+- Add edition manifests, explicit Full/Lite ZIP names, updater migration/recovery,
+  read-only loader reuse and real Firefox restart/security regression coverage.
+
+Earlier local beta.5 drafts below used the name “Compatible Full”; this edition
+is now Lite. Those drafts were not published.
+
+## Local changes — smaller multi-tab capsules
+
+- Reduce ordinary multi-tab capsules from 280px to 240px in Compatible mode, keeping fixed widths across selection and focus. Adjust editor padding to retain usable text space and the native right-edge close target.
+- Reduce normal multi-tab capsules from at most 180px to 160px in the optional JavaScript mode. Keep single-tab capsules and expanded editing space unchanged.
+- Reuse a completed, matching WhiteSur loader read-only when the optional JavaScript method is explicitly selected. Do not rewrite its installation metadata or request elevation just to reuse it.
+- The JavaScript method retains left-click editing and middle-click closing inside the selected tab's editor. Compatible mode retains native mouse handling; CSS cannot route those buttons differently over the native input.
+
+## 2026.11.10-26 (Compatible CSS motion)
+
+- Add a 140ms title/editor crossfade and hover colour/shadow transitions without changing tab or editor widths.
+- Add subtle 160ms capsule fade/slide/scale effects during native tab opening and closing. Keep native tab removal and width-transition completion intact; do not retain detached snapshots.
+- Respect reduced motion for every new effect. Add 14 native frame-sampling checks, bringing Compatible coverage to 64 checks with existing AutoConfig and policy still active.
+
+## 2026.11.10-25 (v0.2.0-beta.5 — Full without AutoConfig)
+
+- Default Full to Compatible profile CSS, preserving existing AutoConfig and enterprise/security configuration. Keep legacy AutoConfig as explicit opt-in and Lite as Classic.
+- Anchor the real native address field to the selected tab where supported; retain the centred single capsule, native suggestions, controls, titles/favicons and adaptive theme colours.
+- Keep a usable separate address/tab layout at narrow widths, without anchors and for pinned selections. Preserve vertical tabs. Keep toolbar controls above the editor during native smooth scrolling.
+- Detect conservative AutoConfig conflicts and refuse rewriting even owned cfg/pref-loader files. Do not copy policy-managed installations into new runtimes. Extend read-only diagnostics.
+- Test real Firefox with active synthetic AutoConfig and enterprise policy, keyboard/mouse entry, crowded tabs, native window dragging, themes, fullscreen, private windows, customization and locked stylesheet behavior.
+- Document feature differences, unsupported privileged behaviors, and the evaluated extension/policy alternatives. Include upstream license notices in both release archives.
+
 ## 2026.11.02-24 (v0.2.0-beta.4 — Centred Tabs and Favicons)
 
 - Centred tab titles and native address/search text, placing the favicon directly beside the text. Preserved native editing, autocomplete, selection, engine/security controls, and long-address scrolling.

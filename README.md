@@ -1,128 +1,143 @@
 # WhiteSur Monterey Adaptive for Windows
 
-A **Monterey-style, adaptive Firefox UI theme for Windows 11**.
+A Monterey-inspired Firefox theme for Windows 11, available in **Full** and **Lite**.
 
-Tabs show their page titles and favicons while browsing. Click a background tab to select it, then click the selected tab to open Firefox's native address/search field. Navigation, Escape, or clicking the page restores the normal tab. It includes native Windows controls, adaptive colours, a PowerShell installer, profile detection, backups, and uninstall support.
+| | Full | Lite |
+| --- | --- | --- |
+| Adaptive colours, rounded capsules, Windows caption buttons | Yes | Yes |
+| Hover-to-edit | No | No |
+| Click selected tab to edit | Yes | Use Ctrl+L / Alt+D / F6 |
+| Middle-click selected browsing tab | Closes the tab | Native tab closing |
+| Middle-click inside the address editor | Closes the selected tab | Native Firefox input behavior |
+| Multiple ordinary tabs | Up to 160px while browsing | Fixed 240px slots |
+| Single-tab capsule | Wide and centred | Wide and centred where space permits |
+| Custom expansion/open/close animations | Yes | CSS fades/slide/scale, native lifecycle |
+| GitHub release updater | Yes; enabled by default | None |
+| AutoConfig | Required; guarded installation/reuse | Never installed |
 
-**v0.2.0-beta.4 refines the Safari-style layout with a centred single-tab capsule, centred text and adjacent favicons.** Full enables editable tabs in your existing Firefox; Lite installs the classic userChrome CSS theme. See the [release notes](docs/releases/v0.2.0-beta.4.md).
+Full is for the complete click editor and updater. Lite is for installations
+with existing AutoConfig such as `zscaler.cfg`, enterprise policies, or a
+preference for profile CSS only. Existing AutoConfig and security configurations
+are never overwritten or chained into.
 
-![WhiteSur Monterey Adaptive running in Firefox on Windows](docs/screenshot.png)
+## Install
 
-> [!IMPORTANT]
-> This is an unofficial community project. It is not affiliated with or endorsed by Mozilla, Apple, Vince Liuice, Rafael Mardojai, AdamXweb, or the developers of Adaptive Tab Bar Color.
-
-## Features
-
-- Monterey-inspired Firefox appearance on Windows
-- Native Windows minimise, maximise, and close buttons on the right
-- Editable selected tabs with native address-bar icons and suggestions
-- Centred tab titles, addresses and search text, with the favicon beside the text
-- Safari-inspired compact capsules with normal titles and favicons while browsing
-- A lone tab forms a centred, Safari-style capsule; multiple tabs stay compact, with only the edited tab expanding
-- Smooth editor expansion/collapse, new-tab entrance, and tab-close effects, respecting reduced motion
-- Middle-click the search field to close its tab
-- Compatible CSS toolbar for older Firefox, vertical tabs, and existing AutoConfig setups
-- Stable spacing when navigation and page-action icons appear
-- Clean tab closing without invisible gaps
-- Draggable empty toolbar and tab-strip regions without interfering with tab reordering or detaching
-- macOS-inspired light/dark middle-click autoscroll indicator
-- Adaptive colours through Firefox theme variables
-- Automatic Firefox profile detection
-- Existing `chrome` folder backup and restoration
-- Preserves your `customChrome.css` during updates
-- Adds the loader to your existing Firefox; requests administrator approval when needed
-
-## Adaptive colours
-
-The theme is designed to work with **Adaptive Tab Bar Color**:
-
-https://addons.mozilla.org/firefox/addon/adaptive-tab-bar-colour/
-
-The extension changes Firefox's theme colours to match the active website. This theme consumes Firefox's standard lightweight-theme variables, so the toolbar and tabs can follow those colours.
-
-Without the extension, the theme still works, but the colours remain based on Firefox's current theme instead of adapting per website.
-
-## Installation
-
-Every release includes a **Full ZIP** and a **Lite ZIP**, each with `Install.cmd`. Full includes editable/searchable tabs. Lite installs only the classic userChrome theme, without adding a Firefox loader or editable-tab script. Use `Install-Lite.cmd` from a source checkout or Full ZIP for classic CSS mode.
-
-1. Download or clone this repository.
-2. Fully close Firefox. Make sure no `firefox.exe` process remains.
-3. Run `Install.cmd`.
-4. Approve the Windows administrator prompt if Firefox is installed in a protected folder. Firefox opens automatically; your usual shortcuts continue to work.
-
-The installer:
-
-- finds the Firefox profile selected by Firefox's `installs.ini`;
-- backs up an existing `chrome` directory;
-- installs the theme;
-- enables the necessary preferences through a managed `user.js` block;
-- on Firefox 158+, adds the editable-tab loader to your existing Firefox installation.
-
-The loader consists of `whitesur.cfg` and `defaults/pref/whitesur-autoconfig.js`, tracked by `.whitesur-loader.json` in the Firefox installation directory. Firefox uses your existing profile, extensions, bookmarks, and shortcuts. Only writing these loader files is elevated when Windows requires it; profile installation runs as your original user.
-
-If editable tabs cannot be installed, installation stops with an error before replacing the profile theme. Update to Firefox 158+ or pass a clean installation with `Install.cmd -FirefoxPath "C:\path\to\firefox.exe"`. Classic mode is an explicit choice: `Install.cmd -ClassicToolbar`.
-
-Click a tab to select it, then click it again to type an address or search. The clicks do not need to be a rapid double-click. Normal searches use your Firefox default engine; `g search terms` uses Google and `q search terms` uses Qwant. `Ctrl+L`, `Alt+D`, and `F6` open editing immediately; `Esc` cancels the draft and restores the title. Clicking the page or navigating also returns to a normal tab. Keyboard tab switching leaves website titles visible, while `Ctrl+T` creates a ready-to-type new tab.
-
-To install just the classic adaptive toolbar:
+Close Firefox before installing. Extract one complete release ZIP and run its
+`Install.cmd`. Full and Lite archives select their own edition, including direct
+PowerShell invocation. In a source checkout:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-WhiteSur-Monterey-Adaptive.ps1 -ClassicToolbar
+.\Install.cmd          # Full: guarded AutoConfig + click editor + updater
+.\Install-Lite.cmd     # Lite: CSS only
+
+# Explicit profile / executable and edition
+powershell -NoProfile -ExecutionPolicy Bypass -File .\Install-WhiteSur-Monterey-Adaptive.ps1 -Edition Lite -ProfilePath "C:\path\to\profile" -FirefoxPath "C:\Program Files\Mozilla Firefox\firefox.exe"
+
+# Full with automatic updates initially disabled
+.\Install.cmd -DisableAutoUpdate
 ```
 
-See [editable-tab setup and compatibility](docs/EDITABLE-TABS.md) for custom paths and loader details.
+Full requires Firefox 158+ and an available AutoConfig slot. A completed,
+matching WhiteSur loader is reused read-only, without rewriting its cfg,
+pref-loader or installation marker. A new loader may need administrator rights.
+Foreign AutoConfig, differing owned cfg contents and detected enterprise policy
+management cause a refusal recommending Lite. `-Force` bypasses only the
+running-Firefox check; it does not bypass configuration protection.
 
-Use `Check-Installation.cmd` to verify the active profile and installed version.
+Lite never writes Firefox installation files or installs privileged scripts or
+an updater. The installer backs up an unrelated chrome folder, preserves your
+`customChrome.css` on updates and manages only its own `user.js` preference block.
+Administrator-locked stylesheet preferences remain authoritative.
 
-## Updating
+`-InstallationMethod AutoConfig` remains an alias for Full behavior;
+`-InstallationMethod Compatible` selects Lite. `-ClassicToolbar` retains the
+older CSS layout for compatibility. See [edition details](docs/COMPATIBILITY.md).
 
-Close Firefox and run `Install.cmd` from the newer release. A user-created `customChrome.css` is preserved. The installer refreshes the loader in your existing Firefox. Firefox keeps its normal update mechanism; rerun the installer if a Firefox update removes the loader files. When upgrading from beta.1, the old owned WhiteSur shortcut is removed and your usual Firefox shortcut works.
+## Use
 
-## Uninstalling
+In Full, click a background tab to select it, then click the selected tab to
+edit its native address field. The second click does not need to be a fast
+double-click. Hovering only changes the highlight. A middle-button press and
+release inside the editor closes exactly that selected tab; releasing outside
+cancels the gesture. Ctrl+L, Alt+D and F6 edit immediately; Escape, navigation or
+clicking the page restores the title. Native suggestions and site-information
+controls remain available. Reduced motion is respected.
 
-Close Firefox and run `Uninstall.cmd`. It removes managed preferences and restores the previous `chrome` backup when available. The shared loader remains for other installed profiles and ignores profiles without this theme's marker. Firefox itself stays installed. A separate copy left by beta.1 can be removed manually after closing it and switching to your usual Firefox.
+Lite keeps browsing tabs available for native left/middle clicks. Hovering does
+not open the editor. Ctrl+L, Alt+D, F6 and new-tab focus reveal the real field;
+Escape follows normal Firefox behavior. Engines with CSS anchors align that
+field with the selected horizontal tab. Narrow windows (up to 980 CSS pixels),
+pinned selections and engines without anchors use a separate address field.
+Vertical tabs retain their native sidebar. Middle-clicking inside a focused
+native input cannot be reassigned by CSS.
 
-## Compatibility
+Both editions consume Firefox's standard theme variables. For site-dependent
+colours, install [Adaptive Tab Bar Color](https://addons.mozilla.org/firefox/addon/adaptive-tab-bar-colour/).
+Without it, Firefox's selected theme supplies the colours.
 
-Version `2026.11.02-24` (`v0.2.0-beta.4`) targets Firefox 158+ on Windows 11 with horizontal tabs for Full. Older versions and detected AutoConfig conflicts can use the Lite ZIP or explicit `-ClassicToolbar` installation, which retains the previous Firefox 154/156 fixes. Vertical tabs leave the editable-tab implementation inactive.
+## Full automatic updates
 
-Adaptive Tab Bar Color compatibility is retained: both layouts use Firefox's existing theme colour variables. Native tests cover light and dark variable changes; extension-specific behaviour also depends on the extension's settings.
+Full checks published releases from
+[`okixk/WhiteSur-Monterey-Adaptive-Windows`](https://github.com/okixk/WhiteSur-Monterey-Adaptive-Windows/releases)
+after startup and at most once a day. Prereleases are included during this beta
+project. Use **Tools → WhiteSur Updates** (Alt+T on Windows) to check now, see
+status, or turn automatic updates off. An opted-out setting survives normal
+installer updates.
 
-Firefox does not officially support third-party browser chrome CSS as a stable public API. A future Firefox update can rename UI elements or change layout behaviour. Please report theme-specific breakage here rather than to Mozilla.
+A verified newer Full ZIP is downloaded and staged while you browse. Its theme
+is applied during normal shutdown, before the profile lock is released, so the
+next start loads the update. The running theme is not replaced mid-session.
+The updater verifies GitHub's SHA-256 asset digest, the package manifest and
+every managed theme file, and rejects unsafe ZIP paths and incompatible packages.
+It never runs downloaded installers or modifies Firefox, AutoConfig, policies,
+extensions, bookmarks, preferences or certificates. `customChrome.css` is copied
+from your active theme at application time, preserving changes made after download.
 
-## Development and testing
+Only managed theme files under `chrome` are updated, including Full's browser-UI
+JavaScript. This trusts the fixed repository's release publisher; checksums
+detect corruption and are not independent author signatures. Put personal CSS
+changes in `customChrome.css`, since other managed theme files are replaced.
+Loader-protocol changes require manual installation instead of rewriting cfg.
 
-This project was **heavily vibe-coded with ChatGPT**, then iteratively tested and corrected in real Firefox sessions on Windows. The final layout was shaped by repeated visual testing, especially around URL-bar geometry, tab closing, responsive widths, toolbar spacing, and native window dragging.
+Updates require a normal quit/restart to apply. After a crash they remain staged
+until a normal shutdown. Previous theme copies are retained for recovery. If a
+power interruption occurs between directory moves and leaves `chrome` missing,
+rerunning the installer restores its owned backup before reinstalling. Details:
+[updater behavior, validation and recovery](docs/AUTO-UPDATES.md).
 
-Native Windows checks use a disposable profile and runtime. Run with Firefox 158+ and [geckodriver](https://github.com/mozilla/geckodriver/releases) 0.37+:
+## Update, diagnose, remove
+
+Close Firefox and rerun the chosen edition's installer for a manual update or
+edition switch. Switching to Lite removes the privileged profile script and
+updater settings and cancels queued Full updates. Shared installation-level
+loader files stay untouched for other profiles.
+
+`Check-Installation.cmd` reports profiles, version, edition/method, AutoConfig
+and policy-source detection. Use `about:policies` for effective enterprise policy
+details. Close Firefox and run `Uninstall.cmd` to remove the theme and managed
+preferences, restoring the earlier chrome backup when available. Owned updater
+cache/rollback directories are retained for manual recovery; they cannot apply
+without the Full runtime and settings.
+
+## Development and tests
+
+All browser testing uses disposable Firefox copies and profiles. The updater
+suite uses real ZIPs, real hashing/extraction, simulated GitHub transport and a
+real quit/relaunch, plus an optional read-only request to GitHub:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_installer.ps1
-py tests/test_editable_tabs_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
-py tests/test_search_mode_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
-py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
-py tests/test_window_titlebar_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/test_compatible_installer.ps1
+python tests/test_full_updater_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe" --network
+python tests/test_compatible_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
+python tests/test_release_packages.py
 ```
 
-See [testing notes](docs/TESTING.md) for coverage and artifacts. The classic layout and package checks run with:
-
-```powershell
-py -m pip install -r requirements-dev.txt
-py -m playwright install chromium
-py tests/render_layout.py
-py tests/test_navigation_states.py
-py tests/test_urlbar_geometry.py
-py tests/test_tab_selected_firefox154.py
-py tests/test_v18_r7_regressions.py
-py tests/test_v18_r8_regressions.py
-py tests/test_v18_r9_toolbar_integration.py
-py tests/render_v18_r7_fixture.py
-py tests/render_v18_r9_fixture.py
-py test_package.py
-```
-
-On Linux, set `CHROMIUM_EXECUTABLE` to a system Chromium path when you prefer not to use Playwright's bundled browser.
+Run native suites sequentially because input focus is shared on Windows. See
+[testing notes](docs/TESTING.md). Firefox chrome CSS and privileged UI internals
+are not stable public APIs; browser updates may require theme changes. This is
+an unofficial community project, unaffiliated with Mozilla, Apple or the
+upstream theme authors.
 
 ## Upstream and inspiration
 

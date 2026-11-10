@@ -124,6 +124,8 @@ def install(profile, source, runtime, shortcuts):
         str(ROOT / "Install-WhiteSur-Monterey-Adaptive.ps1"),
         "-ProfilePath", str(profile), "-FirefoxPath", str(source),
         "-ShortcutDirectory", str(shortcuts), "-Force",
+        "-InstallationMethod", "AutoConfig",
+        "-DisableAutoUpdate",
     ]
     if runtime is not None:
         command.extend(["-RuntimeDirectory", str(runtime)])
@@ -200,7 +202,7 @@ def run(browser, artifacts):
             "&&gBrowser.selectedTab!==singleStart&&document.activeElement===gURLBar.inputField;"))
         settle(browser)
         check("+ on the wide tab opens a second tab and restores compact sizing", browser.js(
-            "return singleStart.getBoundingClientRect().width<=181"
+            "return singleStart.getBoundingClientRect().width<=161"
             "&&gBrowser.selectedTab.getBoundingClientRect().width<=301;"))
         browser.js("gBrowser.removeTab(gBrowser.selectedTab,{animate:true});")
         browser.until(lambda: browser.js("return gBrowser.tabs.length===1;"))

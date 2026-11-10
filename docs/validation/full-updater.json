@@ -1,0 +1,245 @@
+[
+  {
+    "name": "Full starts its updater through the installed loader",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "update controls are available in the native Tools menu",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "native Tools-menu checkbox disables and persists automatic updates",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "invalid updater ownership/state is preserved without network or writes",
+    "pass": true,
+    "details": true
+  },
+  {
+    "name": "corrupt-download is rejected without changing the theme",
+    "pass": true,
+    "details": "Release checksum mismatch."
+  },
+  {
+    "name": "wrong-host is rejected without changing the theme",
+    "pass": true,
+    "details": "Unexpected release download URL."
+  },
+  {
+    "name": "lite-package is rejected without changing the theme",
+    "pass": true,
+    "details": "Not a compatible Full package."
+  },
+  {
+    "name": "zip-slip is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe package path."
+  },
+  {
+    "name": "absolute-path is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe package path."
+  },
+  {
+    "name": "backslash-path is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe package path."
+  },
+  {
+    "name": "windows-alias is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe package path."
+  },
+  {
+    "name": "case-collision is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe release archive."
+  },
+  {
+    "name": "archive-symlink is rejected without changing the theme",
+    "pass": true,
+    "details": "Unsafe release archive."
+  },
+  {
+    "name": "bad-file-hash is rejected without changing the theme",
+    "pass": true,
+    "details": "Theme file checksum mismatch."
+  },
+  {
+    "name": "missing-manifest is rejected without changing the theme",
+    "pass": true,
+    "details": "Component returned failure code: 0x80520012 (NS_ERROR_FILE_NOT_FOUND) [nsIZipReader.getEntry]"
+  },
+  {
+    "name": "oversized-file is rejected without changing the theme",
+    "pass": true,
+    "details": "Missing or oversized theme file."
+  },
+  {
+    "name": "loader changes require manual installation instead of rewriting cfg",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "equal/older releases never replace the installed theme",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "older pre-manifest releases are ignored without a permanent error",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "automatic checks are limited to once per day",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "failed checks do not escape the profile staging directory",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "a valid Full release is staged for the next restart",
+    "pass": true,
+    "details": {
+      "error": null,
+      "lastAsset": "sha256:95603709e4c4987c7debe2835f407a3034f12000bef7ed0837b666cf7b8399ce",
+      "lastChecked": 1794311708927,
+      "lastVersion": "2099.01.01-1",
+      "owner": "WhiteSur-Monterey-Adaptive-Windows",
+      "pending": {
+        "directory": "stage-0f2cdda1-337a-4038-ab50-8577e0ed4252",
+        "manifestHash": "ed4b3ab4d2b976b8d9c1c30a2a7477710f1270a7d754d846afc9d8aa33b502bd",
+        "tag": "v99.0.0",
+        "version": "2099.01.01-1"
+      },
+      "schema": 1,
+      "status": "pending"
+    }
+  },
+  {
+    "name": "staging leaves the currently running theme untouched",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "failed replacement restores the previous working theme",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "failed replacement clears its pending update for a clean retry",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "staged files are rehashed before application",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "a changed staged manifest is rejected before replacement",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "disabled automatic updates make no network request",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "a clean retry can stage a valid update again",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "real Firefox shutdown applies the staged update",
+    "pass": true,
+    "details": {
+      "schema": 1,
+      "owner": "WhiteSur-Monterey-Adaptive-Windows",
+      "status": "applied",
+      "pending": null,
+      "lastChecked": 1794311710082,
+      "error": null,
+      "lastVersion": "2099.01.01-1",
+      "lastAsset": "sha256:95603709e4c4987c7debe2835f407a3034f12000bef7ed0837b666cf7b8399ce",
+      "installedVersion": "2099.01.01-1",
+      "backup": "rollback-51629cbe-09a3-4d7a-985a-24353a18d0f5"
+    }
+  },
+  {
+    "name": "shutdown preserves custom CSS edited after download",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "shutdown leaves updater preferences unchanged",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "a rollback copy of the previous theme is retained",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "no AutoConfig installation files change during updating",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "the next Firefox start executes the updated theme script",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "the next Firefox start loads updated CSS and user overrides",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "the real GitHub release API is readable in Firefox",
+    "pass": true,
+    "details": {
+      "array": true,
+      "count": 7
+    }
+  },
+  {
+    "name": "a second update is pending before switching to Lite",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "Full-to-Lite migration disables and removes the updater",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "a loaded Full updater cannot replace Lite during shutdown",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "switching to Lite cancels a queued Full update",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "Lite restarts without any privileged theme runtime",
+    "pass": true,
+    "details": null
+  },
+  {
+    "name": "installer recovers a backup if a power interruption left chrome absent",
+    "pass": true,
+    "details": null
+  }
+]

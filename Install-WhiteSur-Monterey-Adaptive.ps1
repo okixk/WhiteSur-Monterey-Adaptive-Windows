@@ -7,9 +7,9 @@ Installs WhiteSur Monterey Adaptive into the active Firefox profile on Windows 1
 Finds the profile selected by Firefox's Install section, backs up an existing
 chrome directory, copies the Windows-compatible Monterey Adaptive package, and
 manages the required Firefox user preferences in user.js.
-On supported Firefox versions, adds the AutoConfig loader to the existing
-Firefox installation. Windows requests administrator approval when necessary.
-Use -ClassicToolbar for the CSS-only layout, or -RuntimeDirectory for a copy.
+Full installs the privileged click editor and release updater using AutoConfig.
+Lite installs only profile CSS. Existing AutoConfig and enterprise policies are
+never overwritten. Use -Edition Lite for managed Firefox installations.
 #>
 [CmdletBinding()]
 param(
@@ -36,6 +36,20 @@ param(
     [switch]$ClassicToolbar,
 
     [Parameter()]
+    [ValidateSet('Full', 'Lite')]
+    [string]$Edition,
+
+    [Parameter()]
+    [switch]$DisableAutoUpdate,
+
+    [Parameter()]
+    [switch]$NoLaunch,
+
+    [Parameter()]
+    [ValidateSet('Auto', 'Compatible', 'AutoConfig', 'Classic')]
+    [string]$InstallationMethod = 'Auto',
+
+    [Parameter()]
     [switch]$Launch,
 
     [Parameter()]
@@ -55,15 +69,16 @@ $PackageRoot = Split-Path -Parent $PSCommandPath
 # A Lite archive stays CSS-only even when its PowerShell entry point is used
 # directly, rather than going through the bundled CMD launcher.
 $flavorFile = Join-Path $PackageRoot 'PACKAGE-FLAVOR.txt'
-if ((Test-Path -LiteralPath $flavorFile -PathType Leaf) -and
-    ([IO.File]::ReadAllText($flavorFile).Trim() -eq 'Lite')) {
-    $ClassicToolbar = $true
-}
+$packageEdition = if (Test-Path -LiteralPath $flavorFile -PathType Leaf) { [IO.File]::ReadAllText($flavorFile).Trim() } else { 'Full' }
+if (-not $Edition) { $Edition = $packageEdition }
+if ($packageEdition -eq 'Lite') { $Edition = 'Lite'; $InstallationMethod = 'Compatible' }
+if ($NoLaunch) { $Launch = $false }
 $ChromeSource = Join-Path $PackageRoot 'chrome'
 $ThemeMarkerName = '.whitesur-monterey-adaptive-windows'
 $PreferenceBegin = '// BEGIN WhiteSur Monterey Adaptive Windows'
 $PreferenceEnd = '// END WhiteSur Monterey Adaptive Windows'
 . (Join-Path $PackageRoot 'Editable-Tabs-Runtime.ps1')
+. (Join-Path $PackageRoot 'Theme-Updater-Install.ps1')
 $EditableTabsRuntime = $null
 
 function Write-Status {
@@ -341,6 +356,9 @@ function Set-ManagedPreferences {
     )
 
     $userJs = Join-Path $FirefoxProfilePath 'user.js'
+    if ((Test-Path -LiteralPath $userJs) -and ((Get-Item -LiteralPath $userJs).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw 'The profile user.js is a symbolic link; it was left untouched.'
+    }
     $rawExisting = if (Test-Path -LiteralPath $userJs -PathType Leaf) {
         Get-Content -LiteralPath $userJs -Raw -ErrorAction Stop
     }
@@ -414,6 +432,15 @@ function Get-ProfileStatus {
 }
 
 function Show-Diagnostics {
+    $executable = Find-FirefoxExecutable -RequestedPath $FirefoxPath
+    if ($executable) {
+        $directory = Split-Path -Parent $executable
+        Write-Status "Firefox: $executable ($(Get-FirefoxRuntimeVersion -Executable $executable))" White
+        Write-Host "  Foreign AutoConfig: $(Test-ForeignAutoConfig -Directory $directory)"
+        Write-Host "  policies.json present: $(Test-Path -LiteralPath (Join-Path $directory 'distribution\policies.json'))"
+        Write-Host "  Enterprise policy source detected: $(Test-FirefoxEnterprisePolicy -Directory $directory)"
+        Write-Host '  Compatible choice: Lite (profile CSS only). Effective locked preferences remain authoritative.'
+    }
     $profiles = if (-not [string]::IsNullOrWhiteSpace($ProfilePath)) {
         @(Get-SelectedProfiles)
     }
@@ -434,6 +461,18 @@ function Show-Diagnostics {
         Write-Host "  chrome folder:      $($status.ChromeFolder)"
         Write-Host "  userChrome.css:     $($status.UserChromeCss)"
         Write-Host "  WhiteSur marker:    $($status.WhiteSurMarker)"
+        if ($status.WhiteSurMarker) {
+            Get-Content -LiteralPath (Join-Path $profile.Path "chrome\$ThemeMarkerName") | Where-Object { $_ -match '^(Version|Method|Edition):' } | ForEach-Object { Write-Host "  $_" }
+        }
+        $updaterSettings = Join-Path $profile.Path '.whitesur-updater.json'
+        if (Test-Path -LiteralPath $updaterSettings -PathType Leaf) {
+            if (-not ((Get-Item -LiteralPath $updaterSettings).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+                try {
+                    $update = Get-Content -LiteralPath $updaterSettings -Raw | ConvertFrom-Json
+                    if ($update.owner -eq 'WhiteSur-Monterey-Adaptive-Windows') { Write-Host "  Full auto updates:  $($update.enabled)" }
+                } catch { Write-Host '  Full auto updates:  settings could not be read' }
+            }
+        } else { Write-Host '  Full auto updates:  not installed' }
         Write-Host "  user.js preference: $($status.PreferenceInUserJs)"
         Write-Host "  Editable-tabs script: $($status.EditableTabsScript)"
         Write-Host "  Editable-tabs launcher metadata: $($status.EditableTabsState)"
@@ -504,6 +543,21 @@ function Install-ThemeForProfile {
         [IO.File]::WriteAllText($userChromePath, $styles, [Text.UTF8Encoding]::new($false))
     }
 
+    # Lite is profile CSS only, even when a shared old loader remains installed.
+    $userChromePath = Join-Path $targetChrome 'userChrome.css'
+    $styles = [IO.File]::ReadAllText($userChromePath)
+    if ($EditableTabsRuntime.Method -eq 'Compatible') {
+        if (-not $styles.Contains('@import "lite.css";')) {
+            $styles = $styles.Replace('@import "customChrome.css";', "@import `"lite.css`";`n@import `"customChrome.css`";")
+        }
+    } else {
+        Remove-Item -LiteralPath (Join-Path $targetChrome 'lite.css') -Force -ErrorAction SilentlyContinue
+    }
+    if (-not $EditableTabsRuntime.Enabled) {
+        Remove-Item -LiteralPath (Join-Path $targetChrome 'whitesur-updater.sys.mjs') -Force -ErrorAction SilentlyContinue
+    }
+    [IO.File]::WriteAllText($userChromePath, $styles, [Text.UTF8Encoding]::new($false))
+
     if (($null -ne $preservedCustomChrome) -and (Test-Path -LiteralPath $preservedCustomChrome)) {
         Copy-Item -LiteralPath $preservedCustomChrome -Destination (Join-Path $targetChrome 'customChrome.css') -Force
         Remove-Item -LiteralPath $preservedCustomChrome -Force
@@ -515,9 +569,12 @@ function Install-ThemeForProfile {
         "Package: $PackageRoot"
         "Version: $([IO.File]::ReadAllText((Join-Path $PackageRoot 'VERSION.txt')).Trim())"
         "Profile: $($Profile.Path)"
+        "Method: $($EditableTabsRuntime.Method)"
+        "Edition: $Edition"
     ) | Set-Content -LiteralPath $marker -Encoding UTF8
 
     Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $true -EditableTabs $EditableTabsRuntime.Enabled
+    Set-ThemeUpdaterSettings -ProfileDirectory $Profile.Path -Edition $Edition -Disable:$DisableAutoUpdate
     Set-EditableTabsLauncher -Profile $Profile -Runtime $EditableTabsRuntime -ShortcutDirectory $ShortcutDirectory
 
     $status = Get-ProfileStatus -Profile $Profile
@@ -540,6 +597,7 @@ function Uninstall-ThemeForProfile {
 
     Write-Status "Removing from '$($Profile.Name)' ($($Profile.Path))"
     Remove-EditableTabsLauncher -ProfileDirectory $Profile.Path
+    Remove-ThemeUpdaterSettings -ProfileDirectory $Profile.Path
     Set-ManagedPreferences -FirefoxProfilePath $Profile.Path -Enabled $false
 
     if (Test-Path -LiteralPath $marker -PathType Leaf) {
@@ -582,13 +640,35 @@ if (($runningFirefox.Count -gt 0) -and -not $Force) {
 
 $selectedProfiles = @(Get-SelectedProfiles)
 if (-not $Uninstall) {
-    $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory -Classic:$ClassicToolbar
-    if (-not $ClassicToolbar -and -not $EditableTabsRuntime.Enabled) {
-        throw "Editable tabs could not be installed. $($EditableTabsRuntime.Reason) Update Firefox or specify -FirefoxPath. To explicitly install the classic toolbar, run Install.cmd -ClassicToolbar."
+    if ($ClassicToolbar) { $InstallationMethod = 'Classic'; $Edition = 'Lite' }
+    if ($InstallationMethod -in @('Compatible', 'Classic')) { $Edition = 'Lite' }
+    if ($Edition -eq 'Lite' -and $InstallationMethod -eq 'AutoConfig') { throw 'Lite never installs AutoConfig. Select Full explicitly for privileged features.' }
+    if ($InstallationMethod -eq 'Auto') {
+        $InstallationMethod = if ($Edition -eq 'Full') { 'AutoConfig' } else { 'Compatible' }
+    }
+    if ($InstallationMethod -eq 'AutoConfig') {
+        $EditableTabsRuntime = Initialize-EditableTabsRuntime -SourceExecutable $FirefoxPath -DestinationDirectory $RuntimeDirectory
+        if (-not $EditableTabsRuntime.Enabled) {
+            throw "Full could not be installed. $($EditableTabsRuntime.Reason) Use Install-Lite.cmd or -Edition Lite without changing AutoConfig."
+        }
+        $EditableTabsRuntime | Add-Member -NotePropertyName Method -NotePropertyValue 'AutoConfig'
+    } else {
+        $executable = Find-FirefoxExecutable -RequestedPath $FirefoxPath
+        $conflict = $executable -and (Test-ForeignAutoConfig -Directory (Split-Path -Parent $executable))
+        $reason = if ($InstallationMethod -eq 'Classic') { 'Classic CSS toolbar selected.' } else {
+            'Lite CSS selected. No loader, privileged script or updater is installed; use Ctrl+L to edit.'
+        }
+        if ($conflict) { Write-Status 'AutoConfig detected: existing installation/security files will be left untouched. Use Lite.' Yellow }
+        if ($executable -and (Test-FirefoxEnterprisePolicy -Directory (Split-Path -Parent $executable))) {
+            Write-Status 'Enterprise policy source detected; use Lite. Policy locks remain authoritative.' Yellow
+        }
+        $EditableTabsRuntime = [pscustomobject]@{ Enabled=$false; Method=$InstallationMethod; Executable=$executable; Reason=$reason }
     }
     Write-Status $EditableTabsRuntime.Reason $(if ($EditableTabsRuntime.Enabled) { [ConsoleColor]::Green } else { [ConsoleColor]::Yellow })
 }
 foreach ($profile in $selectedProfiles) {
+    Assert-ProfileChromePath -ProfileDirectory $profile.Path
+    Repair-ThemeUpdateTransaction -ProfileDirectory $profile.Path
     if ($Uninstall) {
         Uninstall-ThemeForProfile -Profile $profile
     }
@@ -610,7 +690,10 @@ else {
             Write-Status "Opened the configured Firefox with profile '$($launchProfile.Name)'." Green
         }
     } else {
-        Write-Status 'Installation complete with the compatible CSS layout. Start Firefox again.' Green
+        Write-Status "Installation complete: Lite ($($EditableTabsRuntime.Method)). No Firefox installation files were changed." Green
+        if ($Launch -and $EditableTabsRuntime.Executable -and $EditableTabsRuntime.Method -eq 'Compatible') {
+            Start-Process -FilePath $EditableTabsRuntime.Executable -ArgumentList ('-no-remote -profile "' + $selectedProfiles[0].Path + '"')
+        }
     }
 }
 exit 0

@@ -5,6 +5,9 @@
   // types. Only activate after all required UI capabilities are present.
   if (Number.parseInt(Services.appinfo.version, 10) < 158 ||
       !Services.prefs.getBoolPref('userChrome.tabSearch.enabled', true)) return;
+  try {
+    window.WhiteSurUpdates = ChromeUtils.importESModule('resource://whitesur/whitesur-updater.sys.mjs').startFullUpdater(window);
+  } catch (error) { Cu.reportError('WhiteSur updater: ' + error); }
   const root = document.documentElement;
   const tabs = gBrowser.tabContainer;
   const container = document.getElementById('urlbar-container');
@@ -213,11 +216,11 @@
     // Give the address a little extra room in a sparse strip, then gradually
     // trim it as tabs fill the available space. Use the fixed budget/count,
     // not measured tab widths, so selection and overflow cannot feed back.
-    const crowding = Math.max(0, Math.min(1, (180 - budget / count) / 92));
+    const crowding = Math.max(0, Math.min(1, (160 - budget / count) / 72));
     const single = visible.length === 1 && ordinary.length === 1;
     const singleWidth = Math.min(budget, 580, Math.max(240, Math.round(budget * .8)));
     const activeWidth = single ? singleWidth : Math.min(budget, Math.round(300 - 40 * crowding));
-    const backgroundWidth = single ? singleWidth : Math.max(88, Math.min(180,
+    const backgroundWidth = single ? singleWidth : Math.max(88, Math.min(160,
       Math.floor((budget - activeWidth) / Math.max(1, count - 1))));
     root.toggleAttribute('tabsearch-single', single);
     set('tab-width', backgroundWidth);
