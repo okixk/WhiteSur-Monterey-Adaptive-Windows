@@ -96,12 +96,11 @@
       }
       #tabbrowser-tabs .tabbrowser-tab[selected]:not([pinned]) { anchor-name: --whitesur-selected-tab; }
       #tabbrowser-tabs .tabbrowser-tab[fadein]:not([pinned]):not([closing]) {
-        min-width: 160px !important;
-        max-width: 220px !important;
-      }
-      &:has(#urlbar[focused]) #tabbrowser-tabs .tabbrowser-tab[selected][fadein]:not([pinned]):not([closing]) {
-        min-width: 320px !important;
-        max-width: 560px !important;
+        /* Selection attributes and saved input focus may be restored after
+         * native visibility calculations. Keep ALL slots independent of both
+         * states; no privileged hook is needed to repair native scrolling. */
+        min-width: 280px !important;
+        max-width: 280px !important;
       }
       /* A lone tab uses the available space, with a cap like Monterey's
        * centred address capsule. Native scroll/close logic still owns tabs. */

@@ -64,7 +64,7 @@ const rect=e=>{let r=e.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r
 const u=document.getElementById('urlbar-container'),t=gBrowser.selectedTab;
 return {url:rect(u),tab:rect(t),strip:rect(document.getElementById('TabsToolbar')),
   input:rect(gURLBar.inputField),width:innerWidth,opacity:getComputedStyle(u).opacity,
-  focused:document.activeElement===gURLBar.inputField,count:gBrowser.tabs.length,
+  focused:document.activeElement===gURLBar.inputField,focusedId:document.activeElement?.id,count:gBrowser.tabs.length,
   stripVisible:getComputedStyle(document.getElementById('TabsToolbar')).display!=='none',
   anchors:CSS.supports('left:anchor(--test left)'),overflow:gBrowser.tabContainer.hasAttribute('overflow')};
 '''
@@ -199,6 +199,8 @@ def run(source, driver, artifacts):
             for count in (3,14):
                 browser.js('while(gBrowser.tabs.length<arguments[0])gBrowser.addTab("about:blank",{triggeringPrincipal:Services.scriptSecurityManager.getSystemPrincipal()});',count)
                 browser.chord('\ue004')
+                browser.until(lambda:browser.js('return !gBrowser._switcher?.switchInProgress;'))
+                settle(browser)
                 for width in (600,800,980,1384,1600):
                     browser.call('POST','window/rect',{'width':width,'height':850})
                     browser.chord('l')
@@ -213,7 +215,10 @@ def run(source, driver, artifacts):
                         screenshot(browser,'narrow-browsing.png')
             for width,index in ((1384,0),(1384,7),(1384,13),(1000,13)):
                 browser.call('POST','window/rect',{'width':width,'height':850})
+                browser.js('gBrowser.selectedBrowser.focus();')
                 browser.js('gBrowser.selectedTab=gBrowser.tabs[arguments[0]];',index)
+                browser.until(lambda:browser.js('return !gBrowser._switcher?.switchInProgress;'))
+                before_focus=browser.js('return gBrowser.selectedTab.getBoundingClientRect().width;')
                 browser.chord('l')
                 settle(browser)
                 # Native smooth tab-strip scrolling is separate from element
@@ -223,7 +228,7 @@ def run(source, driver, artifacts):
                 except TimeoutError:
                     pass
                 sample=browser.js(MEASURE)
-                check(f'overflow selection {index} at {width}px stays inside its strip',sample['url']['x']>=sample['strip']['x']-1 and sample['url']['right']<=sample['strip']['right']+1 and sample['input']['w']>80,sample)
+                check(f'overflow selection {index} at {width}px stays inside its strip',sample['url']['x']>=sample['strip']['x']-1 and sample['url']['right']<=sample['strip']['right']+1 and sample['input']['w']>80 and abs(sample['tab']['w']-before_focus)<1,sample)
             browser.call('POST','window/rect',{'width':1384,'height':850})
             browser.js('gBrowser.pinTab(gBrowser.selectedTab);')
             browser.chord('l')

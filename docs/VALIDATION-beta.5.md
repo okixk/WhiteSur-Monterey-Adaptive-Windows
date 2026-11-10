@@ -49,8 +49,12 @@ native caption buttons and control spacing. Live tests found and corrected:
   disabling pointer interception when the editor is transparent.
 * The classic layer hiding all tabs below 981px: Full now uses a separate tab
   row with its native scroll/new-tab controls.
-* Crowded editors too small to type: reserve a 320px selected editor in roomy
+* Crowded editors too small to type: reserve 280px ordinary tab slots in roomy
   inline mode, keep native overflow scrolling, and allow that scrolling to settle.
+  The first Windows CI run exposed selection/focus-dependent resizing that
+  invalidated native visibility requests. Ordinary tabs now reserve editing
+  width before selection; selecting/focusing cannot change their widths. More
+  tabs therefore use native overflow compared with the dense legacy script.
 * Native scrolling temporarily crossing toolbar controls: keep navigation,
   tools and caption controls above the editor. A clamp based on anchor layout
   coordinates was rejected because native anchor scroll compensation displaced it.

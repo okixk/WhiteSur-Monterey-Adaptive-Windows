@@ -56,6 +56,10 @@ behavior and may leave the field focused. Background tabs still select normally.
 Use tab outer edges for native tab dragging and context menus while the
 centre is an address field.
 
+Ordinary tabs reserve 280px editing slots so selection/focus cannot invalidate
+Firefox's native visibility calculations. Crowded strips use native scrolling
+sooner than the denser legacy JavaScript layout.
+
 At widths at or below 980 CSS pixels, on engines without anchors, or with a
 pinned tab selected, Full uses a separate native address field and tab row.
 Vertical tabs retain their native sidebar. Tabs stay accessible in narrow Full

@@ -62,7 +62,7 @@ for this change used Firefox **159.0**, Windows 11, and geckodriver **0.37.1**.
 | Ctrl+L / Alt+D / F6 / Ctrl+T | Native behavior | Script-assisted native behavior | Native behavior |
 | Escape | Native cancel/close; focus may remain in field | Returns to tab title | Native behavior |
 | Click page | Returns to title unless pointer remains over tab | Returns to title | Native behavior |
-| Editor expansion | CSS width change; native scrolling | Animated coordinated expansion | Separate field |
+| Editor space | All ordinary tabs reserve 280px editing slots; native scrolling | Compact tabs with animated focus-only expansion | Separate field |
 | Open/close animations | Firefox's native motion | Custom entrances/close snapshots | Native motion |
 | Reduced motion | Respected for theme transitions | Also cancels custom motion | Native motion |
 | Middle-click inside address input closes tab | No; normal Firefox input behavior | Yes | No |

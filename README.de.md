@@ -51,6 +51,10 @@ Titel. Escape verwendet das normale Firefox-Verhalten und kann den Fokus im Feld
 belassen. Tab-Aussenränder bleiben für natives Ziehen und Tab-Kontextmenüs
 verfügbar; die Mitte verwendet die Aktionen des Adressfelds.
 
+Normale Tabs reservieren 280 Pixel breite Eingabeplätze. Auswahl und Fokus
+ändern dadurch keine Breiten nach der nativen Scroll-Berechnung; bei vielen
+Tabs wird früher gescrollt als beim dichteren alten JavaScript-Layout.
+
 Bis 980 CSS-Pixel Fensterbreite, ohne CSS-Anker oder bei einem ausgewählten
 angehefteten Tab nutzt Full eine separate Adress- und Tab-Zeile. Vertikale Tabs
 behalten ihre Sidebar. Lite behält das bisherige klassische Layout.
