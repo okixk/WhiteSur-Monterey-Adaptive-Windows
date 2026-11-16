@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.11.16-31 (local — Lite click editing)
+
+- Enable left-click editing in Lite's inline horizontal layout through the native
+  address input, without AutoConfig or privileged JavaScript. Selecting a background
+  page still only selects it; the next click on its title edits. Hover stays inert.
+- The inline title centre uses native input middle-click behavior and keeps the
+  tab open. Native closing remains available on the exposed tab edge and close button.
+
 ## 2026.11.16-30 (v0.2.0-beta.6 — native editor middle-click)
 
 - Keep left-click editing/search in Full and restore native middle-click behavior

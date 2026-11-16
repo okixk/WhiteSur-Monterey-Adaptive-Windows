@@ -10,8 +10,9 @@ using only profile CSS:
 * Short hover and selection colour/shadow transitions.
 
 `prefers-reduced-motion: reduce` removes these decorative transitions. A fading
-editor stops intercepting clicks as soon as it is dismissed. Rapid reversals
-follow the latest focus state without a delayed invisible overlay.
+editor's hidden controls stop intercepting clicks as soon as it is dismissed.
+The native input remains the selected title's click-to-edit target in the inline
+layout. Rapid reversals follow the latest focus state without a delayed overlay.
 
 ## Why widths remain stable
 

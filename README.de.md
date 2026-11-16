@@ -6,7 +6,7 @@ Ein Monterey-inspiriertes Firefox-Theme für Windows 11 in **Full** und **Lite**
 | --- | --- | --- |
 | Adaptive Farben, Kapseln, Windows-Fensterknöpfe | Ja | Ja |
 | Bearbeiten durch Darüberfahren | Nein | Nein |
-| Ausgewählten Tab anklicken zum Bearbeiten | Ja | Strg+L / Alt+D / F6 |
+| Ausgewählten Tab anklicken zum Bearbeiten | Ja | Ja, im horizontalen Inline-Layout |
 | Mittelklick im Adressfeld schliesst den Tab | Nein | Normales Firefox-Verhalten |
 | Mehrere normale Tabs | Bis 160px beim Surfen | Feste 240px-Plätze |
 | Automatische GitHub-Theme-Updates | Ja | Keine |
@@ -40,8 +40,11 @@ im Editor lässt den Tab offen und verwendet das native Firefox-Verhalten. Strg+
 Escape, Navigation oder ein Klick auf die Seite stellt den Titel wieder her.
 Hover hebt nur hervor. Animationen respektieren reduzierte Bewegung.
 
-Lite: Normale Tab-Klicks bleiben nativ, insbesondere Mittelklick zum Schliessen
-eines Browsing-Tabs. Hover öffnet kein Eingabefeld. Strg+L, Alt+D, F6 und neue
+Lite: Im horizontalen Inline-Layout einen Hintergrund-Tab auswählen, dann dessen
+Titel anklicken, um das native Adressfeld zu bearbeiten. Der Titelbereich ist
+auch unsichtbar das native Eingabefeld; ein Mittelklick dort lässt den Tab offen.
+Am freien Tab-Rand bleibt natives Schliessen per Mittelklick möglich.
+Hover öffnet kein Eingabefeld. Strg+L, Alt+D, F6 und neue
 Tabs verwenden das native Adressfeld. Bei CSS-Ankerunterstützung liegt es am
 ausgewählten horizontalen Tab; in schmalen Fenstern, ohne Anker oder bei einer
 angehefteten Auswahl wird eine separate Adresszeile verwendet. Vertikale Tabs

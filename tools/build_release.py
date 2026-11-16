@@ -55,7 +55,7 @@ def build(tag: str, output: Path) -> list[Path]:
             if lite:
                 bundle.writestr(f"{package}/README-LITE.md",
                     "# WhiteSur Lite\n\nClose Firefox, extract this archive, and run Install.cmd.\n"
-                    "Installs the Lite CSS theme. No hover editing; Ctrl+L opens the native field.\n"
+                    "Installs the Lite CSS theme. Click the selected title in inline layout or use Ctrl+L to edit; no hover editing.\n"
                     "No editable-tab script, AutoConfig loader, Firefox copy, or extra shortcut is installed.\n"
                     "Firefox installation files are left untouched. User.js enables custom stylesheets and disables editable tabs.\n"
                     "Existing customChrome.css and unrelated preferences are preserved. Uninstall.cmd restores the previous theme.\n"

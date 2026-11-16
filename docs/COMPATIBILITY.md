@@ -11,9 +11,9 @@ overwrites existing cfg files or changes enterprise/security configurations.
 | Centred native titles and favicons | Yes | Yes, horizontal tabs |
 | Centred single-tab capsule | Up to 580px | Up to 560px where space permits |
 | Multiple ordinary tabs | 88–160px while browsing | Stable 240px editing slots |
-| Edit selected tab | Left click or Ctrl+L / Alt+D / F6 | Ctrl+L / Alt+D / F6 / new-tab focus |
+| Edit selected tab | Left click or Ctrl+L / Alt+D / F6 | Left click in inline layout; keyboard shortcuts everywhere |
 | Hover opens editor | No | No |
-| Middle-click closes selected browsing tab | Yes | Native handling |
+| Middle-click closes selected browsing tab | Yes | Exposed tab edge; inline title centre keeps tab open |
 | Middle-click inside focused address field closes tab | No; native input behavior | No; native input behavior |
 | Native suggestions, site information, engine selector | Yes | Yes |
 | Escape / navigate / click page restores title | Yes | Native focus behavior; Escape may retain editor |

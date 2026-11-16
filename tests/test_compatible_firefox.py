@@ -1,4 +1,4 @@
-"""Real Windows Firefox coverage for profile-only Full, including active AutoConfig.
+"""Real Windows Firefox coverage for profile-only Lite, including active AutoConfig.
 
 No production JavaScript is injected. Chrome context is used only by WebDriver
 to measure UI and arrange test states. All installations and policies are lab
@@ -194,13 +194,28 @@ def run(source, driver, artifacts):
             check('clicking the page restores the title capsule', sample['opacity']=='0', sample)
             move(browser, sample['tab']['x']+sample['tab']['w']/2, sample['tab']['y']+16)
             settle(browser)
-            check('Lite hover leaves the browsing tab available for native clicks', browser.js('return getComputedStyle(document.getElementById("urlbar-container")).opacity==="0";'))
+            check('Lite hover keeps the editor hidden', browser.js('return getComputedStyle(document.getElementById("urlbar-container")).opacity==="0";'))
+            move(browser,sample['tab']['x']+sample['tab']['w']/2,sample['tab']['y']+16,click=True)
+            settle(browser)
+            check('Lite left-click on the selected title focuses and reveals the native editor',browser.js('return document.activeElement===gURLBar.inputField&&getComputedStyle(document.getElementById("urlbar-container")).opacity==="1";'))
+            move(browser,700,400,click=True)
             browser.js('window.liteCloseTarget=gBrowser.selectedTab;gBrowser.addTrustedTab("about:robots",{skipAnimation:true});')
             settle(browser)
-            r=browser.js('let r=gBrowser.selectedTab.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};')
+            r=browser.js('let r=gBrowser.tabs[1].getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};')
+            move(browser,r['x'],r['y'],click=True)
+            settle(browser)
+            check('Lite first click selects a background page without editing',browser.js('return gBrowser.selectedTab===gBrowser.tabs[1]&&document.activeElement!==gURLBar.inputField&&getComputedStyle(document.getElementById("urlbar-container")).opacity==="0";'))
+            move(browser,r['x'],r['y'],click=True)
+            settle(browser)
+            check('Lite next click edits the selected page without AutoConfig',browser.js('return document.activeElement===gURLBar.inputField&&getComputedStyle(document.getElementById("urlbar-container")).opacity==="1";'))
+            move(browser,r['x'],r['y'],click=True,button=1)
+            check('Lite middle-click in the editor preserves its tab',browser.js('return gBrowser.tabs.length===2;'))
+            move(browser,700,400,click=True)
+            browser.js('window.liteCloseTarget=gBrowser.selectedTab;')
+            r=browser.js('let r=gBrowser.selectedTab.getBoundingClientRect();return {x:r.x+6,y:r.y+r.height/2};')
             move(browser,r['x'],r['y'],click=True,button=1)
             browser.until(lambda:browser.js('return !liteCloseTarget.isConnected&&gBrowser.tabs.length===1;'))
-            check('Lite middle-click closes the selected browsing tab',True)
+            check('Lite middle-click on the exposed tab edge closes it natively',True)
             browser.chord('l')
             settle(browser)
             check('Lite keyboard shortcut focuses the native address input', browser.js('return document.activeElement===gURLBar.inputField;'))

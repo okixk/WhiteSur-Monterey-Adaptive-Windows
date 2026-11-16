@@ -156,6 +156,10 @@
         pointer-events: none !important;
       }
       #urlbar-container * { pointer-events: none !important; }
+      /* The transparent native input is the selected tab's click-to-edit
+       * target. Focus reveals it; hover alone does nothing. Keep hidden site
+       * controls inert and the outer tab edges available for native actions. */
+      #urlbar-container .urlbar-input { pointer-events: auto !important; }
       /* Native smooth scrolling can briefly carry the anchored field across
        * a strip edge. Real navigation/tools/caption controls stay above it. */
       #nav-bar-customization-target > :not(#urlbar-container),
@@ -164,8 +168,8 @@
         z-index: 60 !important;
       }
       #nav-bar > .titlebar-buttonbox-container { position: absolute !important; }
-      /* Keep the browsing tab itself available for native middle-click close.
-       * Ctrl+L, Alt+D, F6 and new-tab focus reveal the real address field. */
+      /* Clicking the native input, Ctrl+L, Alt+D, F6 and new-tab focus reveal
+       * the real address field without privileged event handlers. */
       &:has(#urlbar[focused], #urlbar-container:focus-within) #urlbar-container {
         opacity: 1 !important;
         .urlbar-input-container > *, .urlbar-input-container *:not(.urlbar-background),

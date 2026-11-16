@@ -28,13 +28,15 @@ where no new loader installation was requested.
 python tests/test_compatible_firefox.py --firefox "C:\clean-firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
 ```
 
-**65 checks passed**, including 14 frame-sampled motion checks. The suite creates
+**69 checks passed** against local version 2026.11.16-31, including inline
+left-click editing, background selection before editing, native input middle-click
+preservation and exposed-tab-edge closing, plus 14 frame-sampled motion checks. The suite creates
 its own harmless `zscaler.cfg`, locked lab preference and enterprise policy,
 checks their effective values, and verifies their bytes survive install/update/
 uninstall. WhiteSur's privileged scripts/updater remain absent. WebDriver chrome
 access is test-only.
 
-Coverage includes keyboard editing, no hover reveal, native middle-click closing,
+Coverage includes keyboard/click editing, no hover reveal, native tab-edge closing,
 site-information/security panels, real + / Ctrl+W, suggestions/Escape/page clicks,
 single-tab geometry, 3/14 tabs at 600/800/980/1384/1600 outer widths, overflow,
 pinned/vertical tabs, native Windows dragging/maximize, private/fullscreen/

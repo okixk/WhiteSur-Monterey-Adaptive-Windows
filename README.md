@@ -6,7 +6,7 @@ A Monterey-inspired Firefox theme for Windows 11, available in **Full** and **Li
 | --- | --- | --- |
 | Adaptive colours, rounded capsules, Windows caption buttons | Yes | Yes |
 | Hover-to-edit | No | No |
-| Click selected tab to edit | Yes | Use Ctrl+L / Alt+D / F6 |
+| Click selected tab to edit | Yes | Yes, in the inline horizontal layout |
 | Middle-click selected browsing tab | Closes the tab | Native tab closing |
 | Middle-click inside the address editor | Native Firefox input behavior | Native Firefox input behavior |
 | Multiple ordinary tabs | Up to 160px while browsing | Fixed 240px slots |
@@ -63,13 +63,16 @@ edit immediately; Escape, navigation or
 clicking the page restores the title. Native suggestions and site-information
 controls remain available. Reduced motion is respected.
 
-Lite keeps browsing tabs available for native left/middle clicks. Hovering does
-not open the editor. Ctrl+L, Alt+D, F6 and new-tab focus reveal the real field;
+In Lite's inline horizontal layout, click a background tab to select it, then
+click the selected title to focus the real address field. Hovering does not open
+the editor. Ctrl+L, Alt+D, F6 and new-tab focus also reveal the real field;
 Escape follows normal Firefox behavior. Engines with CSS anchors align that
 field with the selected horizontal tab. Narrow windows (up to 980 CSS pixels),
 pinned selections and engines without anchors use a separate address field.
 Vertical tabs retain their native sidebar. Middle-clicking inside a focused
-native input cannot be reassigned by CSS.
+native input cannot be reassigned by CSS. In the inline layout, the title centre
+is the native input's click target even while its paint is hidden; middle-click
+there keeps the tab open. Use the exposed tab edge or close button to close it.
 
 Both editions consume Firefox's standard theme variables. For site-dependent
 colours, install [Adaptive Tab Bar Color](https://addons.mozilla.org/firefox/addon/adaptive-tab-bar-colour/).
