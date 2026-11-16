@@ -1,6 +1,6 @@
 # Full editable tabs (AutoConfig)
 
-Full uses AutoConfig for click editing, middle-click closing and the release updater. Lite uses profile CSS without hover editing or privileged scripts. See [COMPATIBILITY.md](COMPATIBILITY.md) for the edition matrix and [AUTO-UPDATES.md](AUTO-UPDATES.md) for updater behavior.
+Full uses AutoConfig for click editing and the release updater. Lite uses profile CSS without hover editing or privileged scripts. See [COMPATIBILITY.md](COMPATIBILITY.md) for the edition matrix and [AUTO-UPDATES.md](AUTO-UPDATES.md) for updater behavior.
 
 Full enables editable tabs on Firefox 158+ for Windows. `Install.cmd` opens the configured Firefox and selected profile automatically after a successful installation. Tabs show their native page titles and favicons while browsing. Clicking a background tab selects it without editing; clicking the already selected tab opens Firefox's actual address bar, including its search selector, identity/security controls, page actions, suggestions, and keyboard behaviour. This does not require a rapid double-click. Ctrl+L, Alt+D, and F6 open editing directly. Navigation, Escape, or clicking the webpage restores the title. Native search/identity popups remain usable while editing.
 

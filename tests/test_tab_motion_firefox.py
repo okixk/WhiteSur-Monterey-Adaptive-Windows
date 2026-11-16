@@ -185,8 +185,8 @@ def run(browser, artifacts):
         browser.js("TabSearch.edit();")
         settle(browser)
         middle()
-        check("a real middle-click in the input closes exactly its selected tab", browser.js(
-            "return !motionMiddle.isConnected&&gBrowser.tabs.length===motionCount-1;"))
+        check("a real middle-click in the input preserves its selected tab", browser.js(
+            "return motionMiddle.isConnected&&gBrowser.selectedTab===motionMiddle&&gBrowser.tabs.length===motionCount;"))
         settle(browser)
 
         browser.call("POST", "window/rect", {"width": 800, "height": 850})

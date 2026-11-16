@@ -7,7 +7,7 @@ Ein Monterey-inspiriertes Firefox-Theme für Windows 11 in **Full** und **Lite**
 | Adaptive Farben, Kapseln, Windows-Fensterknöpfe | Ja | Ja |
 | Bearbeiten durch Darüberfahren | Nein | Nein |
 | Ausgewählten Tab anklicken zum Bearbeiten | Ja | Strg+L / Alt+D / F6 |
-| Mittelklick im Adressfeld schliesst den Tab | Ja | Normales Firefox-Verhalten |
+| Mittelklick im Adressfeld schliesst den Tab | Nein | Normales Firefox-Verhalten |
 | Mehrere normale Tabs | Bis 160px beim Surfen | Feste 240px-Plätze |
 | Automatische GitHub-Theme-Updates | Ja | Keine |
 | AutoConfig | Erforderlich, geschützt installiert/wiederverwendet | Wird nie installiert |
@@ -35,9 +35,8 @@ und verwaltet nur seinen eigenen `user.js`-Block.
 ## Bedienung
 
 Full: Hintergrund-Tab auswählen, dann ausgewählten Tab anklicken, um das echte
-Adressfeld zu bearbeiten. Ein schneller Doppelklick ist nicht nötig. Mittlere
-Maustaste im Editor drücken und loslassen schliesst den ausgewählten Tab;
-Loslassen ausserhalb bricht ab. Strg+L, Alt+D und F6 funktionieren direkt.
+Adressfeld zu bearbeiten. Ein schneller Doppelklick ist nicht nötig. Ein Mittelklick
+im Editor lässt den Tab offen und verwendet das native Firefox-Verhalten. Strg+L, Alt+D und F6 funktionieren direkt.
 Escape, Navigation oder ein Klick auf die Seite stellt den Titel wieder her.
 Hover hebt nur hervor. Animationen respektieren reduzierte Bewegung.
 

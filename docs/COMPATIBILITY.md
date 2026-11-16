@@ -14,7 +14,7 @@ overwrites existing cfg files or changes enterprise/security configurations.
 | Edit selected tab | Left click or Ctrl+L / Alt+D / F6 | Ctrl+L / Alt+D / F6 / new-tab focus |
 | Hover opens editor | No | No |
 | Middle-click closes selected browsing tab | Yes | Native handling |
-| Middle-click inside focused address field closes tab | Yes; release outside cancels | No; native input behavior |
+| Middle-click inside focused address field closes tab | No; native input behavior | No; native input behavior |
 | Native suggestions, site information, engine selector | Yes | Yes |
 | Escape / navigate / click page restores title | Yes | Native focus behavior; Escape may retain editor |
 | Editor motion | Coordinated expansion and fade | 140ms crossfade at fixed width |

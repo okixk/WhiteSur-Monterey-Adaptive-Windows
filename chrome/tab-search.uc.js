@@ -78,7 +78,7 @@
 
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const visuals = new Map(), ghosts = new Set(), closeSnapshots = new WeakMap();
-  let visualFrame = 0, closeFrame = 0, openFrame = 0, closeBefore = null, openBefore = null, fadingTab = null, removing = 0, middleTab = null;
+  let visualFrame = 0, closeFrame = 0, openFrame = 0, closeBefore = null, openBefore = null, fadingTab = null, removing = 0;
   const motionAllowed = () => !reducedMotion.matches && !abort.signal.aborted && !window.closed;
   function visualTick() {
     visualFrame = 0;
@@ -380,27 +380,7 @@
           !focused?.closest('panel, panel-list, .urlbarView')) hide();
     });
   });
-  const inInputRow = event => !!event.target.closest?.('.urlbar-input-container');
-  on(container, 'mousedown', event => {
-    if (event.button !== 1 || !editingTab || !inInputRow(event)) return;
-    event.preventDefault(); event.stopImmediatePropagation(); middleTab = editingTab;
-  }, true);
-  on(window, 'mouseup', event => {
-    if (event.button !== 1 || !middleTab) return;
-    const tab = middleTab; middleTab = null;
-    event.preventDefault(); event.stopImmediatePropagation();
-    if (inInputRow(event) && tab.isConnected && gBrowser.selectedTab === tab) {
-      cancelClickEdit();
-      gBrowser.removeTab(tab, { animate:true, triggeringEvent:event });
-    }
-  }, true);
-  on(container, 'auxclick', event => {
-    if (event.button === 1 && inInputRow(event)) {
-      event.preventDefault(); event.stopImmediatePropagation();
-    }
-  }, true);
   on(window, 'mousedown', event => {
-    middleTab = null;
     cancelClickEdit();
     // Collapsing here moves + before mouseup, so Firefox never receives its
     // click. Let the native button finish the gesture before changing widths.
@@ -428,7 +408,6 @@
     }
   }, true);
   on(window, 'keydown', event => {
-    middleTab = null;
     newTabPress = false;
     cancelClickEdit();
     if (((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toLowerCase() === 'l') ||

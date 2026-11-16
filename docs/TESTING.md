@@ -102,7 +102,7 @@ Uses separate editable and classic profiles created by the real installer, shari
 
 Current result: **18 checks passed**, with zero measured vertical offset. Fresh-profile classic desktop cases also check that the default sidebar toggle cannot make tabs cover the address field.
 
-## Editor motion and middle-click closing
+## Editor motion and middle-click behavior
 
 ```powershell
 py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\firefox.exe" --geckodriver "C:\tools\geckodriver.exe"
@@ -110,7 +110,7 @@ py tests/test_tab_motion_firefox.py --firefox "C:\Program Files\Mozilla Firefox\
 
 Uses another installer-created profile and runtime. Checks intermediate tab widths and editor opacity, frame-by-frame input alignment, rapid animation reversal, immediate native tab removal with a temporary decorative snapshot, native WebDriver middle-clicks inside the input and releases outside it, reduced-motion behaviour, and cleanup when disabling during motion. Reports go to `tests/artifacts/tab-motion/tab-motion-report.json`. The geometry checks in the main tab suite wait for motion to settle before comparing final widths; the rapid keyboard checks still sample the next frame.
 
-Current result: **27 checks passed** on Windows 11 with Firefox 159.0, including frame-by-frame capsule movement/alignment when opening a second tab and returning to one, expansion at the crowded strip's right edge, and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance also respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
+Current local result: **27 checks passed** on Windows 11 with Firefox 159.0 after removing custom editor middle-click closing (2026.11.16-29). A real middle-click inside the input now preserves its selected tab. The suite also checks frame-by-frame capsule movement/alignment when opening a second tab and returning to one, expansion at the crowded strip's right edge, and actual + clicks while editing with 3/14 tabs at 1384/800 px. The + checks hold the pointer between down/up, confirm exactly one selected tab with a fading entrance and focused editor, and check that returning preserves the original draft. New-tab entrance respects reduced motion and cleanup. Run all native browser suites sequentially so separate Firefox windows cannot steal test focus.
 
 ## Native window titlebar
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026.11.16-30 (v0.2.0-beta.6 — native editor middle-click)
+
+- Keep left-click editing/search in Full and restore native middle-click behavior
+  in its address field. Middle-clicking the editor no longer closes the tab.
+- Native middle-click closing on browsing tabs remains available.
+
 ## 2026.11.10-28 (v0.2.0-beta.5 — Full / Lite editions)
 
 - Restore Full as the guarded AutoConfig edition: selected-tab left click edits,

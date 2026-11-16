@@ -59,7 +59,7 @@ def build(tag: str, output: Path) -> list[Path]:
                     "No editable-tab script, AutoConfig loader, Firefox copy, or extra shortcut is installed.\n"
                     "Firefox installation files are left untouched. User.js enables custom stylesheets and disables editable tabs.\n"
                     "Existing customChrome.css and unrelated preferences are preserved. Uninstall.cmd restores the previous theme.\n"
-                    "Full adds privileged click editing, editor middle-click closing, animations and release updates via AutoConfig.\n")
+                    "Full adds privileged click editing, animations and release updates via AutoConfig.\n")
         archives.append(archive)
     checksums = output / "SHA256SUMS.txt"
     checksums.write_text("".join(f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.name}\n" for p in archives), encoding="ascii")

@@ -8,7 +8,7 @@ A Monterey-inspired Firefox theme for Windows 11, available in **Full** and **Li
 | Hover-to-edit | No | No |
 | Click selected tab to edit | Yes | Use Ctrl+L / Alt+D / F6 |
 | Middle-click selected browsing tab | Closes the tab | Native tab closing |
-| Middle-click inside the address editor | Closes the selected tab | Native Firefox input behavior |
+| Middle-click inside the address editor | Native Firefox input behavior | Native Firefox input behavior |
 | Multiple ordinary tabs | Up to 160px while browsing | Fixed 240px slots |
 | Single-tab capsule | Wide and centred | Wide and centred where space permits |
 | Custom expansion/open/close animations | Yes | CSS fades/slide/scale, native lifecycle |
@@ -57,9 +57,9 @@ older CSS layout for compatibility. See [edition details](docs/COMPATIBILITY.md)
 
 In Full, click a background tab to select it, then click the selected tab to
 edit its native address field. The second click does not need to be a fast
-double-click. Hovering only changes the highlight. A middle-button press and
-release inside the editor closes exactly that selected tab; releasing outside
-cancels the gesture. Ctrl+L, Alt+D and F6 edit immediately; Escape, navigation or
+double-click. Hovering only changes the highlight. Middle-click inside the editor
+keeps the tab open and uses Firefox’s native input behavior. Ctrl+L, Alt+D and F6
+edit immediately; Escape, navigation or
 clicking the page restores the title. Native suggestions and site-information
 controls remain available. Reduced motion is respected.
 
