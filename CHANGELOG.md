@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026.11.18-32 (v0.2.0-beta.7 — Lite tab closing motion)
+
+- Center Lite's remaining tab as the closing tab shrinks, keeping both
+  transitions synchronized instead of moving left before recentering.
+- Keep the expanded single tab inside Firefox's tab strip controls near the
+  narrow-layout cutoff.
+- Add real Firefox checks for closing either tab at narrow, medium and wide
+  window sizes.
+
 ## 2026.11.16-31 (local — Lite click editing)
 
 - Enable left-click editing in Lite's inline horizontal layout through the native

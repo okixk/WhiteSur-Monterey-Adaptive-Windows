@@ -113,6 +113,10 @@
     &:not(:has(#tabbrowser-tabs[orient="vertical"])):not(:has(.tabbrowser-tab[selected][pinned])) {
       --whitesur-compatible-left: 188px;
       --whitesur-compatible-right: calc(var(--whitesur-right-zone) + 44px);
+      --whitesur-lone-tab-left: var(--whitesur-compatible-left);
+      /* Reserve space inside the strip for Firefox's trailing tab controls. */
+      --whitesur-lone-tab-gutter: max(var(--whitesur-lone-tab-left), var(--whitesur-compatible-right) + 72px);
+      --whitesur-lone-tab-width: clamp(88px, 100vw - 2 * var(--whitesur-lone-tab-gutter), 560px);
       &:has(#nav-bar-customization-target > #sidebar-button:not([hidden]):not([collapsed]) ~ #urlbar-container) {
         --whitesur-compatible-left: 188px;
       }
@@ -136,11 +140,17 @@
       }
       /* A lone tab uses the available space, with a cap like Monterey's
        * centred address capsule. Native scroll/close logic still owns tabs. */
-      #tabbrowser-tabs:not([haspinnedtabs]):not(:has(tab-group)):not(:has(.tabbrowser-tab ~ .tabbrowser-tab)) .tabbrowser-tab:not([pinned]) {
+      #tabbrowser-tabs:not([haspinnedtabs]):not(:has(tab-group, .tabbrowser-tab[fadein] ~ .tabbrowser-tab[fadein]))
+        .tabbrowser-tab[fadein]:not([pinned]) {
         flex: 1 1 auto !important;
         width: 560px !important;
-        max-width: 560px !important;
-        margin-inline-start: max(0px, calc((100vw - min(560px, 100vw - var(--whitesur-compatible-left) - var(--whitesur-compatible-right) - 40px)) / 2 - var(--whitesur-compatible-left))) !important;
+        max-width: var(--whitesur-lone-tab-width) !important;
+        margin-inline-start: max(0px, calc((100vw - var(--whitesur-lone-tab-width)) / 2 - var(--whitesur-lone-tab-left))) !important;
+        /* Firefox drops [fadein] at the start of a close. Match its width
+         * transition so centering and the closing tab's collapse run together. */
+        @media (prefers-reduced-motion: no-preference) {
+          transition: min-width 100ms ease-out, max-width 100ms ease-out, margin-inline-start 100ms ease-out !important;
+        }
       }
       #urlbar-container {
         position: fixed !important;
@@ -200,6 +210,8 @@
       /* Native toolbar overflow handles an arbitrary number of pinned addons.
        * At small widths use two rows instead of hiding navigation/security UI. */
       @media (max-width: 980px) {
+        --whitesur-lone-tab-left: 12px;
+        --whitesur-lone-tab-gutter: 52px;
         #TabsToolbar { position: relative !important; inset: auto !important; width: 100% !important; padding-inline: 12px !important; }
         #nav-bar-customization-target::after { display: none; }
         #nav-bar-customization-target > #urlbar-container ~ * { order: 0 !important; }

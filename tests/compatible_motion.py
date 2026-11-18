@@ -14,15 +14,18 @@ SAMPLE = '''
 const kind=arguments[0],done=arguments[arguments.length-1];
 const field=document.getElementById('urlbar-container'),tabs=gBrowser.tabContainer;
 let tab=gBrowser.selectedTab, stack=tab.querySelector('.tab-stack');
+const survivor=kind==='close_first'?window.whiteSurMotionTab:gBrowser.selectedTab;
 const start=performance.now(),frames=[];
 function sample(){
   const t=tab.getBoundingClientRect(),u=field.getBoundingClientRect();
   const s=getComputedStyle(stack);
+  const remaining=survivor.getBoundingClientRect();
   frames.push({time:performance.now()-start,connected:tab.isConnected,closing:tab.closing,
     opacity:Number(s.opacity),translate:s.translate,scale:s.scale,
     fieldOpacity:Number(getComputedStyle(field).opacity),
     titleOpacity:Number(getComputedStyle(gBrowser.selectedTab.querySelector('.tab-label-container')).opacity),
     tabX:t.x,tabWidth:t.width,urlX:u.x,urlWidth:u.width,
+    remainingCenter:remaining.x+remaining.width/2,windowCenter:innerWidth/2,
     ghosts:document.querySelectorAll('.tabsearch-close-ghost').length});
 }
 sample();
@@ -33,8 +36,9 @@ if(kind==='open'){
   stack=tab.querySelector('.tab-stack');
   window.whiteSurMotionTab=tab;
 }
-if(kind==='close'){
-  tab=window.whiteSurMotionTab;stack=tab.querySelector('.tab-stack');
+if(kind==='close'||kind==='close_first'){
+  tab=kind==='close'?window.whiteSurMotionTab:gBrowser.selectedTab;
+  stack=tab.querySelector('.tab-stack');
   gBrowser.removeTab(tab,{animate:true,skipPermitUnload:true});
 }
 function frame(){
@@ -86,13 +90,19 @@ def run_motion(browser, artifacts, settle, move):
           setTimeout(()=>done({opacity:getComputedStyle(document.getElementById('urlbar-container')).opacity,
             pointer:getComputedStyle(document.getElementById('urlbar-container')).pointerEvents}),320);''',asynchronous=True)
         check('rapid focus reversal finishes without an invisible editor overlay',float(reversed_frames['opacity'])<.01 and reversed_frames['pointer']=='none',reversed_frames)
-        for width in (800,1384):
+        for width in (800,1100,1384):
             browser.call('POST','window/rect',{'width':width,'height':850})
-            settle(browser)
-            opened=capture('open')
-            capture('close')
-            settle(browser)
-            check(f'open and close motion keeps native tab removal working at {width}px',browser.js('return gBrowser.tabs.length===1&&!document.querySelector(".tabbrowser-tab[closing]");'))
+            for close_kind, side in (('close_first','first'), ('close','last')):
+                capture('open')
+                settle(browser)
+                frames=capture(close_kind)
+                settle(browser)
+                target=frames[-1]['windowCenter']
+                distance=[abs(frame['remainingCenter']-target) for frame in frames]
+                check(f'closing the {side} tab moves the survivor directly to the center at {width}px',
+                      distance[-1]<2 and all(after<=before+2 for before,after in zip(distance,distance[1:])),frames)
+                check(f'Firefox removes the {side} tab at {width}px',
+                      browser.js('return gBrowser.tabs.length===1;'))
 
         browser.js('Services.prefs.setIntPref("ui.prefersReducedMotion",1);')
         browser.until(lambda:browser.js('return matchMedia("(prefers-reduced-motion: reduce)").matches;'))
