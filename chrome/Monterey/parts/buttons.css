@@ -29,7 +29,7 @@
 button.close:not(.ghost-button),
 .menulist-label-box,
 .expander-down, .expander-up,
-.notification-button,
+.notification-button:where(:not(moz-button)),
 #identity-popup-security-expander,
 #protections-popup-info-button,
 #PanelUI-panic-view-button,
@@ -92,7 +92,7 @@ xul|menulist {
 #appMenu-popup #appMenu-zoomReset-button2:not(#hack),
 #tracking-protection-preferences-button:not(#hack),
 .findbar-container toolbarbutton.findbar-button,
-.notification-button,
+.notification-button:where(:not(moz-button)),
 .protections-popup-footer-button,
 #PanelUI-panic-view-button,
 .tracking-protection-button,
@@ -157,7 +157,7 @@ menulist:hover,
 button.close:not(.ghost-button):hover,
 menulist:hover .menulist-label-box,
 .expander-down:hover, .expander-up:hover,
-.notification-button:hover,
+.notification-button:where(:not(moz-button)):hover,
 .protections-popup-footer-button:hover,
 #identity-popup-security-expander:hover,
 #protections-popup-info-button:hover,
@@ -196,7 +196,7 @@ menulist[open],
 button.close:not(.ghost-button):active,
 menulist[open] .menulist-label-box,
 .expander-down:active, .expander-up:active,
-.notification-button:active,
+.notification-button:where(:not(moz-button)):active,
 .protections-popup-footer-button:not(#hack):active,
 #identity-popup-security-expander:active,
 #protections-popup-info-button:not(#hack):active,
@@ -241,7 +241,7 @@ button.customizationmode-button[disabled] {
 .findbar-container toolbarbutton:-moz-window-inactive,
 #sidebar-switcher-target:-moz-window-inactive,
 #viewButton:-moz-window-inactive,
-.notification-button:-moz-window-inactive {
+.notification-button:where(:not(moz-button)):-moz-window-inactive {
 	background-image: var(--gnome-inactive-button-background) !important;
 	background-color: transparent !important;
 	box-shadow: var(--gnome-inactive-button-box-shadow) !important;
@@ -326,42 +326,61 @@ button.close,
 	margin-left: 0 !important;
 }
 
-/* Buttons with suggested action */
-xul|button[default], button.primary,
-.dialog-button-box button[default="true"],
-#appMenu-popup .panel-banner-item[notificationid="update-restart"],
-button.popup-notification-primary-button,
-#editBookmarkPanelDoneButton,
-#tracking-action-block {
-	color: white !important;
-	background-image: var(--gnome-button-suggested-action-background) !important;
-	background-color: transparent !important;
-	border-color: var(--gnome-button-suggested-action-border-color) !important;
-	border-bottom-color: var(--gnome-button-suggested-action-border-bottom-color) !important;
-	box-shadow: var(--gnome-button-suggested-action-box-shadow) !important;
-	text-shadow: 0 -1px rgba(0, 0, 0, 0.5) !important;
-}
+/* Firefox resolves these system colors through GTK, Windows, or macOS.
+ * Older builds can keep their own primary button palette. */
+@media (forced-colors: none) {
+	@supports (color: AccentColor) and (color: AccentColorText) {
+		:root {
+			--whitesur-primary-button-background: AccentColor;
+			--whitesur-primary-button-text: AccentColorText;
+			--whitesur-primary-button-shade: black;
+			--whitesur-primary-button-hover: color-mix(in srgb, AccentColor, var(--whitesur-primary-button-shade) 10%);
+			--whitesur-primary-button-active: color-mix(in srgb, AccentColor, var(--whitesur-primary-button-shade) 20%);
+		}
 
-xul|button[default]:hover, button.primary:hover,
-.dialog-button-box button[default="true"]:hover,
-#appMenu-popup .panel-banner-item[notificationid="update-restart"]:hover,
-button.popup-notification-primary-button:hover,
-#editBookmarkPanelDoneButton:hover {
-	background-image: var(--gnome-button-suggested-action-hover-background) !important;
-	background-color: transparent !important;
-}
+		/* Shade away from the text so light accents with dark text stay legible. */
+		@supports (color: contrast-color(black)) {
+			:root { --whitesur-primary-button-shade: contrast-color(AccentColorText); }
+		}
 
-xul|button[default]:active, button.primary:active,
-.dialog-button-box button[default="true"]:active,
-#appMenu-popup .panel-banner-item[notificationid="update-restart"]:active,
-button.popup-notification-primary-button:active,
-#editBookmarkPanelDoneButton:active {
-	background-image: var(--gnome-button-suggested-action-active-background) !important;
-	background-color: transparent !important;
-	border-color: var(--gnome-button-suggested-action-active-border-color) !important;
-	box-shadow: var(--gnome-button-suggested-action-active-box-shadow) !important;
-	text-shadow: none !important;
-	transition: none !important;
+		moz-button[type~="primary"] {
+			--button-background-color-primary: var(--whitesur-primary-button-background);
+			--button-background-color-primary-hover: var(--whitesur-primary-button-hover);
+			--button-background-color-primary-active: var(--whitesur-primary-button-active);
+			--button-background-color-primary-selected: var(--whitesur-primary-button-active);
+			--button-text-color-primary: var(--whitesur-primary-button-text);
+			--button-text-color-primary-hover: var(--whitesur-primary-button-text);
+			--button-text-color-primary-active: var(--whitesur-primary-button-text);
+			--button-text-color-primary-selected: var(--whitesur-primary-button-text);
+		}
+	}
+
+	:is(xul|button[default]:not([default="false"]), button.primary,
+		.dialog-button-box button[default="true"], button.popup-notification-primary-button,
+		#appMenu-popup .panel-banner-item[notificationid="update-restart"],
+		#editBookmarkPanelDoneButton, #tracking-action-block):not([disabled], :disabled) {
+		color: var(--whitesur-primary-button-text, var(--button-text-color-primary, white)) !important;
+		background-image: none !important;
+		background-color: var(--whitesur-primary-button-background, var(--button-background-color-primary, #0060df)) !important;
+		border-color: transparent !important;
+		box-shadow: none !important;
+		text-shadow: none !important;
+
+		&:hover {
+			color: var(--whitesur-primary-button-text, var(--button-text-color-primary-hover, white)) !important;
+			background-color: var(--whitesur-primary-button-hover, var(--button-background-color-primary-hover, #003eaa)) !important;
+		}
+
+		&:active {
+			color: var(--whitesur-primary-button-text, var(--button-text-color-primary-active, white)) !important;
+			background-color: var(--whitesur-primary-button-active, var(--button-background-color-primary-active, #002275)) !important;
+		}
+
+		&:focus-visible {
+			outline: var(--focus-outline, 2px solid Highlight) !important;
+			outline-offset: var(--focus-outline-offset, 2px);
+		}
+	}
 }
 
 /* Buttons with destructive action */

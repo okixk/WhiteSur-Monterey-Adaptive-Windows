@@ -281,13 +281,13 @@ toolbarspring {
 	background: none !important;
 }
 
-#main-button .button-background.labelled {
+/* Firefox reuses the internal #main-button ID in popups and dialogs. */
+#urlbar .searchmode-switcher[label]:not([label=""])::part(button) {
 	min-height: 26px !important;
 	min-width: 28px !important;
 	background: var(--gnome-headerbar-button-hover-background) !important;
 	border: none !important;
 	border-radius: 5px !important;
-	outline: 0 !important;
 	margin: 0 !important;
 	padding: 0 9px !important;
 }

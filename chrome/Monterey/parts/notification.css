@@ -36,10 +36,6 @@ notification {
   --notification-button-background-hover: var(--gnome-button-hover-background);
   --notification-button-background-active: var(--gnome-button-active-background);
   --notification-button-text: inherit;
-  --notification-primary-button-background: #0060df;
-  --notification-primary-button-background-hover: #003eaa;
-  --notification-primary-button-background-active: #002275;
-  --notification-primary-button-text: var(--gnome-toolbar-color);
 }
 
 notification:-moz-window-inactive {
@@ -180,19 +176,6 @@ notification[type="critical"] > hbox > .messageImage {
 .notification-button:focus-visible {
   outline: var(--focus-outline);
   outline-offset: var(--focus-outline-offset);
-}
-
-.notification-button.primary {
-  background-color: var(--notification-primary-button-background);
-  color: var(--notification-primary-button-text);
-}
-
-.notification-button.primary:not([disabled]):hover {
-  background-color: var(--notification-primary-button-background-hover);
-}
-
-.notification-button.primary:not([disabled]):hover:active {
-  background-color: var(--notification-primary-button-background-active);
 }
 
 .notificationbox-stack {
