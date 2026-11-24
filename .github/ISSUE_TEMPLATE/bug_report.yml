@@ -14,6 +14,7 @@ body:
       options:
         - Lite
         - Full
+        - Both
     validations:
       required: true
   - type: input
@@ -38,6 +39,7 @@ body:
         - Maximised
         - Restored/windowed
         - Full screen
+        - Both
         - All states
     validations:
       required: true
