@@ -192,6 +192,23 @@
       /* Reserve the tab's native close target while giving compact editors
        * room for their input and native identity/page-action controls. */
       #urlbar .urlbar-input-container { padding-inline: 0 20px !important; }
+      @media (width > 980px) {
+        #urlbar-container { container: whitesur-lite-editor / inline-size; }
+        /* A narrow inline editor needs the URL space taken by the warning
+         * text. Firefox's shield, tooltip and trust panel are still available. */
+        @container whitesur-lite-editor (width <= 320px) {
+          #urlbar #trust-icon-container.insecure {
+            width: 28px !important;
+            min-width: 28px !important;
+          }
+          #urlbar #trust-icon-container.insecure > #trust-label { display: none !important; }
+          /* Leave room for address text when Reader View and other page
+           * actions are visible beside the shield. */
+          #urlbar:has(#trust-icon-container.insecure) .urlbar-input {
+            padding-inline-end: 4px !important;
+          }
+        }
+      }
       #urlbar-background { pointer-events: none !important; }
       &:has(#urlbar[focused], #urlbar-container:focus-within)
         .tabbrowser-tab[selected] :is(.tab-label-container, .tab-icon-stack) { opacity: 0 !important; }

@@ -59,6 +59,19 @@ class Page(http.server.BaseHTTPRequestHandler):
         <article><small>WHITESUR / FIREFOX LAB</small><h1>A calmer place to browse.</h1>
         <p>Native Firefox navigation, Monterey-inspired capsules and adaptive colours.
         This page is served locally in an isolated test profile.</p><a href="/next">Next page</a></article>'''
+        if self.path == '/insecure':
+            # A readable article makes Firefox show its native Reader View action.
+            data = data.replace(b'</article>', b'''
+                <p>The Monterey coast sits along the edge of a deep submarine canyon.
+                Seasonal winds bring cool, nutrient-rich water to the surface, where
+                plankton support schools of fish, seabirds and migrating whales.</p>
+                <p>Kelp forests grow along rocky shores in shallower water. Their tall
+                fronds slow the current and shelter juvenile fish. Sea otters forage
+                on the bottom and sometimes wrap themselves in kelp while resting.</p>
+                <p>Walking paths along the bluff offer views across the bay. The
+                shoreline changes with the tides, exposing pools where anemones
+                and small crabs can shelter until the water returns.</p>
+            </article>''')
         self.send_response(200)
         self.send_header('Content-Type', 'text/html; charset=utf-8')
         self.end_headers()
@@ -85,6 +98,74 @@ def move(browser, x, y, click=False, button=0):
         actions.extend([{'type': 'pointerDown', 'button': button}, {'type': 'pointerUp', 'button': button}])
     browser.call('POST', 'actions', {'actions': [{'type': 'pointer', 'id': 'mouse',
         'parameters': {'pointerType': 'mouse'}, 'actions': actions}]})
+
+
+def check_insecure_editor(browser, port, check, screenshot):
+    # Use a test hostname on loopback so Firefox treats the HTTP page as insecure.
+    browser.js('''
+        Services.prefs.setStringPref("network.dns.localDomains", "whitesur.test");
+        Services.prefs.setBoolPref("dom.security.https_first", false);
+        Services.prefs.setBoolPref("browser.urlbar.trustPanel.featureGate", true);
+    ''')
+    url = f'http://whitesur.test:{port}/insecure'
+    browser.call('POST', 'moz/context', {'context': 'content'})
+    browser.call('POST', 'url', {'url': url})
+    browser.call('POST', 'moz/context', {'context': 'chrome'})
+    browser.until(lambda: browser.js('return !document.getElementById("reader-mode-button").hidden;'))
+
+    def measure():
+        browser.chord('l')
+        browser.js('gURLBar.view.close();')
+        settle(browser)
+        return browser.js('''
+            const input = gURLBar.inputField, style = getComputedStyle(input);
+            const shield = document.querySelector("#trust-icon-container.insecure");
+            return {
+                value: input.value,
+                textWidth: input.getBoundingClientRect().width
+                    - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+                labelWidth: shield?.querySelector("#trust-label").getBoundingClientRect().width,
+                iconWidth: shield?.querySelector("#trust-icon").getBoundingClientRect().width,
+                tooltip: shield?.getAttribute("tooltiptext"),
+                accessibleName: shield?.getAttribute("aria-label"),
+                anchored: getComputedStyle(document.getElementById("urlbar-container")).position === "fixed",
+                pageActions: [...document.querySelectorAll("#page-action-buttons .urlbar-page-action")]
+                    .filter(button => button.getBoundingClientRect().width > 0).map(button => button.id),
+            };
+        ''')
+
+    browser.call('POST', 'window/maximize', {})
+    wide = measure()
+    check('wide Lite editor shows the full insecure connection label',
+          wide['anchored'] and wide['value'] == url and wide.get('labelWidth', 0) > 0, wide)
+    browser.js('window.insecureTestTab = gBrowser.addTrustedTab("about:blank", {skipAnimation: true});')
+    compact = measure()
+    screenshot(browser, 'insecure-compact-editor.png')
+    check('compact Lite editor fits HTTP address text alongside the shield and page actions',
+          compact['anchored'] and compact['value'] == url and compact.get('labelWidth') == 0
+          and compact.get('iconWidth', 0) > 0 and compact.get('tooltip') and compact.get('accessibleName')
+          and {'reader-mode-button', 'star-button-box'} <= set(compact['pageActions'])
+          and len(compact['pageActions']) >= 3 and compact['textWidth'] >= 45, compact)
+    shield = browser.js('return document.getElementById("trust-icon-container");')
+    browser.call('POST', f'element/{shield["element-6066-11e4-a52e-4f735466cecf"]}/click', {})
+    panel = browser.until(lambda: browser.js('''
+        return [...document.querySelectorAll("panel,moz-panel")]
+            .find(element => /trust/i.test(element.id) &&
+                (element.state === "open" || element.hasAttribute("open")))?.id;
+    '''))
+    check('the icon-only shield still opens the native trust panel', True)
+    browser.call('POST', 'actions', {'actions': [{'type': 'key', 'id': 'security-esc', 'actions': [
+        {'type': 'keyDown', 'value': '\ue00c'}, {'type': 'keyUp', 'value': '\ue00c'},
+    ]}]})
+    browser.until(lambda: browser.js('''
+        const panel = document.getElementById(arguments[0]);
+        return !panel.hasAttribute("open") && (!panel.state || panel.state === "closed");
+    ''', panel))
+    browser.call('POST', 'window/rect', {'width': 800, 'height': 850})
+    narrow = measure()
+    check('Lite separate address toolbar still shows the insecure connection label',
+          not narrow['anchored'] and narrow.get('labelWidth', 0) > 0, narrow)
+    browser.js('gBrowser.removeTab(insecureTestTab, {animate: false});')
 
 
 def run(source, driver, artifacts):
@@ -147,6 +228,7 @@ def run(source, driver, artifacts):
                 '&&Services.prefs.prefIsLocked("whitesur.lab.locked")&&Services.prefs.getBoolPref("whitesur.lab.locked");'))
             check('enterprise policy remains active', browser.js('return Services.policies.getActivePolicies().DisableTelemetry===true;'))
             check('no privileged WhiteSur script is loaded', browser.js('return !window.TabSearch;'))
+            check_insecure_editor(browser, server.server_port, check, screenshot)
             browser.call('POST', 'window/rect', {'width': 1384, 'height': 850})
             browser.call('POST', 'moz/context', {'context': 'content'})
             browser.call('POST', 'url', {'url': f'http://127.0.0.1:{server.server_port}/'})
