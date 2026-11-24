@@ -7,6 +7,15 @@ body:
     attributes:
       value: |
         Please first confirm that the issue disappears in vanilla Firefox without this custom chrome theme.
+  - type: dropdown
+    id: theme_version
+    attributes:
+      label: Theme version
+      options:
+        - Lite
+        - Full
+    validations:
+      required: true
   - type: input
     id: firefox
     attributes:
