@@ -25,10 +25,10 @@ body:
     validations:
       required: true
   - type: input
-    id: windows
+    id: operating_system
     attributes:
-      label: Windows version
-      placeholder: "e.g. Windows 11 24H2"
+      label: Operating system / distribution and version
+      placeholder: "e.g. Windows 11 24H2, Ubuntu 24.04, Fedora 42"
     validations:
       required: true
   - type: dropdown
