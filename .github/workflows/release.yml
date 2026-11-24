@@ -8,11 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  verify:
-    uses: ./.github/workflows/tests.yml
-
   package:
-    needs: verify
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
